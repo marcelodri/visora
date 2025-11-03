@@ -1,0 +1,305 @@
+.page {
+    padding-bottom: 100px;
+}
+// .router-link-active {
+//     color: red!important;
+//     border-left: 4px solid red
+// }
+.page-item {
+    // background: #ffffff;
+    a {
+        color: #3a3a3a;
+    }
+}
+.codemirror-container{
+    border-radius: 10px;
+}
+.btn {
+    background: transparent;
+    border: 1px solid #3939ff;
+    color: #3939ff;
+    border-radius: 10px!important;
+    margin-right: 10px;
+    padding: 4px 8px;
+    font-size: 16PX;
+}
+.btn:hover {
+    background: #3939ff!important;
+    color: #ffff;
+}
+.btn-menu {
+    padding: 2px 9px;
+    font-size: 20px;
+    color: #ffffff;
+    background: #3939ff;
+    border: 1px solid #3939ff;
+    border-radius: 50%;
+}
+.btn-menu:hover {
+    background: #3939ff;
+}
+.btn-link {
+    background: transparent;
+    text-decoration: none;
+    color: #3a3a3a;
+}
+.btn-link:hover {
+    background: transparent;
+    text-decoration: underline;
+    color: #3a3a3a;
+}
+.btn-danger {
+    border: 1px solid #dc3545;
+    background: transparent!important;
+    color: #dc3545;
+    border-radius: 10px!important;
+}
+.btn-danger:hover {
+    background: #dc3545!important;
+    color: #ffffff;
+}
+.btn-menu.btn-transparent {
+    background: transparent!important;
+    border: 1px solid transparent!important;
+    color: #3a3a3a;
+}
+.menuitem p {
+    margin: 5px;
+}
+.link-active {
+    font-weight: bold;
+}
+  
+.link-exact-active, .router-link-active {
+    font-weight: bold;
+    color: #3939ff!important; /* Color para el enlace que coincide exactamente */
+    border-left: 4px solid #3939ff!important;
+}
+
+.card {
+    .table th, .table td {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        vertical-align: middle;
+    }
+}
+
+#sidebar {
+    position: fixed;
+    top: 55px;
+    left: 0;
+    bottom: 0;
+    max-width: 300px;
+    z-index: 0;
+    box-shadow: 0 1px 15px rgba(0, 0, 0, .04), 0 1px 6px rgba(0, 0, 0, .04);
+    background: rgba(255, 255,255, 1);
+    border-radius: 4px;
+    width: 230px;
+    .menu {
+      padding-top: 20px;
+      ul {
+        list-style: none;
+        padding-left: 0;
+        li {
+            margin-bottom: 14px; 
+            padding-left: 10px;
+            a { 
+                text-decoration: none;
+                display: flex;
+                //flex-direction: column;
+                align-items: center;
+                color: #3a3a3a;
+                border-left: 4px solid transparent;
+                transition: 0.3s all;
+                font-weight: 400;
+                padding-left: 15px;
+                width: fit-content;
+                span {
+                    font-size: 18px;
+                    margin-right: 16px;
+                }
+            }
+            a:hover {
+                color: #3939ff
+            }
+        }
+      }
+    }
+
+  }
+
+  #menuPanel {
+    box-shadow: 0 1px 15px rgba(0, 0, 0, .04), 0 1px 6px rgba(0, 0, 0, .04);
+    z-index: 10;
+    background: #ffff;
+  }
+footer {
+    padding: 20px 0px;
+    border-top: 1px solid #d7d7d7;
+    z-index: 1;
+}
+
+.card {
+    box-shadow: 0 1px 15px rgba(0, 0, 0, .04), 0 1px 6px rgba(0, 0, 0, .04);
+    border: none;
+    border-radius: .75rem
+}
+
+.logo {
+    width: 80px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    span {
+        font-size: 30px;
+        color: #3939ff;
+        font-weight: 600;
+    }
+}
+
+body.dark {
+    background: var(--color-background);
+    color: #8f8f8f;
+    
+    // .btn {
+    //     background: #6c757d;
+    //     border: 1px solid #6c757d;
+    // }
+    #sidebar, #menuPanel {
+        background: #1d1d1d;
+        a{
+            color: #8f8f8f;
+        }
+    }
+    .card, .modal-content, .custom-modal-content, .menuitem {
+        background: #242424;
+        .table th, .table td {
+            background: #242424;
+            color: #8f8f8f;
+            border-color: #8f8f8f!important;
+        }
+    }
+    .btn-menu.btn-transparent {
+        color: #8f8f8f;
+    }
+    .btn {
+        background: #3939ff;
+        color: #ffff;
+    }
+    .btn-danger {
+        background: transparent!important;
+        color: ffff!important;
+    }
+    .btn:hover {
+        background: transparent;
+        border: 1px solid #3939ff;
+        color: #ffff;
+    }
+    .btn-danger:hover {
+        background: rgba(220, 53, 69, 0.5)!important;
+        border: 1px solid rgba(220, 53, 69, 0.5)!important;
+        color: #ffff!important;
+    }
+    input, select, option, select:focus  {
+        background: #242424!important;
+        color: #8f8f8f;
+        border: 1px solid #8f8f8f!important;
+    }
+    input:focus, select:focus {
+        box-shadow: 0 0 0 .25rem rgba(143, 143, 143, 0.1)!important;
+        color: #8f8f8f;
+    }
+    .page-item {
+        // background: #ffffff;
+        a {
+            color: #8f8f8f;
+            background: transparent!important;
+            border: 1px solid #8f8f8f;
+        }
+    }
+    .modal-footer, .modal-header {
+        border-color: #8f8f8f!important
+    }
+
+    .btn-excel {
+        border-radius: 8px!important;
+        background: #5ea144;
+        color: #fff;
+        border: 1px solid #5ea144;
+    }
+    .btn-excel:hover {
+        background: transparent;
+        color: #5ea144;
+        border: 1px solid #5ea144;
+    }
+
+    .link-exact-active, .router-link-active {
+        font-weight: bold;
+        color: #ffff!important; /* Color para el enlace que coincide exactamente */
+        border-left: 4px solid #3939ff!important;
+    }
+    footer {
+        border-top: 1px solid #8f8f8f;
+    }
+    
+  }
+  
+
+.swal2-confirm,
+.swal2-cancel {
+    background: transparent;
+    border: 1px solid #3939ff;
+    color: #3939ff;
+    border-radius: 20px;
+    width: 60px;
+    text-align: center;
+}
+.swal2-confirm:hover,
+.swal2-cancel:hover {
+    background: #3939ff;
+    border: 1px solid #3939ff;
+    color: #ffff;
+}
+
+h1 {
+    font-weight: lighter;
+}
+.btn-excel {
+    border-radius: 8px!important;
+    background: #5ea144;
+    color: #fff;
+    border: 1px solid #5ea144;
+}
+.btn-excel:hover {
+    background: transparent;
+    color: #5ea144;
+    border: 1px solid #5ea144;
+}
+
+/* General para todas las barras de desplazamiento */
+::-webkit-scrollbar {
+    width: 8px; /* Ancho de la barra vertical */
+    height: 8px; /* Altura de la barra horizontal */
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1); /* Fondo del track */
+    border-radius: 10px; /* Redondeo para el track */
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.4); /* Color del "thumb" */
+    border-radius: 10px; /* Redondeo para el thumb */
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Espacio entre el thumb y el track */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 100, 100, 0.6); /* Color del thumb al pasar el cursor */
+}
+
+/* Firefox (se necesita un prefijo especial) */
+* {
+    scrollbar-width: thin; /* Tamaño del scrollbar */
+    scrollbar-color: rgba(100, 100, 100, 0.4) rgba(0, 0, 0, 0.1); /* thumb | track */
+}
+  

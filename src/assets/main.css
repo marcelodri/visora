@@ -1,0 +1,55 @@
+@import './base.css';
+
+/* #app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+} */
+
+.toast.text-bg-success {
+  background-color: white!important;
+  border-left: 6px solid green;
+  color: #000!important
+}
+.toast .toast-header {
+  border: none;
+  color: #000!important;
+  padding-top: 16px!important;
+}
+.toast .toast-body {
+  padding-top: 0;
+}
+
+.toast.text-bg-danger {
+  background-color: white!important;
+  border-left: 6px solid red;
+  color: #000!important
+}

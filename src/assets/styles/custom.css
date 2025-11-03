@@ -1,0 +1,301 @@
+@charset "UTF-8";
+.page {
+  padding-bottom: 100px;
+}
+
+.page-item a {
+  color: #3a3a3a;
+}
+
+.codemirror-container {
+  border-radius: 10px;
+}
+
+.btn {
+  background: transparent;
+  border: 1px solid #3939ff;
+  color: #3939ff;
+  border-radius: 10px !important;
+  margin-right: 10px;
+  padding: 4px 8px;
+  font-size: 16PX;
+}
+
+.btn:hover {
+  background: #3939ff !important;
+  color: white;
+}
+
+.btn-menu {
+  padding: 2px 9px;
+  font-size: 20px;
+  color: #ffffff;
+  background: #3939ff;
+  border: 1px solid #3939ff;
+  border-radius: 50%;
+}
+
+.btn-menu:hover {
+  background: #3939ff;
+}
+
+.btn-link {
+  background: transparent;
+  text-decoration: none;
+  color: #3a3a3a;
+}
+
+.btn-link:hover {
+  background: transparent;
+  text-decoration: underline;
+  color: #3a3a3a;
+}
+
+.btn-danger {
+  border: 1px solid #dc3545;
+  background: transparent !important;
+  color: #dc3545;
+  border-radius: 10px !important;
+}
+
+.btn-danger:hover {
+  background: #dc3545 !important;
+  color: #ffffff;
+}
+
+.btn-menu.btn-transparent {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #3a3a3a;
+}
+
+.menuitem p {
+  margin: 5px;
+}
+
+.link-active {
+  font-weight: bold;
+  color: #3939ff!important; /* Color para el enlace que coincide exactamente */
+}
+
+.link-exact-active, .router-link-active {
+  font-weight: bold;
+  color: #3939ff !important; /* Color para el enlace que coincide exactamente */
+  border-left: 4px solid #3939ff !important;
+}
+
+.card .table th, .card .table td {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  vertical-align: middle;
+}
+
+#sidebar {
+  position: fixed;
+  top: 55px;
+  left: 0;
+  bottom: 0;
+  max-width: 300px;
+  z-index: 0;
+  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
+  background: rgb(255, 255, 255);
+  border-radius: 4px;
+  width: 230px;
+}
+#sidebar .menu {
+  padding-top: 20px;
+}
+#sidebar .menu ul {
+  list-style: none;
+  padding-left: 0;
+}
+#sidebar .menu ul li {
+  margin-bottom: 14px;
+  padding-left: 10px;
+}
+#sidebar .menu ul li a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  color: #3a3a3a;
+  border-left: 4px solid transparent;
+  transition: 0.3s all;
+  font-weight: 400;
+  padding-left: 15px;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+#sidebar .menu ul li a span {
+  font-size: 18px;
+  margin-right: 16px;
+}
+#sidebar .menu ul li a:hover {
+  color: #3939ff;
+}
+
+#menuPanel {
+  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
+  z-index: 10;
+  background: white;
+}
+
+footer {
+  padding: 20px 0px;
+  border-top: 1px solid #d7d7d7;
+  z-index: 1;
+}
+
+.card {
+  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: 0.75rem;
+}
+
+.logo {
+  width: 80px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.logo span {
+  font-size: 30px;
+  color: #3939ff;
+  font-weight: 600;
+}
+
+body.dark {
+  background: var(--color-background);
+  color: #8f8f8f;
+}
+body.dark #sidebar, body.dark #menuPanel {
+  background: #1d1d1d;
+}
+body.dark #sidebar a, body.dark #menuPanel a {
+  color: #8f8f8f;
+}
+body.dark .card, body.dark .modal-content, body.dark .custom-modal-content, body.dark .menuitem {
+  background: #242424;
+}
+body.dark .card .table th, body.dark .card .table td, body.dark .modal-content .table th, body.dark .modal-content .table td, body.dark .custom-modal-content .table th, body.dark .custom-modal-content .table td, body.dark .menuitem .table th, body.dark .menuitem .table td {
+  background: #242424;
+  color: #8f8f8f;
+  border-color: #8f8f8f !important;
+}
+body.dark .btn-menu.btn-transparent {
+  color: #8f8f8f;
+}
+body.dark .btn {
+  background: #3939ff;
+  color: white;
+}
+body.dark .btn-danger {
+  background: transparent !important;
+  color: ffff !important;
+}
+body.dark .btn:hover {
+  background: transparent;
+  border: 1px solid #3939ff;
+  color: white;
+}
+body.dark .btn-danger:hover {
+  background: rgba(220, 53, 69, 0.5) !important;
+  border: 1px solid rgba(220, 53, 69, 0.5) !important;
+  color: white !important;
+}
+body.dark input, body.dark select, body.dark option, body.dark select:focus {
+  background: #242424 !important;
+  color: #8f8f8f;
+  border: 1px solid #8f8f8f !important;
+}
+body.dark input:focus, body.dark select:focus {
+  box-shadow: 0 0 0 0.25rem rgba(143, 143, 143, 0.1) !important;
+  color: #8f8f8f;
+}
+body.dark .page-item a {
+  color: #8f8f8f;
+  background: transparent !important;
+  border: 1px solid #8f8f8f;
+}
+body.dark .modal-footer, body.dark .modal-header {
+  border-color: #8f8f8f !important;
+}
+body.dark .btn-excel {
+  border-radius: 8px !important;
+  background: #5ea144;
+  color: #fff;
+  border: 1px solid #5ea144;
+}
+body.dark .btn-excel:hover {
+  background: transparent;
+  color: #5ea144;
+  border: 1px solid #5ea144;
+}
+body.dark .link-exact-active, body.dark .router-link-active {
+  font-weight: bold;
+  color: white !important; /* Color para el enlace que coincide exactamente */
+  border-left: 4px solid #3939ff !important;
+}
+body.dark footer {
+  border-top: 1px solid #8f8f8f;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+  background: transparent;
+  border: 1px solid #3939ff;
+  color: #3939ff;
+  border-radius: 20px;
+  width: 60px;
+  text-align: center;
+}
+
+.swal2-confirm:hover,
+.swal2-cancel:hover {
+  background: #3939ff;
+  border: 1px solid #3939ff;
+  color: white;
+}
+
+h1 {
+  font-weight: lighter;
+}
+
+.btn-excel {
+  border-radius: 8px !important;
+  background: #5ea144;
+  color: #fff;
+  border: 1px solid #5ea144;
+}
+
+.btn-excel:hover {
+  background: transparent;
+  color: #5ea144;
+  border: 1px solid #5ea144;
+}
+
+/* General para todas las barras de desplazamiento */
+::-webkit-scrollbar {
+  width: 8px; /* Ancho de la barra vertical */
+  height: 8px; /* Altura de la barra horizontal */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1); /* Fondo del track */
+  border-radius: 10px; /* Redondeo para el track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.4); /* Color del "thumb" */
+  border-radius: 10px; /* Redondeo para el thumb */
+  border: 2px solid rgba(0, 0, 0, 0.1); /* Espacio entre el thumb y el track */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.6); /* Color del thumb al pasar el cursor */
+}
+
+/* Firefox (se necesita un prefijo especial) */
+* {
+  scrollbar-width: thin; /* Tamaño del scrollbar */
+  scrollbar-color: rgba(100, 100, 100, 0.4) rgba(0, 0, 0, 0.1); /* thumb | track */
+}/*# sourceMappingURL=custom.css.map */
