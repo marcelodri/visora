@@ -23,15 +23,15 @@
         <div class="col-8 text-end">
           <nav>
 
-            <div>
+            <!-- <div>
               <button v-if="this.$i18n.locale == 'es'" class="btn-menu btn-transparent" @click="changeLanguage('en')">EN</button>
               <button v-if="this.$i18n.locale == 'en'" class="btn-menu btn-transparent" @click="changeLanguage('es')">ES</button>
-            </div>
+            </div> -->
 
-            <button class="btn-menu btn-transparent" @click="changeBg">
+            <!-- <button class="btn-menu btn-transparent" @click="changeBg">
               <span v-if="isDarkMode" class="bi bi-lightbulb-off-fill"></span>
               <span v-else class="bi bi-lightbulb-fill"></span>
-            </button>
+            </button> -->
             <!-- Dropdown 1 -->
             <div class="link dropdown text-start">
               <button class="btn-menu user" @click="toggleDropdown('dropdown1')">{{ user?.username?.charAt(0) }}</button>

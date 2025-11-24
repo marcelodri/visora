@@ -1,5 +1,9 @@
 <template>
     <FacebookMuro/>
+
+    <!-- Loading -->
+    <LoadingDots :isLoading="isLoading" />
+
 </template>
 
 <script>

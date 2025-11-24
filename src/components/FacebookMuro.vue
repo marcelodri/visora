@@ -75,10 +75,28 @@ import { ref, onMounted } from "vue";
 export default {
   setup() {
     const posts = ref([]);
+    let token = null
+    const isLoading = ref(false);
+    
+    isLoading.value = true;
 
     const fetchPosts = async () => {
-      const res = await fetch("https://hub.redooconect.com.ar/webhook/f09a4d72-bb31-4215-833e-f4d8d12b00dc");
-      const data = await res.json();
+
+      token = sessionStorage.getItem("token");
+      if (!token) throw new Error("Token no encontrado");
+
+      const payload = {action: "fb-muro"};
+
+      const response = await fetch("https://stage.powerflows.pilotcrm.io/api/e45236e2-83c3-47a5-b0ea-39377418e892", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
 
       console.log('data', data)
       posts.value = data.data.map(p => ({
@@ -88,7 +106,10 @@ export default {
         shares: Math.floor(Math.random() * 10),
         imageLoaded: false // 👈 nuevo campo
       }));
+
+      isLoading.value = false;
     };
+    
 
     const formatDate = (date) => {
       return new Date(date).toLocaleDateString("es-ES", {

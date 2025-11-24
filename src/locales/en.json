@@ -27,6 +27,7 @@
         "table_thead_name": "Name",
         "table_thead_value": "Condition",
         "table_thead_actions": "Actions"
+        
     },
     "menu": {
         "home": "Home",
@@ -34,22 +35,35 @@
         "reports": "Reports",
         "password": "Password",
         "logout": "Logout",
-        "search_engine_with_ai": "Search IA",
-        "doc_search_ai": "RAG",
-        "forms": "Forms",
-        "aboutus": "About",
-        "header_footer": "Footer",
-        "products": "Products",
+        "demos-search_ai": "Search IA",
+        "demos-doc_search_ai": "RAG",
+        "settings-menu": "Menu",
+        "forms-templates": "Templates",
+        "forms-menu-logo": "Logo menu",
+        "forms-menu-background": "Background menu",
+        "forms-menu-color": "Color menu",
+        "forms-main": "Forms",
+        "forms-aboutus": "Cards Section 2",
+        "forms-header_footer": "Footer",
+        "forms-products": "Cards Section 1",
         "templates": "Templates",
         "styles": "Colors",
-        "settings": "settings",
+        "social-settings": "Start",
+        "settings-brands": "Brands",
+        "settings-business-types": "Business types",
         "brands": "Brands",
         "business-types": "Business types",
-        "multipost": "Posts",
-        "facebookpost": "Facebook Post",
-        "pilotpost": "Pilot Post",
-        "listpost": "Schedules",
-        "facebookmuro": "Facebook Wall"
+        "settings-general": "Begin",
+        "social-facebookpost": "Facebook Post",
+        "social-pilotpost": "Pilot Post",
+        "social-listpost": "Schedules",
+        "social-facebookmuro": "Facebook Wall",
+        "incolmotos-import": "Import sales",
+        "incolmotos-customers": "Customers",
+        "demos-advancedSearch": "Advanced Search",
+        "demos-reports": "History reports",
+        "demos-myagent": "Mi agente"
+        
     },
     "reports": {
         "title": "Reports",
@@ -96,7 +110,9 @@
         "form_field_button": "Add Option",
         "form_servicie": "Submit Service",
         "message_success": "Success Message",
-        "message_error": "Error Message"
+        "message_error": "Error Message",
+        "limit_form": "You have exceeded the allowed number of forms."
+
     },
     "about": {
         "title": "About",
@@ -112,7 +128,8 @@
     "business_type":{
         "name": "Name",
         "code": "Code"
-    }
+    },
+    "limit_forms": "Number of forms allowed"
 
 
 

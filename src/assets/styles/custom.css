@@ -12,7 +12,8 @@
 }
 
 .btn {
-  background: transparent;
+  /* background: transparent; */
+  background: #3939ff;
   border: 1px solid #3939ff;
   color: #3939ff;
   border-radius: 10px !important;
@@ -127,7 +128,7 @@
 }
 #sidebar .menu ul li a span {
   font-size: 18px;
-  margin-right: 16px;
+  margin-right: 0!important
 }
 #sidebar .menu ul li a:hover {
   color: #3939ff;

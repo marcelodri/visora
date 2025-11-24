@@ -14,12 +14,12 @@
 
           <div class="col-8 px-0">
             <ul>
-              <li>
+              <!-- <li>
                 <div>
                     <button v-if="this.$i18n.locale == 'es'" class="btn-menu btn-transparent" @click="changeLanguage('en')">EN</button>
                     <button v-if="this.$i18n.locale == 'en'" class="btn-menu btn-transparent" @click="changeLanguage('es')">ES</button>
                 </div>
-              </li>
+              </li> -->
               <li>
                 <router-link class="btn-link px-0" :to="{ name: 'login' }">
                   <i class="bi bi-box-arrow-in-right"></i> {{ $t('home.login') }}

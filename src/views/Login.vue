@@ -83,7 +83,7 @@ export default {
         const authStore = useAuthStore();
 
         // Realiza una petición POST al webhook con las credenciales
-        const response = await axios.post('https://stage.powerflows.pilotcrm.io/api/05544bd3-7bd1-47bf-8a8a-4ff88e51dd06', {
+        const response = await axios.post('https://apis.madautomate.cloud/webhook/6892bbc7-ce41-4bf2-98da-63e321a6fc74', {
           username: this.username,
           password: this.password,
         });
@@ -99,14 +99,16 @@ export default {
             username: response.data.username,
             email: response.data.email,
             level: response.data.level,
-            instance: response.data.instance
+            instance: response.data.instance,
+            appkey: response.data.appkey,
+            details: response.data.details
           }
           authStore.login(userData);
           
           console.log(' Obtener el menú usando el token')
           // 2. Obtener el menú usando el token
           const menuResponse = await axios.get(
-            'https://stage.powerflows.pilotcrm.io/api/368bbc17-f60a-4bc5-9617-fc9987781ac6',
+            'https://apis.madautomate.cloud/webhook/06e5d47d-62f0-4a24-bc5c-d6ef1d853438',
             {
               headers: {
                 Authorization: `Bearer ${response.data.token}`
@@ -126,7 +128,7 @@ export default {
           // const dynamicRoutes = await this.buildRoutesFromMenu(menuResponse.data);
           // console.log('buildRoutesFromMenu', dynamicRoutes)
 
-          // // // Agregar children a /panel
+          // // // Agregar children a /panel 
           // dynamicRoutes.forEach(r => {
           //   this.$router.addRoute('panel', r);
           // });

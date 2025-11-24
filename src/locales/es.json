@@ -34,23 +34,34 @@
         "reports": "Reportes",
         "password": "Contraseña",
         "logout": "Salir",
-        "search_engine_with_ai": "Buscador IA",
-        "doc_search_ai": "RAG",
-        "forms": "Formulario",
-        "aboutus": "Acerca de",
-        "header_footer": "Footer",
-        "products": "Productos",
+        "demos-search_ai": "Buscador IA",
+        "demos-doc_search_ai": "RAG",
+        "settings-menu": "Menú",
+        "forms-templates": "Plantillas",
+        "forms-menu-logo": "Logo menú",
+        "forms-menu-background": "Background menú",
+        "forms-menu-color": "Color menú",
+        "forms-main": "Formularios",
+        "forms-aboutus": "Cards Sección 2",
+        "forms-header_footer": "Footer",
+        "forms-products": "Cards Sección 1",
         "templates": "Plantillas",
         "styles": "Colores",
-        "settings": "Configuración",
+        "social-settings": "Inicio",
+        "settings-general": "<b>Comenzar</b>",
+        "settings-brands": "Marcas",
         "brands": "Marcas",
+        "settings-business-types": "Negocios",
         "business-types": "Negocios",
-        "multipost": "Publicaciones",
-        "facebookpost": "Facebook Post",
-        "pilotpost": "Pilot Post",
-        "listpost": "Programaciones",
-        "facebookmuro": "Facebook Muro"
-
+        "social-facebookpost": "Facebook Post",
+        "social-pilotpost": "Pilot Post",
+        "social-listpost": "Programaciones",
+        "social-facebookmuro": "Facebook Muro",
+        "incolmotos-import": "Importar Ventas",
+        "incolmotos-customers": "Clientes",
+        "demos-advancedSearch": "Búsqueda avanzada",
+        "demos-reports": "Reporte Historial",
+        "demos-myagent": "Mi agente"
     },
     "business_type":{
         "name": "Nombre",
@@ -101,7 +112,10 @@
         "form_field_button": "Agrega opción",
         "form_servicie": "Servicio Submit",
         "message_success": "Se ejecutó la tarea de manera correcta!",
-        "message_error": "Hubo un problema, comuníquese con soporte."
+        "message_error": "Hubo un problema, comuníquese con soporte.",
+        "limit_form": "Ha superado la cantidad de formularios permitidos.",
+        "welcome_1": "<p>Crea landing pages profesionales con formularios en minutos. <br>Con <strong>Visora Forms</strong> podés diseñar, publicar y administrar tus propias páginas de contacto o promoción de manera simple, sin depender de desarrolladores.</p><p>Importante — cómo está organizada cada landing:</p>",
+        "welcome_2": ""
     },
     "about": {
         "title": "Acerca de",
@@ -113,6 +127,7 @@
         "list_image": "Imagen",
         "list_edit": "Editar",
         "list_delete": "Borrar"
-    }
+    },
+    "limit_forms": "Cantidad de formularios permitidos"
     
 }

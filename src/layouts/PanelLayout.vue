@@ -66,7 +66,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-#main { padding-top: 100px; .container-fluid {min-height: 75vh}}
+#main { padding-top: 80px; .container-fluid {min-height: 75vh}}
 
 @media(max-width: 769px) {
     #main { padding-top: 60px;}

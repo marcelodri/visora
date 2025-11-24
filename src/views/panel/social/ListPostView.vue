@@ -120,13 +120,28 @@ export default {
     const toastMessage = ref("");
     const isSuccess = ref(true);
     const toastComponent = ref(null);
+    let token = null
 
     // Simulación GET
     const fetchPosts = async () => {
       try {
         isLoading.value = true;
 
-        const response = await fetch("https://hub.redooconect.com.ar/webhook/23d3265d-6db6-4156-b4fe-69e9b80a030d");
+        // const response = await fetch("https://hub.redooconect.com.ar/webhook/23d3265d-6db6-4156-b4fe-69e9b80a030d");
+        token = sessionStorage.getItem("token");
+        if (!token) throw new Error("Token no encontrado");
+
+        const payload = {action: "list-schedule"};
+
+        const response = await fetch("https://stage.powerflows.pilotcrm.io/api/e45236e2-83c3-47a5-b0ea-39377418e892", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
         const data = await response.json();
 
         posts.value = data.map((p, i) => ({
