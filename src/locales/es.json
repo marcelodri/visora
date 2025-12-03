@@ -42,6 +42,7 @@
         "forms-menu-background": "Background menú",
         "forms-menu-color": "Color menú",
         "forms-main": "Formularios",
+        "pages-main": "Páginas",
         "forms-aboutus": "Cards Sección 2",
         "forms-header_footer": "Footer",
         "forms-products": "Cards Sección 1",
@@ -52,16 +53,21 @@
         "settings-brands": "Marcas",
         "brands": "Marcas",
         "settings-business-types": "Negocios",
+        "settings-templates": "Plantillas",
         "business-types": "Negocios",
         "social-facebookpost": "Facebook Post",
         "social-pilotpost": "Pilot Post",
         "social-listpost": "Programaciones",
         "social-facebookmuro": "Facebook Muro",
-        "incolmotos-import": "Importar Ventas",
-        "incolmotos-customers": "Clientes",
+        "rewards-import": "Importar Ventas",
+        "rewards-customers": "Clientes",
+        "rewards-rules": "Reglas",
         "demos-advancedSearch": "Búsqueda avanzada",
         "demos-reports": "Reporte Historial",
-        "demos-myagent": "Mi agente"
+        "demos-myagent": "Mi agente",
+        "events-main": "Comenzar",
+        "events-list": "Eventos",
+        "registrations-main": "Inscripciones"
     },
     "business_type":{
         "name": "Nombre",
@@ -87,8 +93,8 @@
     },
     "download": "Descargar",
     "forms": {
-        "title": "Formularios",
-        "button_mas": "Nuevo Formulario",
+        "title": "Páginas",
+        "button_mas": "Nueva página",
         "list_one": "Nombre",
         "list_two": "Código de llamada",
         "list_three": "Servicio",
@@ -97,7 +103,7 @@
         "action_duplicate": "Duplicar",
         "action_style": "Estilos",
         "action_delete": "Borrar",
-        "form_name": "Nombre del Formulario",
+        "form_name": "Nombre de la página",
         "form_code": "Código de llamada",
         "form_img": "Imagen de Cabecera",
         "form_title": "Texto de Cabecera",
@@ -128,6 +134,14 @@
         "list_edit": "Editar",
         "list_delete": "Borrar"
     },
-    "limit_forms": "Cantidad de formularios permitidos"
+    "limit_forms": "Cantidad de formularios permitidos",
+    "events": {
+        "button_new": "Nuevo Evento",
+        "title": "Gestión de Eventos",
+        "list_edit": "Editar",
+        "list_delete": "Borrar",
+        "list_qr": "Ver QR",
+        "list_status": "Cambiar estado"
+    }
     
 }

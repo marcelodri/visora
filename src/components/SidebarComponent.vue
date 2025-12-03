@@ -34,7 +34,7 @@
                     v-for="route in category.routes"
                     :key="route.name"
                     class="mb-2"
-                    :class="['/panel/forms/settings', '/panel/forms/templates'].includes(route.path) ? 'border-b pb-2' : ''"
+                    :class="['/panel/forms/settings', '/panel/forms/templates', '/panel/events/start'].includes(route.path) ? 'border-b pb-2' : ''"
                   >
                     <router-link
                       :to="route.path"

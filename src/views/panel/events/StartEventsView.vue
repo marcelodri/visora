@@ -1,7 +1,7 @@
 <template>
   <div class="settings-container p-6 max-w-5xl mx-auto">
     <div class="header-section mb-6">
-      <h2 class="main-title">Bienvenido a <span class="brand">Visora landing pages</span></h2>
+      <h2 class="main-title">Bienvenido a <span class="brand">Visora Events</span></h2>
       <p class="subtitle">Configurá y gestioná tus formularios de manera simple y profesional</p>
     </div>
 
@@ -67,7 +67,7 @@
     </div>
 
     <!-- Card de Guía -->
-    <div class="card guide-card mb-5">
+    <!-- <div class="card guide-card mb-5">
       <div class="card-header">
         <i class="bi bi-book-fill me-2"></i>
         <span>Guía de uso</span>
@@ -81,7 +81,37 @@
               <div class="guide-icon">🧭</div>
               <div class="guide-content">
                 <h6 class="guide-title">Menú</h6>
-                <p>El menú es <strong>global</strong> — es el mismo para todas las páginas y se configura una sola vez.</p>
+                <p>El menú es <strong>global</strong> — es el mismo para todas las landings y se configura una sola vez.</p>
+              </div>
+            </div>
+          </router-link>
+
+          <router-link :to="{ name: 'forms-main' }" class="guide-item-link">
+            <div class="guide-item">
+              <div class="guide-icon">📨</div>
+              <div class="guide-content">
+                <h6 class="guide-title">Header + Formulario</h6>
+                <p>Cada <strong>formulario</strong> tiene su propia imagen de header, textos y formulario de contacto. Además, cada formulario cuenta con un <strong>código de llamada</strong> (Call Code) que lo identifica y permite integrarlo fácilmente en cualquier sitio web o página externa.</p>
+              </div>
+            </div>
+          </router-link>
+
+          <router-link :to="{ name: 'forms-products' }" class="guide-item-link">
+            <div class="guide-item">
+              <div class="guide-icon">🧱</div>
+              <div class="guide-content">
+                <h6 class="guide-title">Sección 1</h6>
+                <p>Crea cards para la Sección 1 y asociálas a un formulario. Cada card tiene la opción de incluir su propio <strong>Call Code</strong>, lo que permite generar un enlace directo a otro formulario dentro de la misma plataforma.</p>
+              </div>
+            </div>
+          </router-link>
+
+          <router-link :to="{ name: 'forms-aboutus' }" class="guide-item-link">
+            <div class="guide-item">
+              <div class="guide-icon">💬</div>
+              <div class="guide-content">
+                <h6 class="guide-title">Sección 2</h6>
+                <p>Crea cards para la Sección 2 y asociálas a un formulario. Las cards se cargan desde el enlace específico de "cards Sección 2".</p>
               </div>
             </div>
           </router-link>
@@ -91,78 +121,7 @@
               <div class="guide-icon">⚓</div>
               <div class="guide-content">
                 <h6 class="guide-title">Footer</h6>
-                <p>El footer también es <strong>global</strong> y se aplica a todas las páginas.</p>
-              </div>
-            </div>
-          </router-link>
-
-          <router-link :to="{ name: 'forms-products' }" class="guide-item-link">
-            <div class="guide-item">
-              <div class="guide-icon">🧱</div>
-              <div class="guide-content">
-                <h6 class="guide-title">Cards Sección 1</h6>
-                <p>Crea cards para la Sección 1 que se mostrarán en todas las páginas. Estas cards son <strong>globales</strong> y pueden enlazar a páginas específicas.</p>
-              </div>
-            </div>
-          </router-link>
-
-          <router-link :to="{ name: 'forms-aboutus' }" class="guide-item-link">
-            <div class="guide-item">
-              <div class="guide-icon">💬</div>
-              <div class="guide-content">
-                <h6 class="guide-title">Cards Sección 2</h6>
-                <p>Crea cards para la Sección 2 que se mostrarán en todas las páginas. Estas cards también son <strong>globales</strong>.</p>
-              </div>
-            </div>
-          </router-link>
-
-          <router-link :to="{ name: 'settings-brands' }" class="guide-item-link">
-            <div class="guide-item">
-              <div class="guide-icon">🏷️</div>
-              <div class="guide-content">
-                <h6 class="guide-title">Marcas</h6>
-                <p>Gestiona las marcas disponibles en tu sistema. Las marcas son <strong>globales</strong> y se usan para organizar modelos y negocios.</p>
-              </div>
-            </div>
-          </router-link>
-
-          <router-link :to="{ name: 'settings-business-types' }" class="guide-item-link">
-            <div class="guide-item">
-              <div class="guide-icon">🏢</div>
-              <div class="guide-content">
-                <h6 class="guide-title">Negocios</h6>
-                <p>Gestiona los negocios disponibles. Los negocios son <strong>globales</strong> y sirven para clasificar tus páginas.</p>
-              </div>
-            </div>
-          </router-link>
-
-          <router-link :to="{ name: 'pages-main' }" class="guide-item-link">
-            <div class="guide-item">
-              <div class="guide-icon">📄</div>
-              <div class="guide-content">
-                <h6 class="guide-title">Páginas por Modelo y Negocio</h6>
-                <p>Crea páginas individuales para cada combinación de <strong>modelo y negocio</strong>. Cada página tiene:</p>
-                <ul class="mb-2">
-                  <li>Una o varias <strong>imágenes</strong> (si agregás más de una, se activa automáticamente un carrusel)</li>
-                  <li><strong>Textos personalizables</strong> (título, descripción, etc.)</li>
-                  <li>Un <strong>formulario asociado</strong> (seleccionado de los formularios disponibles)</li>
-                  <li>Un <strong>código de llamada</strong> (Call Code) único para integrar la página</li>
-                </ul>
-              </div>
-            </div>
-          </router-link>
-
-          <router-link :to="{ name: 'forms-main' }" class="guide-item-link">
-            <div class="guide-item">
-              <div class="guide-icon">📨</div>
-              <div class="guide-content">
-                <h6 class="guide-title">Formularios</h6>
-                <p>Los formularios se crean y gestionan <strong>por separado</strong>. Luego, desde la configuración de cada página, podés <strong>asociar un formulario existente</strong>. Esto te permite:</p>
-                <ul class="mb-0">
-                  <li>Reutilizar un mismo formulario en múltiples páginas</li>
-                  <li>Centralizar la gestión de formularios</li>
-                  <li>Modificar un formulario y que el cambio se refleje en todas las páginas que lo usan</li>
-                </ul>
+                <p>El footer también es <strong>global</strong> y se aplica a todas las landings.</p>
               </div>
             </div>
           </router-link>
@@ -171,35 +130,22 @@
         <div class="summary-box">
           <h6 class="summary-title">
             <i class="bi bi-lightbulb-fill me-2"></i>
-            Resumen del nuevo modelo
+            Resumen
           </h6>
-          <p><strong>Elementos globales (compartidos por todas las páginas):</strong></p>
-          <ul>
-            <li>Menú de navegación</li>
-            <li>Footer</li>
-            <li>Cards de Sección 1 y Sección 2</li>
-            <li>Catálogo de Marcas y Negocios</li>
-            <li>Biblioteca de Formularios</li>
-          </ul>
+          <p>Una vez creado y configurado tu formulario, <strong>copiá el <a href="#insercion">código de inserción</a></strong> que genera el sistema y <strong>pegalo en tu sitio web</strong> donde quieras que aparezca. También podés acceder al mismo formulario mediante una <em>URL con código de referencia</em>.</p>
           
-          <p><strong>Elementos individuales por página:</strong></p>
-          <ul>
-            <li>Imágenes (una o varias, con carrusel automático si hay más de una)</li>
-            <li>Textos personalizados</li>
-            <li>Formulario asociado (elegido de la biblioteca)</li>
-            <li>Call Code único para integración</li>
-          </ul>
+          <p>En resumen: cada formulario controla su propio <strong>header</strong> y sus dos secciones principales (con sus respectivas cards). El <strong>menú</strong> y el <strong>footer</strong> son compartidos entre todas las landings.</p>
           
-          <p class="mb-0"><strong>Beneficios clave:</strong> Podés crear un único formulario y usarlo en múltiples páginas, o crear formularios específicos para cada página según tus necesidades. El sistema es flexible y te permite mantener coherencia visual mientras personalizas cada página individualmente.</p>
+          <p class="mb-0">Esto permite tener múltiples landings (cada una con su formulario y contenido personalizado) manteniendo una identidad visual coherente y una estructura común.</p>
         </div>
 
         <div class="contact-box">
           <i class="bi bi-envelope-fill me-2"></i>
-          <strong>¿Necesitás más páginas o formularios?</strong> Escribinos a 
+          <strong>¿Necesitás más formularios?</strong> Escribinos a 
           <a href="mailto:team@madcoder.io">team@madcoder.io</a>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Card de Código de Inserción -->
     <div class="card code-card mb-5" id="insercion">
@@ -275,8 +221,8 @@ export default {
         details: Array.isArray(user.details) ? user.details : [],
       };
 
-      this.htmlContent = `<div id="form-container" data-appkey="${this.settings.appkey}"></div>\n<scr` +
-        `ipt src="https://madcoder.io/cdn/form/iframe-loader.js"></scr` +
+      this.htmlContent = `<div id="events-container" data-appkey="${this.settings.appkey}"></div>\n<scr` +
+        `ipt src="https://madcoder.io/cdn/events/iframe-loader.js"></scr` +
         `ipt>`;
 
       this.isLoading = false;

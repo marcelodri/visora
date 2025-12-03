@@ -1,10 +1,12 @@
 
 <template>
   <div class="container-fluid mt-4 page">
-    <h2>Templates</h2>
-    <hr><br>
+    <div class="header-section mb-4 mt-5">
+      <h2>Templates</h2>
+    </div>
+    <hr class="header-divider">
 
-    <div class="accordion mb-5" id="accordionPlantillas">
+    <div class="accordion mb-5 mt-5" id="accordionPlantillas">
       <div class="accordion-item tip-banner-style">
         <h2 class="accordion-header" id="headingPlantillas">
           <button 
@@ -16,7 +18,7 @@
             aria-controls="collapsePlantillas"
           >
             <div class="tip-icon">
-              <i class="bi bi-layout-text-window-reverse"></i>
+              <i class="bi bi-lightbulb-fill"></i>
             </div>
             <div class="tip-text">
               <strong>Tip:</strong> Explorá las plantillas disponibles y usá el ícono del ojo para ver una simulación en vivo de cómo quedará tu landing page.
@@ -450,13 +452,13 @@ export default {
 .menu-item:nth-child(3) { animation-delay: 0.4s; }
 
 /* HEADER */
-.header-section {
+.preview-container .header-section {
   background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
   border-left: 6px solid #00acc1;
   min-height: 180px;
 }
 
-.header-section .section-label {
+.preview-container .header-section .section-label {
   color: #00695c;
 }
 

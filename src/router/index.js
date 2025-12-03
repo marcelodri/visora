@@ -64,6 +64,15 @@ const router = createRouter({
               meta: { requiresAuth: true, category: 'forms', label: 'Marcas' }
             },
             {
+              path: 'pages',
+              name: 'pages-main',
+              component: () => import('@/views/panel/formularios/PagesView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'forms'
+              }
+            },
+            {
               path: 'forms',
               name: 'forms-main',
               component: () => import('@/views/panel/formularios/FormsView.vue'),
@@ -97,6 +106,43 @@ const router = createRouter({
               meta: {
                 requiresAuth: true,
                 category: 'forms'
+              }
+            }
+          ]
+        },
+
+        // Events
+        {
+          path: 'events',
+          name: 'events',
+          redirect: '/panel/events/events', // redirige al primero del grupo
+          meta: { category: 'events', icon: '<i class="bi bi-calendar-event"></i>' },
+          children: [
+            {
+              path: 'start',
+              name: 'events-main',
+              component: () => import('@/views/panel/events/StartEventsView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'events'
+              }
+            },
+            {
+              path: 'events',
+              name: 'events-list',
+              component: () => import('@/views/panel/events/EventsView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'events'
+              }
+            },
+            {
+              path: 'registrations',
+              name: 'registrations-main',
+              component: () => import('@/views/panel/events/RegistrationsView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'events'
               }
             }
           ]
@@ -165,33 +211,43 @@ const router = createRouter({
           ]
         },
 
-        // Incolmotos
+        // Ventas (Incolmotos)
         {
-          path: 'incolmotos',
-          name: 'incolmotos',
+          path: 'rewards',
+          name: 'rewards',
           meta: {
             requiresAuth: true,
-            category: 'incolmotos',
+            category: 'rewards',
             icon: '<i class="bi bi-coin"></i>'
           },
           children: [
             {
-              path: 'sales',
-              name: 'incolmotos-import',
-              component: () => import('@/views/panel/incolmotos/SalesView.vue'),
+              path: 'rules',
+              name: 'rewards-rules',
+              component: () => import('@/views/panel/rewards/RulesView.vue'),
               meta: {
                 requiresAuth: true,
-                category: 'incolmotos',
+                category: 'rewards',
+                label: 'Pilot Post'
+              }
+            },
+            {
+              path: 'rewards',
+              name: 'rewards-import',
+              component: () => import('@/views/panel/rewards/SalesView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'rewards',
                 label: 'Pilot Post'
               }
             },
             {
               path: 'customers',
-              name: 'incolmotos-customers',
-              component: () => import('@/views/panel/incolmotos/SalesView.vue'),
+              name: 'rewards-customers',
+              component: () => import('@/views/panel/rewards/CustomersView.vue'),
               meta: {
                 requiresAuth: true,
-                category: 'incolmotos',
+                category: 'rewards',
                 label: 'Pilot Post'
               }
             }
@@ -293,7 +349,16 @@ const router = createRouter({
         requiresAuth: true,
       }
     }
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    // Si hay una posición guardada (por ejemplo, al usar el botón "atrás" del navegador)
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      // Siempre volver al top
+      return { top: 0 }
+    }
+  }
 });
 
 // Función helper para verificar acceso al menú

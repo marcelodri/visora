@@ -288,8 +288,8 @@
         ];
         
         const resultActions = [
-            { label: t('about.list_edit'), class: 'btn btn-outline-primary btn-sm', method: editForm, icon: '<i class="bi bi-pencil-square"></i>' },
-            { label: t('about.list_delete'), class: 'btn btn-sm btn-outline-danger', method: confirmDelete, icon: '<i class="bi bi-trash3"></i>' },
+            { label: t('about.list_edit'), class: 'btn btn-outline btn-sm', method: editForm, icon: '<i class="bi bi-pencil-square"></i>' },
+            { label: t('about.list_delete'), class: 'btn btn-sm btn-danger', method: confirmDelete, icon: '<i class="bi bi-trash3"></i>' },
         ];
   
         const fetchForms = async () => {

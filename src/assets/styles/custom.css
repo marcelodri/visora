@@ -102,6 +102,7 @@
   background: rgb(255, 255, 255);
   border-radius: 4px;
   width: 230px;
+  z-index: 1;
 }
 #sidebar .menu {
   padding-top: 20px;

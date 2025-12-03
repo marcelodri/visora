@@ -1,6 +1,7 @@
 @import './base.css';
 @import './styles/whatsapp.css';
-
+@import './styles/forms.css';
+@import './styles/events.css';
 /* #app {
   max-width: 1280px;
   margin: 0 auto;

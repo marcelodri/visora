@@ -1,1253 +1,774 @@
+<template>
+  <div class="container-fluid mt-4 page forms">
+    <div class="header-section mb-4">
+      <h2>Formularios</h2>
+      <button @click="openModalForm()" class="btn btn-primary btn-add">
+        <i class="bi bi-plus-circle me-2"></i> Nuevo formulario
+      </button>
+    </div>
+    <hr class="header-divider">
 
-  <template>
-    <div class="container-fluid mt-4 page">
-      <div class="header-section mb-4">
-        <h2>{{ $t('forms.title') }}</h2>
-        <button @click="openModalForm()" class="btn btn-primary btn-add">
-          <i class="bi bi-plus-circle me-2"></i> {{ $t('forms.button_mas') }}
-        </button>
-      </div>
-      <hr class="header-divider">
-
-      <!-- Tip Accordion (sin cambios) -->
-      <div class="accordion mb-5" id="accordionForms">
-        <div class="accordion-item tip-banner-style">
-          <h2 class="accordion-header" id="headingForms">
-            <button 
-              class="accordion-button collapsed tip-banner-button" 
-              type="button" 
-              data-bs-toggle="collapse" 
-              data-bs-target="#collapseForms" 
-              aria-expanded="false" 
-              aria-controls="collapseForms"
-            >
-              <div class="tip-icon">
-                <i class="bi bi-ui-checks-grid"></i>
-              </div>
-              <div class="tip-text">
-                <strong>Tip:</strong> Creá y personalizá tus formularios configurando encabezado, campos, secciones, estilos y mensajes de confirmación.
-              </div>
-            </button>
-          </h2>
-          <div 
-            id="collapseForms" 
-            class="accordion-collapse collapse" 
-            aria-labelledby="headingForms" 
-            data-bs-parent="#accordionForms"
+    <!-- Tip Accordion -->
+    <div class="accordion mb-5" id="accordionForms">
+      <div class="accordion-item tip-banner-style">
+        <h2 class="accordion-header" id="headingForms">
+          <button 
+            class="accordion-button collapsed tip-banner-button" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapseForms" 
+            aria-expanded="false" 
+            aria-controls="collapseForms"
           >
-            <div class="accordion-body tip-expanded">
-              <!-- Contenido del tip sin cambios -->
-              <p>Esta sección te permite <strong>crear y personalizar los formularios</strong> que luego vas a insertar en tu sitio web.</p>
-              <h6 class="mt-3"><strong>1. Encabezado del formulario</strong></h6>
-              <ul>
-                <li><strong>Título</strong> del formulario</li>
-                <li><strong>Descripción</strong> introductoria</li>
-                <li><strong>Imagen de cabecera</strong></li>
+            <div class="tip-icon">
+              <i class="bi bi-lightbulb-fill"></i>
+            </div>
+            <div class="tip-text">
+              <strong>Tip:</strong> Creá formularios reutilizables con campos personalizados, estilos y mensajes. Un mismo formulario puede usarse en múltiples páginas.
+            </div>
+          </button>
+        </h2>
+        <div 
+          id="collapseForms" 
+          class="accordion-collapse collapse" 
+          aria-labelledby="headingForms" 
+          data-bs-parent="#accordionForms"
+        >
+          <div class="accordion-body tip-expanded">
+            <p>Esta sección te permite <strong>crear y gestionar tu biblioteca de formularios</strong>. Los formularios se crean de forma independiente y luego se asocian a las páginas desde la configuración de cada página.</p>
+            
+            <h6 class="mt-3"><strong>1. Información del formulario</strong></h6>
+            <ul>
+              <li><strong>Nombre del formulario</strong>: identificador interno para reconocerlo fácilmente</li>
+              <li><strong>Título</strong>: el título que verán los usuarios</li>
+              <li><strong>Descripción</strong>: texto introductorio del formulario</li>
+            </ul>
+
+            <h6 class="mt-3"><strong>2. Campos personalizados</strong></h6>
+            <p>Agregá y configurá los campos que el usuario deberá completar:</p>
+            <ul>
+              <li><strong>Tipos disponibles</strong>: texto, email, teléfono, select, textarea, checkbox, etc.</li>
+              <li><strong>Validaciones</strong>: campos obligatorios, formato de email, longitud, etc.</li>
+              <li><strong>Orden</strong>: organizá los campos en el orden que prefieras</li>
+            </ul>
+
+            <h6 class="mt-3"><strong>3. Configuración y servicios</strong></h6>
+            <ul>
+              <li><strong>Servicio asociado</strong>: seleccioná el servicio que procesará los datos</li>
+              <li><strong>Mensajes de confirmación</strong>: personalizá mensajes de éxito y error</li>
+              <li><strong>Estilos</strong>: ajustá colores, botones y apariencia general</li>
+            </ul>
+
+            <div class="alert alert-success mt-3">
+              <i class="bi bi-star-fill me-2"></i>
+              <strong>Ventajas de la gestión independiente:</strong>
+              <ul class="mb-0 mt-2">
+                <li>✅ <strong>Reutilización</strong>: usá el mismo formulario en múltiples páginas</li>
+                <li>✅ <strong>Mantenimiento centralizado</strong>: modificá una vez, se actualiza en todas las páginas</li>
+                <li>✅ <strong>Organización</strong>: mantené todos tus formularios en un solo lugar</li>
+                <li>✅ <strong>Flexibilidad</strong>: creá formularios específicos o genéricos según necesites</li>
               </ul>
-              <h6 class="mt-3"><strong>2. Campos del formulario</strong></h6>
-              <p>Acá agregás los campos que el usuario deberá completar.</p>
-              <h6 class="mt-3"><strong>3. Código de llamada</strong></h6>
-              <p>👉 <strong>Recordá: cada formulario necesita un código de llamada único.</strong></p>
+            </div>
+
+            <div class="alert alert-info mt-3 mb-0">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <strong>¿Cómo usar los formularios?</strong> Una vez creado tu formulario, andá a la sección "Páginas" y asocialo a la página que quieras desde el selector de formularios.
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="card data-card">
-        <div class="card-body p-0">
-          <DataTableComponent
-            :data="forms"
-            :columns="columns"
-            :actions="resultActions"
-            :items-per-page="10"
-            :marcas="marcas"
-            :negocios="negocios"
-          />
-        </div>
+    <!-- Tabla de datos -->
+    <div class="card data-card">
+      <div class="card-body p-0">
+        <DataTableComponent
+          :data="forms"
+          :columns="columns"
+          :actions="resultActions"
+          :items-per-page="10"
+        />
       </div>
+    </div>
 
-      <!-- MODAL PRINCIPAL -->
-      <ModalComponent 
-        ref="formModal" 
-        modalId="formModal" 
-        :modalTitle="editingIndex === null ? 'Nuevo Formulario' : 'Editar Formulario'" 
-        class="modal-xl" 
-        @closeModal="handleCloseModal"
-      >
-        <div class="modal-body">
-          <div class="accordion accordion-modern" id="formAccordion">
-
-            <!-- 1. DATOS BÁSICOS -->
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingDatosBasicos">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDatosBasicos" aria-expanded="true">
-                  <i class="bi bi-info-circle-fill me-2"></i>
-                  1. Datos Básicos
-                </button>
-              </h2>
-              <div id="collapseDatosBasicos" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                  <div class="row g-3">
-                    <div class="col-12">
-                      <label class="form-label"><i class="bi bi-globe me-2"></i>Dominio:</label>
-                      <input v-model="formData.dominio" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                      <label class="form-label"><i class="bi bi-file-text me-2"></i>{{ $t('forms.form_name') }}:</label>
-                      <input v-model="formData.name" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                      <label class="form-label"><i class="bi bi-hash me-2"></i>{{ $t('forms.form_code') }}:</label>
-                      <input v-model="formData.code" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                      <label class="form-label"><i class="bi bi-tag-fill me-2"></i>{{ $t('menu.brands') }}:</label>
-                      <select v-model="formData.marca_id" class="form-select">
-                        <option value="">Seleccione una marca</option>
-                        <option v-for="marca in marcas" :key="marca.id" :value="marca.id">{{ marca.name }}</option>
-                      </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                      <label class="form-label"><i class="bi bi-briefcase-fill me-2"></i>{{ $t('menu.business-types') }}:</label>
-                      <select v-model="formData.tipo_de_negocio_id" class="form-select">
-                        <option value="">Seleccione un tipo de negocio</option>
-                        <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">{{ negocio.name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <!-- MODAL PRINCIPAL -->
+    <ModalComponent 
+      ref="formModal" 
+      modalId="formModal" 
+      :modalTitle="editingIndex === null ? 'Nuevo Formulario' : 'Editar Formulario'" 
+      class="modal-xl" 
+      @closeModal="handleCloseModal"
+    >
+      <div class="modal-body">
+        <!-- Nombre del formulario -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-card-heading me-2"></i>
+                Nombre:
+              </label>
+              <input 
+                v-model="formData.name" 
+                type="text" 
+                class="form-control" 
+                placeholder="Ingrese el nombre del formulario" 
+              />
             </div>
+          </div>
+        </div>
 
-            <!-- 2. IMAGEN -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImagen">
-                  <i class="bi bi-image-fill me-2"></i>
-                  2. Imagen del Formulario
-                </button>
-              </h2>
-              <div id="collapseImagen" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                  <label class="form-label"><i class="bi bi-card-image me-2"></i>{{ $t('forms.form_img') }}:</label>
-                  <input type="file" class="d-none" id="fileInput" accept="image/*" @change="handleImageUpload" />
-                  <label for="fileInput" class="file-input-label">
-                    <i class="bi bi-cloud-upload me-2"></i>
-                    {{ formData.fileName || "Seleccionar archivo..." }}
-                  </label>
-                  <div v-if="formData.image || formData.path" class="image-preview-container">
-                    <div class="image-preview">
-                      <img :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`" class="preview-image" />
-                      <button class="btn-remove-image" @click="removeImage">
-                        <i class="bi bi-trash3"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <!-- Título del formulario -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-type-h1 me-2"></i>
+                Título:
+              </label>
+              <input 
+                v-model="formData.header_text" 
+                type="text" 
+                class="form-control" 
+                placeholder="Ingrese título del formulario (opcional)" 
+              />
             </div>
-
-            <!-- 3. ENCABEZADO -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEncabezado">
-                  <i class="bi bi-text-left me-2"></i>
-                  3. Encabezado del Formulario
-                </button>
-              </h2>
-              <div id="collapseEncabezado" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                  <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.form_title') }}:</label>
-                    <input v-model="formData.header_text" type="text" class="form-control" />
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.form_subtitle') }}:</label>
-                    <input v-model="formData.header_subtext" type="text" class="form-control" />
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.form_descript') }}:</label>
-                    <textarea v-model="formData.header_descript" class="form-control" style="height:160px"></textarea>
-                  </div>
-                </div>
-              </div>
+          </div>
+        </div>
+        
+        <!-- Descripción -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-text-paragraph me-2"></i>
+                Descripción (opcional):
+              </label>
+              <textarea 
+                v-model="formData.header_descript" 
+                class="form-control" 
+                rows="4" 
+                placeholder="Ingrese descripción del formulario (opcional)"
+              ></textarea>
             </div>
+          </div>
+        </div>
 
-            <!-- 4. CAMPOS (mantener funcionalidad completa) -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCampos">
-                  <i class="bi bi-ui-checks-grid me-2"></i>
-                  4. Campos del Formulario
-                </button>
-              </h2>
-              <div id="collapseCampos" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                  <div v-for="(field, fieldIndex) in formData.fields" :key="fieldIndex" class="field-item mb-4">
-                    <div class="field-header">
-                      <span class="field-number">Campo {{ fieldIndex + 1 }}</span>
-                      <button class="btn btn-sm btn-danger" @click="removeField(fieldIndex)">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </div>
-                    
-                    <div class="field-body">
-                      <div class="row g-3 mb-3">
-                        <div class="col-6">
-                          <div class="form-check">
-                            <input type="checkbox" class="form-check-input" v-model="field.hidden" :id="'hidden' + fieldIndex" />
-                            <label class="form-check-label" :for="'hidden' + fieldIndex">Hidden</label>
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="form-check">
-                            <input type="checkbox" class="form-check-input" v-model="field.required" :id="'required' + fieldIndex" />
-                            <label class="form-check-label" :for="'required' + fieldIndex">Requerido</label>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="row g-3 mb-3">
-                        <div class="col-4">
-                          <label class="form-label">{{ $t('forms.form_field_label') }}:</label>
-                          <input v-model="field.label" class="form-control" placeholder="Etiqueta" />
-                        </div>
-                        <div class="col-4">
-                          <label class="form-label">{{ $t('forms.form_field_name') }}:</label>
-                          <input v-model="field.name" class="form-control" placeholder="Nombre" />
-                        </div>
-                        <div class="col-4">
-                          <label class="form-label">{{ $t('forms.form_field_value') }}:</label>
-                          <input v-model="field.value" class="form-control" placeholder="Valor" />
-                        </div>
-                      </div>
-
-                      <div class="mb-3">
-                        <label class="form-label">{{ $t('forms.form_field_type') }}:</label>
-                        <select v-model="field.type" class="form-select">
-                          <option value="text">Texto</option>
-                          <option value="number">Número</option>
-                          <option value="email">Email</option>
-                          <option value="textarea">Textarea</option>
-                          <option value="select">Select</option>
-                        </select>
-                      </div>
-
-                      <div v-if="field.type === 'select'" class="options-section">
-                        <h6>{{ $t('forms.form_field_options') }}</h6>
-                        <div v-for="(option, optIndex) in field.options" :key="optIndex" class="option-item mb-2">
-                          <input v-model="option.text" class="form-control" placeholder="Texto" />
-                          <input v-model="option.value" class="form-control" placeholder="Valor" />
-                          <button class="btn btn-sm btn-danger" @click="removeOption(fieldIndex, optIndex)">×</button>
-                        </div>
-                        <button class="btn btn-sm btn-secondary" @click="addOption(fieldIndex)">
-                          <i class="bi bi-plus-circle me-1"></i>Agregar opción
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <button class="btn btn-primary" @click="addField">
-                    <i class="bi bi-plus-circle me-2"></i>Agregar Campo
+        <!-- Campos del formulario -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-ui-checks me-2"></i>
+                Campos del formulario:
+              </label>
+              
+              <div v-for="(field, fieldIndex) in formData.fields" :key="fieldIndex" class="field-item mb-4">
+                <div class="field-header">
+                  <span class="field-number">
+                    <i class="bi bi-input-cursor-text me-1"></i>
+                    Campo {{ fieldIndex + 1 }}
+                  </span>
+                  <button class="btn btn-sm btn-danger" @click="removeField(fieldIndex)">
+                    <i class="bi bi-trash"></i>
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <!-- 5. MENSAJES -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMensajes">
-                  <i class="bi bi-chat-dots-fill me-2"></i>
-                  5. Mensajes del Formulario
-                </button>
-              </h2>
-              <div id="collapseMensajes" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                  <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.message_success') }}:</label>
-                    <textarea class="form-control" v-model="formData.success"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.message_error') }}:</label>
-                    <textarea class="form-control" v-model="formData.error"></textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 6. SECCIÓN 1 -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto">
-                  <i class="bi bi-grid-3x3-gap-fill me-2"></i>
-                  6. Sección 1 (Productos)
-                </button>
-              </h2>
-              <div id="collapseProducto" class="accordion-collapse collapse">
-                <div class="accordion-body">
+                
+                <div class="field-body">
                   <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Enlace Name</label>
-                      <input v-model="formData.product_label" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Product Title</label>
-                      <input v-model="formData.product_title" type="text" class="form-control" />
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Product Descripción</label>
-                    <textarea class="form-control" v-model="formData.product_description" style="height:200px"></textarea>
-                  </div>
-                  <div class="row g-3">
                     <div class="col-6">
-                      <label class="form-label">Background</label>
-                      <div class="color-picker-wrapper">
-                        <input v-model="formData.product_background" type="color" class="color-input" />
-                        <input type="text" v-model="formData.product_background" class="color-value-input" />
+                      <div class="form-check">
+                        <input type="checkbox" class="form-check-input" v-model="field.hidden" :id="'hidden' + fieldIndex" />
+                        <label class="form-check-label" :for="'hidden' + fieldIndex">
+                          <i class="bi bi-eye-slash me-1"></i>
+                          Campo oculto
+                        </label>
                       </div>
                     </div>
                     <div class="col-6">
-                      <label class="form-label">Color</label>
-                      <div class="color-picker-wrapper">
-                        <input v-model="formData.product_color" type="color" class="color-input" />
-                        <input type="text" v-model="formData.product_color" class="color-value-input" />
+                      <div class="form-check">
+                        <input type="checkbox" class="form-check-input" v-model="field.required" :id="'required' + fieldIndex" />
+                        <label class="form-check-label" :for="'required' + fieldIndex">
+                          <i class="bi bi-asterisk me-1"></i>
+                          Requerido
+                        </label>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- 7. SECCIÓN 2 -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAbout">
-                  <i class="bi bi-card-text me-2"></i>
-                  7. Sección 2 (About)
-                </button>
-              </h2>
-              <div id="collapseAbout" class="accordion-collapse collapse">
-                <div class="accordion-body">
                   <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Enlace Name</label>
-                      <input v-model="formData.about_label" type="text" class="form-control" />
+                    <div class="col-4">
+                      <label class="form-label">Etiqueta:</label>
+                      <input v-model="field.label" class="form-control" placeholder="Ej: Nombre completo" />
                     </div>
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">About Title</label>
-                      <input v-model="formData.about_title" type="text" class="form-control" />
+                    <div class="col-4">
+                      <label class="form-label">Nombre del campo:</label>
+                      <input v-model="field.name" class="form-control" placeholder="Ej: full_name" />
+                    </div>
+                    <div class="col-4">
+                      <label class="form-label">Valor por defecto:</label>
+                      <input v-model="field.value" class="form-control" placeholder="Opcional" />
                     </div>
                   </div>
+
                   <div class="mb-3">
-                    <label class="form-label">About Descripción</label>
-                    <textarea class="form-control" v-model="formData.about_description" style="height:200px"></textarea>
+                    <label class="form-label">Tipo de campo:</label>
+                    <select v-model="field.type" class="form-select">
+                      <option value="text">Texto</option>
+                      <option value="number">Número</option>
+                      <option value="email">Email</option>
+                      <option value="textarea">Área de texto</option>
+                      <option value="select">Lista desplegable</option>
+                    </select>
                   </div>
-                  <div class="row g-3">
-                    <div class="col-6">
-                      <label class="form-label">Background</label>
-                      <div class="color-picker-wrapper">
-                        <input v-model="formData.about_background" type="color" class="color-input" />
-                        <input type="text" v-model="formData.about_background" class="color-value-input" />
-                      </div>
+
+                  <div v-if="field.type === 'select'" class="options-section">
+                    <h6>
+                      <i class="bi bi-list-ul me-1"></i>
+                      Opciones del select
+                    </h6>
+                    <div v-for="(option, optIndex) in field.options" :key="optIndex" class="option-item mb-2">
+                      <input v-model="option.text" class="form-control" placeholder="Texto visible" />
+                      <input v-model="option.value" class="form-control" placeholder="Valor" />
+                      <button class="btn btn-sm btn-danger" @click="removeOption(fieldIndex, optIndex)">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
                     </div>
-                    <div class="col-6">
-                      <label class="form-label">Color</label>
-                      <div class="color-picker-wrapper">
-                        <input v-model="formData.about_color" type="color" class="color-input" />
-                        <input type="text" v-model="formData.about_color" class="color-value-input" />
-                      </div>
-                    </div>
+                    <button class="btn btn-sm btn-secondary" @click="addOption(fieldIndex)">
+                      <i class="bi bi-plus-circle me-1"></i>Agregar opción
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" @click="saveForm">
-            <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
-          </button>
-          <button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
-            <i class="bi bi-x-circle me-2"></i>{{$t('search_view.cancel')}}
-          </button>
-        </div>
-      </ModalComponent>
-
-      <!-- MODAL ESTILOS (simplificado) -->
-      <ModalComponent ref="styleModal" modalId="styleModal" :modalTitle="'Estilo de formulario'" class="modal-xl">
-        <div class="modal-body">
-          <h5 class="mb-3">{{$t('menu.templates')}}</h5>
-          <select v-model="formData.selectedStyleOption" class="form-select mb-4">
-            <option disabled value="">Selecciona un template</option>
-            <option v-for="(item, index) in styleOptions" :key="index" :value="item.code">{{ item.name }}</option>
-          </select>
-
-          <h5 class="mb-3">Colores</h5>
-          <div v-for="(color, key) in formData.colorOptions" :key="key" class="mb-3">
-            <label class="form-label">{{ color.label }}</label>
-            <div class="color-picker-wrapper">
-              <input type="color" v-model="formData.colorOptions[key].value" class="color-input">
-              <input type="text" v-model="formData.colorOptions[key].value" class="color-value-input">
+              
+              <button class="btn btn-primary" @click="addField">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Campo
+              </button>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" @click="saveStyleForm">
-            <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
-          </button>
-          <button type="button" class="btn btn-outline-secondary" @click="closeStyleModalForm">
-            <i class="bi bi-x-circle me-2"></i>{{$t('search_view.cancel')}}
-          </button>
+
+        <!-- Servicios -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-gear-fill me-2"></i>
+                Servicio:
+              </label>
+              <select v-model="formData.service" class="form-select">
+                <option disabled value="">Selecciona un servicio</option>
+                <option v-for="(item, index) in services" :key="index" :value="item.name">
+                  {{ item.name }}
+                </option>
+              </select>
+            </div>
+          </div>
         </div>
-      </ModalComponent>
 
-      <ToastComponent 
-        :title="toastTitle" 
-        :message="toastMessage" 
-        :isSuccess="isSuccess" 
-        :show.sync="showToastFlag"
-        ref="toastComponent"
-      />
+        <!-- Mensaje de éxito -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-check-circle me-2"></i>
+                Mensaje de éxito:
+              </label>
+              <textarea 
+                v-model="formData.success" 
+                class="form-control" 
+                rows="4" 
+                placeholder="Mensaje que verá el usuario al enviar correctamente el formulario"
+              ></textarea>
+            </div>
+          </div>
+        </div>
 
-      <ConfirmPopup 
-        ref="confirmPopup" 
-        :title="$t('search_view.alert_confirm_title')" 
-        :question="$t('search_view.alert_confirm_question')" 
-        @response="handleResponse" 
-      />
+        <!-- Mensaje de error -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Mensaje de error:
+              </label>
+              <textarea 
+                v-model="formData.error" 
+                class="form-control" 
+                rows="4" 
+                placeholder="Mensaje que verá el usuario si ocurre un error"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" @click="saveForm">
+          <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
+        </button>
+        <button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
+          <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
+        </button>
+      </div>
+    </ModalComponent>
 
-      <LoadingDots :isLoading="isLoading" />
+    <!-- MODAL ESTILOS -->
+    <ModalComponent 
+      ref="styleModal" 
+      modalId="styleModal" 
+      :modalTitle="'Estilos del formulario'" 
+      class="modal-xl"
+    >
+      <div class="modal-body">
+        <h5 class="mb-3">
+          <i class="bi bi-palette me-2"></i>
+          Personalización de colores
+        </h5>
+        <div v-for="(color, key) in formData.colorOptions" :key="key" class="mb-3">
+          <label class="form-label">{{ color.label }}</label>
+          <div class="color-picker-wrapper">
+            <input type="color" v-model="formData.colorOptions[key].value" class="color-input">
+            <input type="text" v-model="formData.colorOptions[key].value" class="color-value-input">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" @click="saveStyleForm">
+          <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
+        </button>
+        <button type="button" class="btn btn-outline-secondary" @click="closeStyleModalForm">
+          <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
+        </button>
+      </div>
+    </ModalComponent>
 
-    </div>
-  </template>
+    <!-- Componentes auxiliares -->
+    <ToastComponent 
+      :title="toastTitle" 
+      :message="toastMessage" 
+      :isSuccess="isSuccess" 
+      :show.sync="showToastFlag"
+      ref="toastComponent"
+    />
+
+    <ConfirmPopup 
+      ref="confirmPopup" 
+      :title="$t('search_view.alert_confirm_title')" 
+      :question="$t('search_view.alert_confirm_question')" 
+      @response="handleResponse" 
+    />
+
+    <LoadingDots :isLoading="isLoading" />
+  </div>
+</template>
 
 <script>
-  import { ref, getCurrentInstance, onMounted, nextTick } from 'vue';
-  import axios from 'axios';
-  import DataTableComponent from '@/components/DataTableComponent.vue';
-  import ModalComponent from '@/components/ModalComponent.vue';
-  import ToastComponent from '@/components/ToastComponent.vue'; // Asegúrate de ajustar la ruta
-  import ConfirmPopup from '@/components/ConfirmPopup.vue'
-  import { useI18n } from "vue-i18n";
+import { ref, getCurrentInstance, onMounted } from 'vue';
+import axios from 'axios';
+import DataTableComponent from '@/components/DataTableComponent.vue';
+import ModalComponent from '@/components/ModalComponent.vue';
+import ToastComponent from '@/components/ToastComponent.vue';
+import ConfirmPopup from '@/components/ConfirmPopup.vue';
+import { useI18n } from "vue-i18n";
 
-  export default {
-    components: {
-      ModalComponent,
-      DataTableComponent,
-      ToastComponent,
-      ConfirmPopup
+export default {
+  components: {
+    ModalComponent,
+    DataTableComponent,
+    ToastComponent,
+    ConfirmPopup
+  },
+  setup() {
+    const { t } = useI18n();
+    const instance = getCurrentInstance();
+    const forms = ref([]);
+    const editingIndex = ref(null);
+    const formData = ref({ 
+      name: '', 
+      images: [],
+      fields: [], 
+      header_text: "",
+      header_subtext: "",
+      header_descript: "",
+      success: "",
+      error: "",
+      service: "",
+      status: "draft",
+      colorOptions: {
+      background: { label: 'Color de fondo', value: '#ffffff', code: "bg_form" },
+      inputs: { label: 'Color de inputs', value: '#f8f9fa', code: "bg_input" },
+      text: { label: 'Color de texto', value: '#000000', code: "tx_form" },
+      placeholder: { label: 'Color de placeholder', value: '#6c757d', code: "pl_form" },
+      buttonBg: { label: 'Color de fondo del botón', value: '#007bff', code: "btn_bg_form" },
+      buttonBorder: { label: 'Color de borde del botón', value: '#007bff', code: "btn_border_form" },
+      buttonText: { label: 'Color de texto del botón', value: '#ffffff', code: "btn_txt_form" },
     },
-    setup() {
+      appkey_pilot: ""
+    });
+    const token = ref(null);
+    const isLoading = ref(false);
+    const formModal = ref(null);
+    const styleModal = ref(null);
+    const toastTitle = ref('');
+    const toastMessage = ref('');
+    const isSuccess = ref(true);
+    const toastComponent = ref(null);
+    const showToastFlag = ref(false);
+    const confirmPopup = ref(null);
+    const actionToExecute = ref(null);
+    const selectedForm = ref(null);
+    let formDelete = {};
+    
+    const url = "https://apis.madautomate.cloud/webhook/81d62e39-5785-4ca3-8efc-735a72e05302";
 
-      const { t } = useI18n();
-      const instance = getCurrentInstance();
-      const forms = ref([]);
-      const marcas = ref([]);
-      const negocios = ref([]);
-      const formDataForm = ref({title: "", description: ""})
-      const isModalOpen = ref(false);
-      const editingIndex = ref(null);
-      const formData = ref({ name: '', image: '', fields: [], service: "pilot", header_text: "", header_subtext: "", header_descript: "", colorOptions:{}, selectedStyleOption:"classic", status: "inactive", about_title:"",about_description:"", product_title: "", product_description: "", about_background: "#ffffff", about_color: "#0000", product_background: "#ffffff", product_color: "#0000" });
-      const token = ref(null);
-      const isLoading = ref(false);
-      const formModal = ref(null);
-      const styleModal = ref(null);
-      const toastTitle = ref('');
-      const toastMessage = ref('');
-      const isSuccess = ref(true);
-      const toastComponent = ref(null); // Referencia del ToastComponent
-      const showToastFlag = ref(false);
-      const confirmPopup = ref(null);
-      const actionToExecute = ref(null);
-      const selectedForm = ref(null);
-      let formDelete = {};
-      // const quillEditorRef1 = ref(null);
-      // const quillEditorRef2 = ref(null);
-      const url = "https://apis.madautomate.cloud/webhook/81d62e39-5785-4ca3-8efc-735a72e05302";
+    onMounted(() => {
+      confirmPopup.value = instance?.proxy?.$refs.confirmPopup;
+    });
 
-      onMounted(() => {
-        confirmPopup.value = instance?.proxy?.$refs.confirmPopup; // Acceder a $refs en onMounted
+    const services = ref([
+      { id: 1, name: "pilot" },
+      { id: 2, name: "event" }
+    ]);
+
+    const columns = ref([
+      { label: t("forms.list_one"), key: 'name' },
+      { label: t("forms.list_three"), key: 'service' }
+    ]);
+
+    const colorOptions = ref({
+      background: { label: 'Color de fondo', value: '#ffffff', code: "bg_form" },
+      inputs: { label: 'Color de inputs', value: '#f8f9fa', code: "bg_input" },
+      text: { label: 'Color de texto', value: '#000000', code: "tx_form" },
+      placeholder: { label: 'Color de placeholder', value: '#6c757d', code: "pl_form" },
+      buttonBg: { label: 'Color de fondo del botón', value: '#007bff', code: "btn_bg_form" },
+      buttonBorder: { label: 'Color de borde del botón', value: '#007bff', code: "btn_border_form" },
+      buttonText: { label: 'Color de texto del botón', value: '#ffffff', code: "btn_txt_form" },
+    });
+
+    const openModalForm = (index = null) => {
+      editingIndex.value = index;
+      if (index !== null) {
+        formData.value = JSON.parse(JSON.stringify(index));
+        if (!Array.isArray(formData.value.images)) {
+          formData.value.images = formData.value.images ? [formData.value.images] : [];
+        }
+      }
+      formModal.value.openModal();
+    };
+
+    const closeModalForm = () => {
+      formData.value = { 
+        name: '', 
+        images: [],
+        fields: [], 
+        header_text: "",
+        header_subtext: "",
+        header_descript: "",
+        success: "",
+        error: "",
+        service: "",
+        status: "draft",
+        colorOptions: {
+      background: { label: 'Color de fondo', value: '#ffffff', code: "bg_form" },
+      inputs: { label: 'Color de inputs', value: '#f8f9fa', code: "bg_input" },
+      text: { label: 'Color de texto', value: '#000000', code: "tx_form" },
+      placeholder: { label: 'Color de placeholder', value: '#6c757d', code: "pl_form" },
+      buttonBg: { label: 'Color de fondo del botón', value: '#007bff', code: "btn_bg_form" },
+      buttonBorder: { label: 'Color de borde del botón', value: '#007bff', code: "btn_border_form" },
+      buttonText: { label: 'Color de texto del botón', value: '#ffffff', code: "btn_txt_form" },
+    },
+        appkey_pilot: ""
+      };
+      formModal.value.closeModal();
+    };
+
+    const closeStyleModalForm = () => {
+      styleModal.value.closeModal();
+    };
+
+    const handleCloseModal = () => {
+      closeModalForm();
+      closeStyleModalForm();
+    };
+
+    const addField = () => {
+      if (!formData.value.fields || formData.value.fields === "") {
+        formData.value.fields = [];
+      }
+      formData.value.fields.push({ 
+        label: '', 
+        name: '', 
+        type: 'text', 
+        hidden: false, 
+        required: false, 
+        options: [] 
       });
+    };
 
-      const styleOptions = ref([
-        { id: 1, name:"Clásico", image: "https://via.placeholder.com/100", code: "classic" },
-        { id: 2, name: "Template B", image: "https://via.placeholder.com/100", code: "template-b"  },
-        { id: 3, name: "Landing PRO", image: "https://via.placeholder.com/100", code: "landing-pro"  }
-      ]);
+    const removeField = (index) => {
+      formData.value.fields.splice(index, 1);
+    };
 
-      const columns = ref([
-        { label: t("forms.list_one"), key: 'name' },
-        { label: t("forms.list_two"), key: 'code' },
-        { label: t("forms.list_three"), key: 'service' },
-        { label: t("menu.settings-brands"), key: 'marca_name' },
-        { label: t("menu.settings-business-types"), key: 'tipo_de_negocio_name' }
-      ]);
-
-      const colorOptions = ref({
-        background: { label: 'Background Color', value: '#ffffff', code: "bg_form" },
-        inputs: { label: 'Inputs Color', value: '#f8f9fa', code: "bg_input" },
-        text: { label: 'Text Color', value: '#000000', code: "tx_form" },
-        placeholder: { label: 'Placeholder Color', value: '#6c757d', code: "pl_form" },
-        buttonBg: { label: 'Botón Background Color', value: '#007bff', code: "btn_bg_form" },
-        buttonBorder: { label: 'Botón Border Color', value: '#007bff', code: "btn_border_form" },
-        buttonText: { label: 'Botón Text Color', value: '#ffffff', code: "btn_txt_form" },
+    const addOption = (fieldIndex) => {
+      formData.value.fields[fieldIndex].options.push({
+        text: "",
+        value: "",
       });
-  
-      const openModalForm = (index = null) => {
-        editingIndex.value = index;
-        if (index !== null) {
-          formData.value = index;
-        } else {
-          console.log('formData.value',formData.value);
-          formData.value = { name: '', image: '', fields: "", service: "pilot", header_text: "", header_subtext: "", header_descript: "", colorOptions:colorOptions.value, selectedStyleOption:"classic", status: "inactive", about_title:"",about_description:"", product_title: "", product_description: "", about_background: "#ffffff", about_color: "#0000", product_background: "#ffffff", product_color: "#0000" };
-        }
-        formModal.value.openModal();
-      };
-  
-      const closeModalForm = () => {
-        // Limpia ambos editores
-        // if (quillEditorRef1.value) {
-        //   quillEditorRef1.value.setHTML('');
-        //   quillEditorRef1.value.setText('');
-        // }
-        
-        // if (quillEditorRef2.value) {
-        //   quillEditorRef2.value.setHTML('');
-        //   quillEditorRef2.value.setText('');
-        // }
-        
-        // Resetea los datos
-        formData.value = { 
-          name: '', 
-          image: '', 
-          fields: [], 
-          about_title: "",
-          about_description: "", 
-          about_background: "#ffffff",
-          about_color: "#0000",
-          about_label: "",
-          product_title: "", 
-          product_description: "",
-          product_background: "#ffffff",
-          product_color: "#0000",
-          product_label: ""
-        };
-        formModal.value.closeModal();
-      };
-  
-      const closeStyleModalForm = () => {
-        styleModal.value.closeModal();
+    };
+
+    const removeOption = (fieldIndex, optIndex) => {
+      formData.value.fields[fieldIndex].options.splice(optIndex, optIndex);
+    };
+
+    const saveForm = () => {
+      if (editingIndex.value === null) {
+        instance.proxy.createForm(JSON.parse(JSON.stringify(formData.value)));
+      } else {
+        instance.proxy.updateForm(JSON.parse(JSON.stringify(formData.value)));
       }
+      closeModalForm();
+    };
 
-      const handleCloseModal = () => {
-        closeModalForm();
-        closeStyleModalForm();
-        // acá hacés lo que necesites cuando el modal se cierre
-      };
+    const deleteForm = async () => {
+      isLoading.value = true;
+      formDelete.action = "deleteForm";
 
-      const handleImageUpload = (event) => {
-        const file = event.target.files[0];
-        formData.value.fileName = file.name; // Guardar el nombre del archivo
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            formData.value.image = reader.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-  
-      const addField = () => {
-        // Verificamos si fields está vacío o es una cadena vacía
-        if (!formData.value.fields || formData.value.fields === "") {
-          formData.value.fields = []; // Si es vacío o cadena vacía, lo transformamos en un array vacío
-        }
-        formData.value.fields.push({ label: '', name: '', type: 'text', hidden: false, required: false, options: [] });
-      };
-  
-      const removeField = (index) => {
-        formData.value.fields.splice(index, 1);
-      };
-  
-      const addOption = (fieldIndex) => {
-        formData.value.fields[fieldIndex].options.push({
-          text: "", // Campo para el texto visible en el select
-          value: "", // Campo para el valor de la opción
+      try {
+        const response = await axios.post(url, formDelete, {
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
         });
-      };
-  
-      const removeOption = (fieldIndex, optIndex) => {
-        formData.value.fields[fieldIndex].options.splice(optIndex, 1);
-      };
-  
-      const saveForm = () => {
-        if (editingIndex.value === null) {
-          instance.proxy.createForm(JSON.parse(JSON.stringify(formData.value)));
-        } else {
-          forms.value[editingIndex.value] = JSON.parse(JSON.stringify(formData.value));
-          instance.proxy.updateForm(JSON.parse(JSON.stringify(formData.value)));
-        }
-        closeModalForm();
-      };
-  
-      const duplicateForm = (index = null) => {
-        const original = index;
-        console.log('index', index)
-        let baseName = original.name.replace(/_copy_\d+$/, '').replace(/_copy$/, '');
-        let newName = baseName + '_copy';
-        let baseCode = original.code.replace(/_copy_\d+$/, '').replace(/_copy$/, '');
-        let newCode = baseCode + '_copy';
-        let count = 1;
-        while (forms.value.some((f) => f.name === newName)) {
-          count++;
-          newName = `${baseName}_copy_${count}`;
-          newCode = `${baseCode}_copy_${count}`;
-        }
-        const newForm = JSON.parse(JSON.stringify(original));
-        delete newForm.id;
-        newForm.name = newName;
-        newForm.code = newCode;
-        newForm.duplicateForm = true;
-        createForm(newForm);
-      };
-  
-
-      const deleteForm = async () => {
-        isLoading.value = true;
-        formDelete.action = "deleteForm";
-
-        try {
-          const response = await axios.post(url,formDelete, {
-            headers: {
-              Authorization: `Bearer ${token.value}`,
-            },
-          });
-          if (response.status === 200) {
-            // Buscar el índice del formulario en el array por ID
-            const index = forms.value.findIndex(f => f.id === formDelete.id);
-            if (index !== -1) {
-              forms.value.splice(index, 1); // Eliminar el formulario del array
-            }
-            await getForms();
-
-            setTimeout(() => {
-              triggerToast('Realizado!', 'Formulario eliminado!', true);
-            }, 1000)
+        
+        if (response.status === 200) {
+          const index = forms.value.findIndex(f => f.id === formDelete.id);
+          if (index !== -1) {
+            forms.value.splice(index, 1);
           }
-        } catch (error) {
-          console.error('Error al obtener las columnas:', error);
+          await getForms();
           setTimeout(() => {
-            triggerToast('Error!', $t('limit_form'), false);
-          }, 1000)
-        } finally {
-          isLoading.value = false;
-        }
-
-      };
-      
-
-      const handleResponse = (isConfirmed) => {
-        if (!isConfirmed) return;
-
-        if (actionToExecute.value === "delete") {
-          deleteForm(selectedForm.value);
-        }
-
-        if (actionToExecute.value === "duplicate") {
-          duplicateForm(selectedForm.value);
-        }
-
-        // limpiar acción
-        actionToExecute.value = null;
-        selectedForm.value = null;
-      };
-      
-      
-
-      const confirmDelete = (form) => {
-        form.imageDelete = formData.value.fileName;
-        form.image = "";
-        form.fileName = "";
-        formDelete = form;
-        actionToExecute.value = "delete";
-        confirmPopup.value.showConfirmPopup(); // Mostramos el popup de confirmación
-      }
-
-      const duplicateClick = (form) => {
-        selectedForm.value = form;
-        actionToExecute.value = "duplicate";
-        confirmPopup.value.showConfirmPopup(); // Mostramos el popup de confirmación
-      }
-
-      const selectedDefault = async (selectedForm) => {
-        try {
-          await setDefaultForm(selectedForm);
-
-          forms.value.forEach(form => {
-            form.default = (form.id === selectedForm.id) ? true : null;
-          });
-
-        } catch (error) {
-          console.error('Error al actualizar el formulario:', error);
-        }
-      }
-
-
-
-      // Métodos externos (equivalentes a los de methods)
-      const getToken = async () => {
-        token.value = sessionStorage.getItem('token');
-      };
-  
-      const getMarcas = async () => {
-
-        const response = await axios.post('https://apis.madautomate.cloud/webhook/7279e62e-5ab0-4f43-9707-c1ff44e95d89', {action: 'databrands'}, {
-            headers: {
-                Authorization: `Bearer ${token.value}`,
-            },
-        });
-
-        if (response && response.data && Array.isArray(response.data)) {
-          marcas.value = response.data; // 🔁 Carga los datos en el datatable
-        }
-
-      };
-
-      const getTiposDeNegocios = async () => {
-
-        const response = await axios.post('https://apis.madautomate.cloud/webhook/bb230afc-9ef9-43ec-9319-58e9deda6564', {action: "databusiness"}, {
-            headers: {
-                Authorization: `Bearer ${token.value}`,
-            },
-        });
-
-        if (response && response.data && Array.isArray(response.data)) {
-          negocios.value = response.data; // 🔁 Carga los datos en el datatable
-        }
-
-      };
-
-
-
-
-
-
-      const getForms = async () => {
-        isLoading.value = true;
-
-        try {
-          const response = await axios.post(url, {action: "dataforms"}, {
-            headers: {
-              Authorization: `Bearer ${token.value}`,
-            },
-          });
-
-          console.log('response', response.data);
-
-          if (response.data.length > 0 && Object.keys(response.data[0]).length > 0) {
-            // Función para convertir imagen a base64
-            forms.value = await Promise.all(
-              response.data.map(async (form) => {
-                return {
-                  ...form,
-                  fields: form.fields ? JSON.parse(form.fields) : [],
-                  colorOptions: form.colorOptions ? JSON.parse(form.colorOptions) : []
-                };
-              })
-            );
-          }
-        } catch (error) {
-          console.error('Error al obtener las columnas:', error);
-        } finally {
-          isLoading.value = false;
-        }
-      };
-
-
-      const createForm = async (data) => {
-
-        data.fields = JSON.stringify(data.fields);
-        data.action = "saveform";
-        delete data.id;
-
-        if(!data.duplicateForm) {
-          data.colorOptions = JSON.stringify(colorOptions.value);
-        } else {
-          data.colorOptions = JSON.stringify(data.colorOptions);
-        }
-
-        isLoading.value = true;
-        
-        console.log('data', data);
-
-        try {
-          const postdata = await axios.post(url, data, {
-            headers: {
-              Authorization: `Bearer ${token.value}`, // Añadir el token como Bearer Token
-            },
-          });
-  
-          if(postdata.status == 200) {
-
-            data.id = postdata.data.id;
-            data.fields = JSON.parse(data.fields)
-            data.colorOptions = JSON.parse(data.colorOptions)
-            
-            forms.value.push(JSON.parse(JSON.stringify(data)));
-            closeModalForm();
-            await getForms();
-            setTimeout(() => {
-              triggerToast('Realizado!', 'Formulario creado!', true);
-            }, 1000)
-          }
-
-        } catch (error) {
-          console.error('Error al guardar la consulta:', error);
-
-          // Aseguramos que el backend devuelva algo tipo "forms.limit_form"
-          const errorKey = error?.response?.data?.error || 'forms.message_error';
-
-          // Verificamos si existe la clave
-          const translated = t(errorKey) !== errorKey ? t(errorKey) : t('forms.message_error');
-          setTimeout(() => {
-            triggerToast('Error', translated, false);
+            triggerToast('Realizado!', 'Formulario eliminado!', true);
           }, 1000);
-
-        } finally {
-          isLoading.value = false;
         }
-      };
+      } catch (error) {
+        console.error('Error al eliminar el formulario:', error);
+        setTimeout(() => {
+          triggerToast('Error!', 'No se pudo eliminar el formulario', false);
+        }, 1000);
+      } finally {
+        isLoading.value = false;
+      }
+    };
 
-      const updateForm = async (data) => {
-        //console.log('updateForm', data);
+    const handleResponse = (isConfirmed) => {
+      if (!isConfirmed) return;
 
-        data.colorOptions = JSON.stringify(data.colorOptions)
-        data.fields = JSON.stringify(data.fields)
-        data.action = "saveform";
-
-        isLoading.value = true;
-        try {
-          const postdata = await axios.post(url, data, {
-            headers: {
-              Authorization: `Bearer ${token.value}`, // Añadir el token como Bearer Token
-            },
-          });
-          if(postdata.status == 200) {
-            await getForms();
-            setTimeout(() => {
-              triggerToast('Realizado!', 'Formulario actualizado!', true);
-            }, 1000)
-          }
-          closeStyleModalForm();
-        } catch (error) {
-          console.error('Error al guardar la consulta:', error);
-        } finally {
-          isLoading.value = false;
-        }
-
-
-
-      };
-
-      const setDefaultForm = async (data) => {
-        isLoading.value = true;
-        data.action= 'setdefault';
-        try {
-          const postdata = await axios.post(url, data, {
-            headers: {
-              Authorization: `Bearer ${token.value}`, // Añadir el token como Bearer Token
-            },
-          });
-        } catch (error) {
-          console.error('Error al guardar la consulta:', error);
-        } finally {
-          isLoading.value = false;
-        }
-
+      if (actionToExecute.value === "delete") {
+        deleteForm(selectedForm.value);
       }
 
+      actionToExecute.value = null;
+      selectedForm.value = null;
+    };
 
-      const styleForm = async (index = null) => {
-        editingIndex.value = index;
-        formData.value = index;
-        styleModal.value.openModal();
+    const confirmDelete = (form) => {
+      formDelete = form;
+      actionToExecute.value = "delete";
+      confirmPopup.value.showConfirmPopup();
+    };
+
+    const duplicateClick = (form) => {
+      selectedForm.value = form;
+      actionToExecute.value = "duplicate";
+      confirmPopup.value.showConfirmPopup();
+    };
+
+    const getToken = async () => {
+      token.value = sessionStorage.getItem('token');
+    };
+
+    const getForms = async () => {
+      isLoading.value = true;
+
+      try {
+        const response = await axios.post(url, { action: "dataforms" }, {
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        });
+
+        if (response.data.length > 0 && Object.keys(response.data[0]).length > 0) {
+          forms.value = await Promise.all(
+            response.data.map(async (form) => {
+              return {
+                ...form,
+                fields: form.fields ? JSON.parse(form.fields) : [],
+                colorOptions: form.colorOptions ? JSON.parse(form.colorOptions) : [],
+                images: form.images ? JSON.parse(form.images) : []
+              };
+            })
+          );
+        }
+      } catch (error) {
+        console.error('Error al obtener los formularios:', error);
+      } finally {
+        isLoading.value = false;
       }
+    };
 
-      const saveStyleForm = async () => {
-        // Crear una copia del formData y convertir colorOptions a string
-        const formDataToSend = {
-          ...formData.value,
-          colorOptions: formData.value.colorOptions
-        };
-        instance.proxy.updateForm(formDataToSend); // Enviar la data corregida
-      };
+    const createForm = async (data) => {
+      data.fields = JSON.stringify(data.fields);
+      data.images = JSON.stringify(data.images);
+      data.colorOptions = JSON.stringify(data.colorOptions);
+      data.action = "saveform";
+      delete data.id;
 
-  
-      const triggerToast = (title, message, success) => {
-        toastTitle.value = title;
-        toastMessage.value = message;
-        isSuccess.value = success;
-        toastComponent.value.showToas();
-      };
+      isLoading.value = true;
 
-      const removeImage = () => {
-        formData.value.imageDelete = formData.value.fileName;
-        formData.value.image = "";
-        formData.value.path = "";
-        formData.value.fileName = "";
-      };
+      try {
+        const postdata = await axios.post(url, data, {
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        });
 
-      const enlaceClick = (row) => {
-        const data = row?.__v_raw || row;
-        //console.log('data', data)
-        try {
-          // Dominio base (podés reemplazar por el tuyo o tomarlo de la instancia)
-          const dominio = data.dominio; 
-
-          // Validar que tenga código
-          if (!data.code) {
-            alert("El formulario no tiene un código asignado.");
-            return;
-          }
-
-          // Construir la URL final
-          const url = `${dominio}?code=${data.code}`;
-
-          // Abrir en una nueva pestaña
-          window.open(url, "_blank");
-        } catch (err) {
-          console.error("Error al abrir el enlace:", err);
+        if (postdata.status == 200) {
+          data.id = postdata.data.id;
+          data.fields = JSON.parse(data.fields);
+          data.colorOptions = JSON.parse(data.colorOptions);
+          
+          forms.value.push(JSON.parse(JSON.stringify(data)));
+          closeModalForm();
+          await getForms();
+          setTimeout(() => {
+            triggerToast('Realizado!', 'Formulario creado!', true);
+          }, 1000);
         }
-      };
+      } catch (error) {
+        console.error('Error al guardar la consulta:', error);
+        const errorKey = error?.response?.data?.error || 'forms.message_error';
+        const translated = t(errorKey) !== errorKey ? t(errorKey) : t('forms.message_error');
+        setTimeout(() => {
+          triggerToast('Error', translated, false);
+        }, 1000);
+      } finally {
+        isLoading.value = false;
+      }
+    };
 
+    const updateForm = async (data) => {
+      data.colorOptions = JSON.stringify(data.colorOptions);
+      data.fields = JSON.stringify(data.fields);
+      data.images = JSON.stringify(data.images);
+      data.action = "saveform";
 
-
-      const resultActions = [
-        {
-          label: "Establecer como defecto",
-          class: 'btn btn-sm btn-outline',
-          method: selectedDefault,
-          icon: (row) => row.default === true || row.default === 1
-            ? '<i class="bi bi-star-fill"></i>'
-            : '<i class="bi bi-star"></i>'
-        },
-        {
-          label: t("forms.action_edit"),
-          class: 'btn btn-sm btn-outline',
-          method: openModalForm,
-          icon: '<i class="bi bi-pencil-square"></i>'
-        },
-          {
-          label: t("forms.action_duplicate"),
-          class: 'btn btn-sm btn-outline',
-          method: duplicateClick,
-          icon: '<i class="bi bi-copy"></i>'
-        },
-        {
-          label: t("forms.action_style"),
-          class: 'btn btn-sm btn-style',
-          method: styleForm,
-          icon: '<i class="bi bi-image"></i>'
-        },
-        {
-          label: "Link",
-          class: 'btn btn-sm btn-outline',
-          method: enlaceClick,
-          icon: '<i class="bi bi-box-arrow-up-right"></i>'
-        },
-        {
-          label: t("forms.action_delete"),
-          class: 'btn btn-danger btn-sm',
-          method: confirmDelete,
-          icon: '<i class="bi bi-trash3"></i>'
+      isLoading.value = true;
+      
+      try {
+        const postdata = await axios.post(url, data, {
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        });
+        
+        if (postdata.status == 200) {
+          await getForms();
+          setTimeout(() => {
+            triggerToast('Realizado!', 'Formulario actualizado!', true);
+          }, 1000);
         }
-      ];
+        closeStyleModalForm();
+      } catch (error) {
+        console.error('Error al guardar la consulta:', error);
+      } finally {
+        isLoading.value = false;
+      }
+    };
 
-      // Cargar las funciones al iniciar el componente
-      getToken();
-      getMarcas();
-      getTiposDeNegocios();
-      getForms();
-  
-      return {
-        forms,
-        isModalOpen,
-        formData,
-        editingIndex,
-        openModalForm,
-        closeModalForm,
-        handleImageUpload,
-        addField,
-        removeField,
-        addOption,
-        removeOption,
-        saveForm,
-        duplicateForm,
-        deleteForm,
-        getToken,
-        getForms,
-        createForm,
-        columns,
-        resultActions,
-        isLoading,
-        formModal,
-        styleModal,
-        styleOptions,
-        colorOptions,
-        closeStyleModalForm,
-        saveStyleForm,
-        updateForm,
-        triggerToast,
-        toastComponent,
-        toastTitle,
-        toastMessage,
-        isSuccess,
-        showToastFlag,
-        removeImage,
-        confirmPopup,
-        handleResponse,
-        confirmDelete,
-        formDataForm,
-        handleCloseModal,
-        selectedDefault,
-        setDefaultForm,
-        getMarcas,
-        getTiposDeNegocios,
-        negocios,
-        marcas,
-        enlaceClick,
-        duplicateClick
+    const styleForm = async (index = null) => {
+      editingIndex.value = index;
+      formData.value = index;
+      styleModal.value.openModal();
+    };
 
+    const saveStyleForm = async () => {
+      const formDataToSend = {
+        ...formData.value,
+        colorOptions: formData.value.colorOptions
       };
+      instance.proxy.updateForm(formDataToSend);
+    };
 
-    },
-  };
-  </script>
+    const triggerToast = (title, message, success) => {
+      toastTitle.value = title;
+      toastMessage.value = message;
+      isSuccess.value = success;
+      toastComponent.value.showToas();
+    };
 
-<style scoped>
-/* Header Section */
-.header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
+    const resultActions = [
+      {
+        label: t("forms.action_edit"),
+        class: 'btn btn-sm btn-outline',
+        method: openModalForm,
+        icon: '<i class="bi bi-pencil-square"></i>'
+      },
+      {
+        label: t("forms.action_style"),
+        class: 'btn btn-sm btn-style',
+        method: styleForm,
+        icon: '<i class="bi bi-palette"></i>'
+      },
+      {
+        label: t("forms.action_delete"),
+        class: 'btn btn-danger btn-sm',
+        method: confirmDelete,
+        icon: '<i class="bi bi-trash3"></i>'
+      }
+    ];
 
-.header-section h2 {
-  margin: 0;
-  color: #1f2937;
-  font-weight: 700;
-}
+    // Inicialización
+    getToken();
+    getForms();
 
-.btn-add {
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(57, 57, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.btn-add:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(57, 57, 255, 0.3);
-}
-
-.header-divider {
-  margin: 1.5rem 0;
-  border-top: 2px solid #e5e7eb;
-}
-
-/* Data Card */
-.data-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
-
-/* Accordion Modern */
-.accordion-modern .accordion-item {
-  border: 2px solid #e5e7eb;
-  border-radius: 8px !important;
-  margin-bottom: 1rem;
-  overflow: hidden;
-}
-
-.accordion-modern .accordion-button {
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  font-weight: 700;
-  color: #1f2937;
-  padding: 1rem 1.25rem;
-}
-
-.accordion-modern .accordion-button:not(.collapsed) {
-  background: linear-gradient(135deg, #3939ff 0%, #5757ff 100%);
-  color: white;
-}
-
-.accordion-modern .accordion-body {
-  padding: 1.5rem;
-}
-
-/* Forms */
-.form-label {
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.form-control, .form-select {
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.625rem 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: #3939ff;
-  box-shadow: 0 0 0 3px rgba(57, 57, 255, 0.1);
-}
-
-/* File Input */
-.file-input-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: white;
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.file-input-label:hover {
-  border-color: #3939ff;
-  background: #f9fafb;
-  color: #3939ff;
-}
-
-/* Image Preview */
-.image-preview-container {
-  margin-top: 1rem;
-}
-
-.image-preview {
-  position: relative;
-  display: inline-block;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.preview-image {
-  max-height: 200px;
-  display: block;
-}
-
-.btn-remove-image {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-
-/* Field Item */
-.field-item {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.field-header {
-  background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
-  padding: 0.75rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.field-number {
-  font-weight: 700;
-  color: #1e40af;
-}
-
-.field-body {
-  padding: 1rem;
-}
-
-/* Options Section */
-.options-section {
-  background: #ffffff;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.option-item {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* Color Picker */
-.color-picker-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: white;
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-}
-
-.color-input {
-  width: 60px;
-  height: 40px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.color-value-input {
-  flex: 1;
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.5rem;
-  font-family: 'Courier New', monospace;
-}
-
-/* Modal Footer */
-.modal-footer .btn {
-  padding: 0.625rem 1.25rem;
-  font-weight: 600;
-  border-radius: 6px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .header-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .btn-add {
-    width: 100%;
-    justify-content: center;
-  }
-}
-</style>
+    return {
+      forms,
+      formData,
+      editingIndex,
+      openModalForm,
+      closeModalForm,
+      addField,
+      removeField,
+      addOption,
+      removeOption,
+      saveForm,
+      deleteForm,
+      getForms,
+      createForm,
+      columns,
+      resultActions,
+      isLoading,
+      formModal,
+      styleModal,
+      colorOptions,
+      closeStyleModalForm,
+      saveStyleForm,
+      updateForm,
+      triggerToast,
+      toastComponent,
+      toastTitle,
+      toastMessage,
+      isSuccess,
+      showToastFlag,
+      confirmPopup,
+      handleResponse,
+      confirmDelete,
+      handleCloseModal,
+      duplicateClick,
+      services,
+      styleForm
+    };
+  },
+};
+</script>

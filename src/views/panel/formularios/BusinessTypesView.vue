@@ -20,7 +20,7 @@
                 aria-controls="collapseTipos"
               >
                 <div class="tip-icon">
-                  <i class="bi bi-tags-fill"></i>
+                  <i class="bi bi-lightbulb-fill"></i>
                 </div>
                 <div class="tip-text">
                   <strong>Tip:</strong> Los Tipos de Negocios te permiten agregar una segunda capa de clasificación para segmentar formularios y cards de forma más específica.
