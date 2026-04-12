@@ -202,7 +202,7 @@
                 />
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-4">
                 <label class="form-label">
                   <i class="bi bi-file-text me-2"></i>
                   Plan:
@@ -210,7 +210,7 @@
                 <input v-model="formData.plan" type="text" class="form-control" placeholder="Ej: Plan 70/30" />
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-4">
                 <label class="form-label">
                   <i class="bi bi-calendar-range me-2"></i>
                   Plazo:
@@ -218,13 +218,30 @@
                 <input v-model="formData.plazo" type="text" class="form-control" placeholder="Ej: Plazo 96 meses" />
               </div>
 
-              <div class="col-12">
+              <div class="col-12 col-md-4">
                 <label class="form-label">
                   <i class="bi bi-currency-dollar me-2"></i>
                   Importe:
                 </label>
                 <input v-model="formData.precio" type="text" class="form-control" placeholder="Ej: Cuotas desde $239.246" />
               </div>
+
+              <div class="col-12 col-md-3">
+                <label class="form-label">
+                  <i class="bi bi-fonts me-2"></i>
+                  Título Link externo:
+                </label>
+                <input v-model="formData.title_link_external" type="text" class="form-control" placeholder="Ej: Miralo aquí" />
+              </div>
+
+              <div class="col-12 col-md-9">
+                <label class="form-label">
+                  <i class="bi bi-box-arrow-up-right me-2"></i>
+                  Link externo:
+                </label>
+                <input v-model="formData.link_external" type="text" class="form-control" placeholder="Ej: https://www.mercadolibre.com.ar/" />
+              </div>
+
             </div>
           </div>
         </div>

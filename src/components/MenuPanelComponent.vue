@@ -10,6 +10,11 @@
             <button class="btn-outline-secondary d-md-none me-4 pt-2" @click="$emit('toggleSidebar')">
               <i class="bi bi-list"></i>
             </button>
+            <!-- <button 
+            class="btn-close d-md-none mb-3 ms-auto" 
+              @click="$emit('closeSidebar')"
+              aria-label="Cerrar menú"
+            ></button> -->
 
             <div class="logo">
               <a href="/" style="text-decoration: none">
@@ -62,6 +67,12 @@ import Avatar from 'vue-avatar';
 
 export default {
   name: 'MenuPanelComponent',
+  props: {
+    isVisible: {
+      type: Boolean,
+      default: false
+    }
+  },
   components: {
     Avatar
   },
@@ -207,9 +218,6 @@ nav {
   position: fixed;
   width: 100%;
 }
-#sidebar.show {
-  left: 0px!important;
-  z-index: 1000;
-}
+
 
 </style>

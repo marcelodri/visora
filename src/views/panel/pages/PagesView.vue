@@ -142,6 +142,63 @@
                         </select>
                     </div>
                     </div>
+                    <!-- Switches para Menú y Footer -->
+                    <div class="mt-4 p-3 rounded border border-secondary">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="form-check form-switch">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    role="switch" 
+                                    id="menuVisibleSwitch"
+                                    :checked="formData.menu_is_visible === 'true' || formData.menu_is_visible === true"
+                                    @change="formData.menu_is_visible = $event.target.checked ? 'true' : 'false'"
+                                    >
+                                    <label class="form-check-label fw-bold" for="menuVisibleSwitch">
+                                    Menú Visible: {{ formData.menu_is_visible === 'true' || formData.menu_is_visible === true ? 'Sí' : 'No' }}
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span v-if="formData.menu_is_visible === 'true' || formData.menu_is_visible === true">
+                                            <strong>Visible:</strong> El menú será mostrado en la página.
+                                        </span>
+                                        <span v-else>
+                                            <strong>Oculto:</strong> El menú no será visible en la página.
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-check form-switch">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    role="switch" 
+                                    id="footerVisibleSwitch"
+                                    :checked="formData.footer_is_visible === 'true' || formData.footer_is_visible === true"
+                                    @change="formData.footer_is_visible = $event.target.checked ? 'true' : 'false'"
+                                    >
+                                    <label class="form-check-label fw-bold" for="footerVisibleSwitch">
+                                    Footer Visible: {{ formData.footer_is_visible === 'true' || formData.footer_is_visible === true ? 'Sí' : 'No' }}
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span v-if="formData.footer_is_visible === 'true' || formData.footer_is_visible === true">
+                                            <strong>Visible:</strong> El footer será mostrado en la página.
+                                        </span>
+                                        <span v-else>
+                                            <strong>Oculto:</strong> El footer no será visible en la página.
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 </div>
             </div>
@@ -210,6 +267,34 @@
                 <div v-else class="text-center text-muted py-4">
                     <i class="bi bi-image" style="font-size: 3rem;"></i>
                     <p class="mt-2">No hay imágenes cargadas</p>
+                </div>
+
+                <!-- Switch para Encabezado Visible -->
+                <div class="mt-4 p-3 rounded border border-secondary">
+                    <div class="form-check form-switch">
+                        <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        role="switch" 
+                        id="headerVisibleSwitch"
+                        :checked="formData.header_is_visible === 'true' || formData.header_is_visible === true"
+                        @change="formData.header_is_visible = $event.target.checked ? 'true' : 'false'"
+                        >
+                        <label class="form-check-label fw-bold" for="headerVisibleSwitch">
+                        Encabezado Visible: {{ formData.header_is_visible === 'true' || formData.header_is_visible === true ? 'Sí' : 'No' }}
+                        </label>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <span v-if="formData.header_is_visible === 'true' || formData.header_is_visible === true">
+                                <strong>Visible:</strong> El encabezado (imágenes) será mostrado en la página.
+                            </span>
+                            <span v-else>
+                                <strong>Oculto:</strong> El encabezado (imágenes) no será visible en la página.
+                            </span>
+                        </small>
+                    </div>
                 </div>
                 </div>
             </div>
@@ -368,6 +453,64 @@
                         </div>
                     </div>
                     </div>
+                    <!-- Switches para activar/desactivar la sección -->
+                    <div class="mt-5 p-3 rounded">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="form-check form-switch">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    role="switch" 
+                                    id="productVisibleSwitch"
+                                    :checked="formData.product_is_visible === 'true' || formData.product_is_visible === true"
+                                    @change="formData.product_is_visible = $event.target.checked ? 'true' : 'false'"
+                                    >
+                                    <label class="form-check-label fw-bold" for="productVisibleSwitch">
+                                    Visible: {{ formData.product_is_visible === 'true' || formData.product_is_visible === true ? 'Sí' : 'No' }}
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span v-if="formData.product_is_visible === 'true' || formData.product_is_visible === true">
+                                            <strong>Visible:</strong> Esta sección será mostrada en la página.
+                                        </span>
+                                        <span v-else>
+                                            <strong>Oculto:</strong> Esta sección no será visible en la página.
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-switch">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    role="switch" 
+                                    id="productCarouselSwitch"
+                                    :checked="formData.product_carrouselcard === 1"
+                                    @change="formData.product_carrouselcard = $event.target.checked ? 1 : 0"
+                                    >
+                                    <label class="form-check-label fw-bold" for="productCarouselSwitch">
+                                    {{ formData.product_carrouselcard === 1 ? 'Carrousel Activo' : 'Carrousel Inactivo' }}
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span v-if="formData.product_carrouselcard === 1">
+                                            <strong>Carrusel:</strong> En desktop se mostrarán 3 cards en la primera pantalla, las demás estarán disponibles mediante navegación del carrusel. En móvil se mostrará 1 card a la vez.
+                                        </span>
+                                        <span v-else>
+                                            <strong>Grid:</strong> Las cards se mostrarán una al lado de la otra en filas de 3. Todas las cards serán visibles sin necesidad de navegación.
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 </div>
             </div>
@@ -411,12 +554,107 @@
                         <input type="text" v-model="formData.about_color" class="color-value-input" />
                         </div>
                     </div>
+                    <!-- Switches para activar/desactivar la sección -->
+                    <div class="mt-5 p-3 rounded">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="form-check form-switch">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    role="switch" 
+                                    id="aboutVisibleSwitch"
+                                    :checked="formData.about_is_visible === 'true' || formData.about_is_visible === true"
+                                    @change="formData.about_is_visible = $event.target.checked ? 'true' : 'false'"
+                                    >
+                                    <label class="form-check-label fw-bold" for="aboutVisibleSwitch">
+                                    Visible: {{ formData.about_is_visible === 'true' || formData.about_is_visible === true ? 'Sí' : 'No' }}
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span v-if="formData.about_is_visible === 'true' || formData.about_is_visible === true">
+                                            <strong>Visible:</strong> Esta sección será mostrada en la página.
+                                        </span>
+                                        <span v-else>
+                                            <strong>Oculto:</strong> Esta sección no será visible en la página.
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-switch">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    role="switch" 
+                                    id="aboutCarouselSwitch"
+                                    :checked="formData.about_carrouselcard === 1"
+                                    @change="formData.about_carrouselcard = $event.target.checked ? 1 : 0"
+                                    >
+                                    <label class="form-check-label fw-bold" for="aboutCarouselSwitch">
+                                    {{ formData.about_carrouselcard === 1 ? 'Carrousel Activo' : 'Carrousel Inactivo' }}
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span v-if="formData.about_carrouselcard === 1">
+                                            <strong>Carrusel:</strong> En desktop se mostrarán 3 cards en la primera pantalla, las demás estarán disponibles mediante navegación del carrusel. En móvil se mostrará 1 card a la vez.
+                                        </span>
+                                        <span v-else>
+                                            <strong>Grid:</strong> Las cards se mostrarán una al lado de la otra en filas de 3. Todas las cards serán visibles sin necesidad de navegación.
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
+                </div>
+                
+            </div>
+
+            <!-- 7. HTML -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHTML">
+                    <i class="bi bi-card-text me-2"></i>
+                    7. Contenido HTML 
+                </button>
+                </h2>
+                <div id="collapseHTML" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <div class="row g-3 mb-3">
+                    
+                        <div class="mb-5">
+                <div class="col-12">
+                    <h5 class="form-label">HTML Personalizado</h5>
+                    <textarea 
+                        v-model="formData.html_content" 
+                        class="form-control css-editor" 
+                        rows="15"
+                        placeholder="/* Escribe tu HTML aquí */
+                        
+<h1>Hello</h1>
+                        "
+                        spellcheck="false"
+                        @keydown.tab.prevent="handleTab"
+                    ></textarea>
+                    <small class="form-text text-muted">
+                        Escribe HTML. El código se aplicará automáticamente en la página.
+                    </small>
+                </div>
+            </div>
                     </div>
                 </div>
                 </div>
             </div>
 
-            </div>
+        </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-primary" @click="saveForm">
@@ -535,7 +773,7 @@
         const negocios = ref([]);
         const isModalOpen = ref(false);
         const editingIndex = ref(null);
-        const formData = ref({ name: '', image: '', images: [], images_deleted: [], header_text: "", header_subtext: "", header_descript: "", colorOptions:{}, selectedStyleOption:"classic", status: "inactive", about_title:"",about_description:"", product_title: "", product_description: "", about_background: "#ffffff", about_color: "#0000", product_background: "#ffffff", product_color: "#0000", form_id: null });
+        const formData = ref({ name: '', image: '', images: [], images_deleted: [], header_text: "", header_subtext: "", header_descript: "", colorOptions:{}, selectedStyleOption:"classic", status: "inactive", about_title:"",about_description:"", product_title: "", product_description: "", about_background: "#ffffff", about_color: "#0000", product_background: "#ffffff", product_color: "#0000", form_id: null, html_content: "", about_carrouselcard: 0, product_carrouselcard: 0, product_is_visible: "false", about_is_visible: "false", menu_is_visible: "false", footer_is_visible: "false", header_is_visible: "false", marca_id: "", marca_name: "", tipo_de_negocio_id: "", tipo_de_negocio_name: "" });
         const token = ref(null);
         const isLoading = ref(false);
         const formModal = ref(null);
@@ -603,7 +841,19 @@
                 product_color: "#0000",
                 product_label: "",
                 form_id: null,
-                images_deleted: []
+                images_deleted: [],
+                html_content: "",
+                about_carrouselcard: 0, 
+                product_carrouselcard: 0,
+                product_is_visible: "false",
+                about_is_visible: "false",
+                menu_is_visible: "false",
+                footer_is_visible: "false",
+                header_is_visible: "false",
+                marca_id: "",
+                marca_name: "",
+                tipo_de_negocio_id: "",
+                tipo_de_negocio_name: ""
             };
             formModal.value.closeModal();
         };
@@ -845,6 +1095,16 @@
 
         const createForm = async (data) => {
 
+        // Limpiar marca y negocio si están vacíos
+        if (data.marca_id === "") {
+            data.marca_id = null;
+            data.marca_name = null;
+        }
+        if (data.tipo_de_negocio_id === "") {
+            data.tipo_de_negocio_id = null;
+            data.tipo_de_negocio_name = null;
+        }
+
         data.images = JSON.stringify(data.images);
         data.images_deleted = JSON.stringify(data.images_deleted);
         data.action = "saveform";
@@ -899,6 +1159,16 @@
 
         const updateForm = async (data) => {
             console.log('updateForm', data);
+
+            // Limpiar marca y negocio si están vacíos
+            if (data.marca_id === "") {
+                data.marca_id = null;
+                data.marca_name = null;
+            }
+            if (data.tipo_de_negocio_id === "") {
+                data.tipo_de_negocio_id = null;
+                data.tipo_de_negocio_name = null;
+            }
 
             data.colorOptions = JSON.stringify(data.colorOptions)
             data.images = JSON.stringify(data.images);

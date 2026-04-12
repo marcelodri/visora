@@ -2,7 +2,7 @@
   <div class="settings-container p-6 max-w-5xl mx-auto">
     <div class="header-section mb-6">
       <h2 class="main-title">Bienvenido a <span class="brand">Visora Events</span></h2>
-      <p class="subtitle">Configurá y gestioná tus formularios de manera simple y profesional</p>
+      <p class="subtitle">Crea, gestiona y controla eventos con inscripciones, validación de asistencia y control de acceso mediante QR</p>
     </div>
 
     <!-- Card de Configuración -->
@@ -14,7 +14,8 @@
       <div class="card-body p-4">
         <div class="container">
           <div class="row g-4">
-            <div class="col-12 col-md-3">
+
+            <div class="col-12 col-md-6">
               <div class="form-group">
                 <label class="field-label">
                   <i class="bi bi-building me-1"></i>
@@ -29,18 +30,31 @@
               </div>
             </div>
 
-            <div class="col-12 col-md-3">
-              <div 
-                v-for="(detail, index) in settings.details"
-                :key="detail.id || index"
-                class="form-group">
+            <div class="col-12 col-md-6">
+              <div class="form-group">
                 <label class="field-label">
-                  <i class="bi bi-info-circle me-1"></i>
-                  {{ $t(detail.key) }}
+                  <i class="bi bi-globe me-1"></i>
+                  Dominio
                 </label>
                 <input
                   type="text"
-                  :value="detail.value"
+                  v-model="settings.domain"
+                  readonly
+                  class="form-control readonly-input"
+                />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div v-if="limitEventDetail" class="form-group">
+                <label class="field-label">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Cantidad de eventos permitidos
+                </label>
+
+                <input
+                  type="text"
+                  :value="limit"
                   readonly
                   class="form-control readonly-input"
                 />
@@ -61,103 +75,173 @@
                 />
               </div>
             </div>
+
           </div>
         </div>
       </div>
     </div>
 
     <!-- Card de Guía -->
-    <!-- <div class="card guide-card mb-5">
+    <div class="card guide-card mb-5">
       <div class="card-header">
         <i class="bi bi-book-fill me-2"></i>
         <span>Guía de uso</span>
       </div>
       <div class="card-body p-4">
-        <div class="intro-text" v-html="$t('forms.welcome_1')"></div>
+        <div class="intro-text">
+          El módulo de <strong>Eventos</strong> es una solución completa para gestionar desde la promoción de tus eventos hasta la validación de asistencia. Crea eventos con múltiples sesiones, controla inscripciones, valida acceso con QR y obtén reportes de asistencia en tiempo real.
+        </div>
 
         <div class="guide-list">
-          <router-link :to="{ name: 'settings-menu' }" class="guide-item-link">
+          <!-- <a href="#" class="guide-item-link"> -->
             <div class="guide-item">
-              <div class="guide-icon">🧭</div>
+              <div class="guide-icon">📅</div>
               <div class="guide-content">
-                <h6 class="guide-title">Menú</h6>
-                <p>El menú es <strong>global</strong> — es el mismo para todas las landings y se configura una sola vez.</p>
+                <h6 class="guide-title">Crear Eventos</h6>
+                <p>Define eventos con nombre, descripción detallada e imagen representativa. Los eventos son el contenedor principal que agrupa una o más sesiones. Puedes crear eventos para capacitaciones, conferencias, ferias, webinars y más.</p>
               </div>
             </div>
-          </router-link>
+          <!-- </a> -->
 
-          <router-link :to="{ name: 'forms-main' }" class="guide-item-link">
+          <!-- <a href="#" class="guide-item-link"> -->
             <div class="guide-item">
-              <div class="guide-icon">📨</div>
+              <div class="guide-icon">🕐</div>
               <div class="guide-content">
-                <h6 class="guide-title">Header + Formulario</h6>
-                <p>Cada <strong>formulario</strong> tiene su propia imagen de header, textos y formulario de contacto. Además, cada formulario cuenta con un <strong>código de llamada</strong> (Call Code) que lo identifica y permite integrarlo fácilmente en cualquier sitio web o página externa.</p>
+                <h6 class="guide-title">Sesiones</h6>
+                <p>Agrega múltiples sesiones a cada evento, cada una con su propia <strong>fecha, hora y ubicación</strong>. Personaliza cada sesión con:</p>
+                <ul class="mb-0">
+                  <li><strong>Cupo de asistentes</strong>: ilimitado o con límite máximo</li>
+                  <li><strong>Modalidad pública</strong>: cualquiera con el enlace puede inscribirse</li>
+                  <li><strong>Modalidad privada</strong>: solo usuarios validados en lista autorizada</li>
+                  <li><strong>Descripción específica</strong>: detalla qué incluye cada sesión</li>
+                </ul>
               </div>
             </div>
-          </router-link>
+          <!-- </a> -->
 
-          <router-link :to="{ name: 'forms-products' }" class="guide-item-link">
+          <!-- <a href="#" class="guide-item-link"> -->
             <div class="guide-item">
-              <div class="guide-icon">🧱</div>
+              <div class="guide-icon">📋</div>
               <div class="guide-content">
-                <h6 class="guide-title">Sección 1</h6>
-                <p>Crea cards para la Sección 1 y asociálas a un formulario. Cada card tiene la opción de incluir su propio <strong>Call Code</strong>, lo que permite generar un enlace directo a otro formulario dentro de la misma plataforma.</p>
+                <h6 class="guide-title">Listas de Validación</h6>
+                <p>Para sesiones privadas, importa un archivo <strong>Excel (.xlsx)</strong> con los participantes autorizados. Especifica campos de validación como DNI, email, código de empleado, nombre o documento. Solo quienes coincidan con los datos de la lista podrán completar su inscripción.</p>
               </div>
             </div>
-          </router-link>
+          <!-- </a> -->
 
-          <router-link :to="{ name: 'forms-aboutus' }" class="guide-item-link">
+          <!-- <a href="#" class="guide-item-link"> -->
             <div class="guide-item">
-              <div class="guide-icon">💬</div>
+              <div class="guide-icon">📝</div>
               <div class="guide-content">
-                <h6 class="guide-title">Sección 2</h6>
-                <p>Crea cards para la Sección 2 y asociálas a un formulario. Las cards se cargan desde el enlace específico de "cards Sección 2".</p>
+                <h6 class="guide-title">Asociar Formularios</h6>
+                <p>Vincula un formulario de <strong>Visora Forms</strong> a tu evento para capturar información personalizada en la inscripción. Recopila datos como nombre, teléfono, empresa, preferencias y preguntas específicas. El formulario se mostrará automáticamente cuando el usuario seleccione una sesión para inscribirse.</p>
               </div>
             </div>
-          </router-link>
+          <!-- </a> -->
 
-          <router-link :to="{ name: 'forms-header_footer' }" class="guide-item-link">
+          <!-- <a href="#" class="guide-item-link"> -->
             <div class="guide-item">
-              <div class="guide-icon">⚓</div>
+              <div class="guide-icon">🔗</div>
               <div class="guide-content">
-                <h6 class="guide-title">Footer</h6>
-                <p>El footer también es <strong>global</strong> y se aplica a todas las landings.</p>
+                <h6 class="guide-title">Código de Inserción</h6>
+                <p>Genera un código embed para integrar en tu sitio web sin necesidad de redireccionar. Muestra una <strong>galería interactiva de eventos</strong> y al seleccionar uno, despliega sus sesiones disponibles con el formulario de inscripción. Compatible con cualquier CMS o página web.</p>
               </div>
             </div>
-          </router-link>
+          <!-- </a> -->
+
+          <!-- <a href="#" class="guide-item-link"> -->
+            <div class="guide-item">
+              <div class="guide-icon">👥</div>
+              <div class="guide-content">
+                <h6 class="guide-title">Gestión de Inscripciones</h6>
+                <p>Panel centralizado para visualizar, filtrar y gestionar todas las inscripciones. Cada inscripción tiene un estado que indica su ciclo de vida:</p>
+                <ul class="mb-2">
+                  <li><strong>Registrado</strong>: inscripción confirmada y válida, pendiente de escaneo QR</li>
+                  <li><strong>Presente</strong>: asistencia confirmada (manual o por escaneo QR en el evento)</li>
+                  <li><strong>Ausente</strong>: el evento terminó sin escanear el QR</li>
+                  <li><strong>Cancelado</strong>: inscripción anulada por el usuario o administrador</li>
+                </ul>
+                <p class="mb-0">Cambia estados manualmente, descarga reportes y aplica acciones en lote. Las reglas automáticas pueden actualizar estados según condiciones.</p>
+              </div>
+            </div>
+          <!-- </a> -->
+
+          <!-- <a href="#" class="guide-item-link"> -->
+            <div class="guide-item">
+              <div class="guide-icon">📱</div>
+              <div class="guide-content">
+                <h6 class="guide-title">Códigos QR y Check-in</h6>
+                <p>Cada inscripción genera un <strong>QR único y encriptado</strong> que se envía automáticamente por email. En el día del evento:</p>
+                <ul class="mb-0">
+                  <li>El participante lleva su teléfono con el QR (email o captura de pantalla)</li>
+                  <li>Escanea con tu dispositivo usando el app o scanner web integrado</li>
+                  <li>El estado cambia a <strong>Presente</strong> instantáneamente</li>
+                  <li>Sistema antifraude: previene escaneos duplicados y registra timestamp</li>
+                  <li>Funciona offline y sin conexión a internet</li>
+                </ul>
+              </div>
+            </div>
+          <!-- </a> -->
+
+          <!-- <a href="#" class="guide-item-link"> -->
+            <div class="guide-item">
+              <div class="guide-icon">⚙️</div>
+              <div class="guide-content">
+                <h6 class="guide-title">Reglas de Validación</h6>
+                <p>Automatiza procesos repetitivos con reglas personalizables que se ejecutan según condiciones:</p>
+                <ul class="mb-0">
+                  <li>Marcar como <strong>Ausente</strong> tras X horas de finalización del evento</li>
+                  <li>Enviar <strong>recordatorios por email</strong> 24h o 1h antes</li>
+                  <li><strong>Bloquear inscripciones</strong> cuando se alcance el cupo</li>
+                  <li><strong>Validar datos</strong> en tiempo real contra listas de validación</li>
+                  <li>Enviar <strong>confirmación automática</strong> con QR tras inscripción</li>
+                  <li>Cancelar automáticamente si no completa el formulario</li>
+                </ul>
+              </div>
+            </div>
+          <!-- </a> -->
         </div>
 
         <div class="summary-box">
           <h6 class="summary-title">
             <i class="bi bi-lightbulb-fill me-2"></i>
-            Resumen
+            Flujo de trabajo paso a paso
           </h6>
-          <p>Una vez creado y configurado tu formulario, <strong>copiá el <a href="#insercion">código de inserción</a></strong> que genera el sistema y <strong>pegalo en tu sitio web</strong> donde quieras que aparezca. También podés acceder al mismo formulario mediante una <em>URL con código de referencia</em>.</p>
+          <ol class="mb-3">
+            <li><strong>Crear el evento</strong> con nombre, descripción e imagen representativa</li>
+            <li><strong>Agregar sesiones</strong> con fechas, horarios, ubicación y cupo máximo</li>
+            <li><strong>Elegir modalidad</strong>: pública (abierta a todos) o privada (con validación de lista)</li>
+            <li><strong>Cargar lista de validación</strong> (Excel) si es evento privado</li>
+            <li><strong>Asociar formulario</strong> de Visora Forms para recopilar datos personalizados</li>
+            <li><strong>Configurar reglas automáticas</strong>: recordatorios, bloqueo de cupo, cambio de estado</li>
+            <li><strong>Generar código embed</strong> y publicar en tu sitio web o compartir enlace directo</li>
+            <li><strong>Monitorear inscripciones</strong> en tiempo real desde el panel</li>
+            <li><strong>En el evento</strong>: escanea QR de asistentes con el app mobile para registrar check-in</li>
+            <li><strong>Después</strong>: descarga reportes de asistencia y ejecuta acciones de seguimiento</li>
+          </ol>
           
-          <p>En resumen: cada formulario controla su propio <strong>header</strong> y sus dos secciones principales (con sus respectivas cards). El <strong>menú</strong> y el <strong>footer</strong> son compartidos entre todas las landings.</p>
-          
-          <p class="mb-0">Esto permite tener múltiples landings (cada una con su formulario y contenido personalizado) manteniendo una identidad visual coherente y una estructura común.</p>
+          <p class="mb-0"><strong>Resultado:</strong> Un flujo completo y automatizado que te permite promover eventos, controlar acceso, validar asistencia en tiempo real y obtener métricas detalladas de participación.</p>
         </div>
 
         <div class="contact-box">
           <i class="bi bi-envelope-fill me-2"></i>
-          <strong>¿Necesitás más formularios?</strong> Escribinos a 
+          <strong>¿Necesitas más eventos, sesiones o funcionalidades personalizadas?</strong> Contáctanos a 
           <a href="mailto:team@madcoder.io">team@madcoder.io</a>
         </div>
       </div>
-    </div> -->
+    </div>
 
     <!-- Card de Código de Inserción -->
     <div class="card code-card mb-5" id="insercion">
       <div class="card-header">
         <i class="bi bi-code-slash me-2"></i>
-        <span>Código de inserción</span>
+        <span>Código de inserción para eventos</span>
       </div>
       <div class="card-body p-4">
         <div class="form-group">
           <label class="field-label mb-3">
             <i class="bi bi-file-earmark-code me-1"></i>
-            Copiá este código y pegalo en tu sitio web
+            Copia este código y pégalo en tu sitio web o CMS para mostrar la galería de eventos interactiva
           </label>
           <div class="code-container">
             <pre class="html-viewer"><code>{{ htmlContent }}</code></pre>
@@ -190,27 +274,29 @@
 </template>
 
 <script>
-import axios from "axios";
+
 import { useAuthStore } from '@/stores/auth';
 
 export default {
-  name: "SettingsView",
+  name: 'EventosGuide',
   data() {
     return {
-      token: null,
-      settings: {
-        appkey: "",
-        instance_name: "",
-        details: [],
-      },
-      htmlContent: "",
-      copying: false,
+      isLoading: false,
       copied: false,
-      copyTimeoutId: null,
-      isLoading: {value: true}
+      copying: false,
+      settings: {
+        instance_name: 'Mi Empresa SRL',
+        domain: 'https://madcoder.io/proyectos/events/',
+        details: [],
+        appkey: ''
+      },
+      htmlContent: '',
+      limit: 0
     };
   },
+
   methods: {
+
     async fetchSettings() {
       const authStore = useAuthStore();
       const user = authStore.user;
@@ -219,39 +305,44 @@ export default {
         instance_name: user.instance || "Sin nombre",
         appkey: user.appkey || "N/A",
         details: Array.isArray(user.details) ? user.details : [],
+        domain: "https://madcoder.io/proyectos/forms/?code=events"
       };
 
       this.htmlContent = `<div id="events-container" data-appkey="${this.settings.appkey}"></div>\n<scr` +
-        `ipt src="https://madcoder.io/cdn/events/iframe-loader.js"></scr` +
-        `ipt>`;
+      `ipt src="https://madcoder.io/cdn/events/iframe-loader.js"></scr` +
+      `ipt>`;
 
       this.isLoading = false;
     },
 
     async copyHtml() {
-      if (this.copying) return;
       this.copying = true;
-      this.copied = false;
-
+      const authStore = useAuthStore();
+      const user = authStore.user;
       try {
-        const htmlToCopy = this.htmlContent.trim();
-        await navigator.clipboard.writeText(htmlToCopy);
+        await navigator.clipboard.writeText(this.htmlContent);
         this.copied = true;
-        clearTimeout(this.copyTimeoutId);
-        this.copyTimeoutId = setTimeout(() => (this.copied = false), 2500);
+        setTimeout(() => {
+          this.copied = false;
+        }, 2000);
       } catch (err) {
-        console.error("Error copiando HTML:", err);
+        console.error('Error al copiar:', err);
       } finally {
         this.copying = false;
       }
     },
+
+    limitEventDetail() {
+      this.limit = this.settings.details.find(d => d.key = "limit_events").value;
+    }
+
   },
+
   mounted() {
     this.fetchSettings();
+    this.limitEventDetail();
   },
-  beforeUnmount() {
-    clearTimeout(this.copyTimeoutId);
-  }
+
 };
 </script>
 
@@ -269,113 +360,97 @@ export default {
   margin-bottom: 0.5rem;
 }
 
+
+/* Estilos heredados del componente original */
+/* .settings-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+} */
+
+/* .main-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+} */
 .brand {
   color: #3939ff;
   font-weight: 800;
 }
 
+
 .subtitle {
-  font-size: 1rem;
   color: #6b7280;
-  margin: 0;
+  font-size: 1rem;
 }
 
-/* Cards */
 .card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  transition: box-shadow 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .card-header {
   background: linear-gradient(135deg, #3939ff 0%, #5757ff 100%);
   color: white;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
   font-weight: 600;
-  font-size: 1.1rem;
   display: flex;
   align-items: center;
-}
-
-/* Info Card */
-.info-card .card-body {
-  background: #f9fafb;
 }
 
 .field-label {
-  display: flex;
-  align-items: center;
-  font-weight: 600;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: #374151;
   margin-bottom: 0.5rem;
-  font-size: 0.9rem;
 }
 
 .readonly-input {
-  background: white !important;
-  border: 2px solid #e5e7eb;
-  color: #1f2937;
-  font-weight: 500;
-  cursor: default;
-  transition: border-color 0.2s ease;
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #6b7280;
 }
 
-.readonly-input:focus {
-  border-color: #3939ff;
-  outline: none;
-}
-
-.appkey-input {
-  font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-}
-
-/* Guide Card */
-.guide-card .intro-text {
+.intro-text {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+  padding: 1rem;
   margin-bottom: 1.5rem;
-  color: #4b5563;
-  line-height: 1.6;
+  border-radius: 0.25rem;
+  color: #1e40af;
 }
 
 .guide-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 0.75rem;
 }
 
 .guide-item-link {
   text-decoration: none;
   color: inherit;
-  display: block;
 }
 
 .guide-item {
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  /* border-left: 4px solid #3939ff; */
-  transition: all 0.3s ease;
-  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  background: white;
 }
 
 .guide-item:hover {
-  background: #f3f4f6;
-  transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(57, 57, 255, 0.15);
+  border-color: #2563eb;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
 }
 
 .guide-icon {
-  font-size: 1.5rem;
+  font-size: 2rem;
   flex-shrink: 0;
 }
 
@@ -384,87 +459,85 @@ export default {
 }
 
 .guide-title {
-  color: #3939ff;
-  font-weight: 700;
-  font-size: 1.05rem;
-  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
 }
 
 .guide-content p {
-  margin: 0;
   color: #6b7280;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.guide-content ul {
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding-left: 1.25rem;
 }
 
 .summary-box {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-left: 4px solid #3b82f6;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .summary-title {
-  color: #1e40af;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.summary-box p {
-  color: #1e3a8a;
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.summary-box a {
-  color: #3939ff !important;
   font-weight: 600;
+  color: #15803d;
+  margin-bottom: 0.75rem;
+}
+
+.summary-box p,
+.summary-box ul,
+.summary-box ol {
+  color: #166534;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.summary-box ul,
+.summary-box ol {
+  padding-left: 1.25rem;
 }
 
 .contact-box {
   background: #fef3c7;
-  border-left: 4px solid #f59e0b;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
+  border: 1px solid #fbbf24;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1.5rem;
   color: #92400e;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .contact-box a {
-  color: #3939ff !important;
-  font-weight: 600;
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
-/* Code Card */
 .code-container {
   position: relative;
+  background: #1f2937;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 .html-viewer {
-  background: #1f2937;
-  color: #10b981;
-  border: 2px solid #374151;
-  border-radius: 8px;
   padding: 1.5rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
-  white-space: pre-wrap;
-  overflow-x: auto;
   margin: 0;
-  line-height: 1.6;
+  color: #d1d5db;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  overflow-x: auto;
 }
 
 .copy-overlay {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 0.75rem;
+  right: 0.75rem;
 }
 
 .copy-btn {
@@ -505,30 +578,5 @@ export default {
   display: flex;
   align-items: center;
   font-size: 1rem;
-}
-
-.btn-text {
-  font-size: 0.9rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .main-title {
-    font-size: 1.5rem;
-  }
-
-  .guide-item {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .guide-icon {
-    font-size: 2rem;
-  }
-
-  .copy-btn {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-  }
 }
 </style>

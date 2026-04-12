@@ -137,17 +137,21 @@
                 </div>
 
                 <div class="row py-4">
-                <div class="col-4">
+                <div class="col-3">
                     <label class="form-label">{{ $t('forms.form_field_label') }}:</label>
                     <input v-model="field.label" class="form-control" placeholder="Etiqueta del campo" />
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                     <label class="form-label">{{ $t('forms.form_field_name') }}:</label>
                     <input v-model="field.name" class="form-control" placeholder="Nombre del campo" />
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                     <label class="form-label">{{ $t('forms.form_field_value') }}:</label>
                     <input v-model="field.value" class="form-control" placeholder="Valor por defecto" />
+                </div>
+                <div class="col-3">
+                    <label class="form-label">Ancho (%):</label>
+                    <input v-model.number="field.width" type="number" min="1" max="100" class="form-control" placeholder="100" />
                 </div>
                 </div>
                 <div class="mb-4">

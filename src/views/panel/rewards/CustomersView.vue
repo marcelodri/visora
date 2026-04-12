@@ -10,12 +10,48 @@
                 <h2>Gestión de Clientes y Referidos</h2>
                 <p class="subtitle">Administra clientes, puntos y programa de referidos</p>
             </div>
-            <button type="button" @click="openModalCustomer()" class="btn btn-add">
-                <i class="bi bi-person-plus-fill me-1"></i> Nuevo Cliente
+            <button type="button" @click="openModalCustomer()" class="btn btn-primary btn-add">
+                <i class="bi bi-plus-circle me-2"></i> Nuevo Cliente
             </button>
         </div>
         <hr class="header-divider">
 
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-card-icon bg-primary">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-value">{{ customerStats.cantidad_clientes_totales ?? '—' }}</div>
+                        <div class="stat-card-label">Clientes Totales</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-card-icon bg-warning">
+                        <i class="bi bi-envelope-x-fill"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-value">{{ customerStats.cantidad_clientes_sin_email ?? '—' }}</div>
+                        <div class="stat-card-label">Sin Email</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-card-icon bg-success">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-value">{{ customerStats.fecha_del_ultimo_cliente_ingresado ? formatDate(customerStats.fecha_del_ultimo_cliente_ingresado) : '—' }}</div>
+                        <div class="stat-card-label">Último Cliente Ingresado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Search Card -->
         <div class="card shadow-sm mb-4 border-0">
@@ -31,8 +67,8 @@
                         <div class="col-md-3">
                             <label for="searchType" class="form-label">Buscar por</label>
                             <select v-model="searchParams.type" id="searchType" class="form-select">
-                                <option value="dni">DNI</option>
-                                <option value="name">Nombre / Apellido</option>
+                                <option value="document">Documento</option>
+                                <option value="firstname">Nombre / Apellido</option>
                                 <option value="email">Email</option>
                             </select>
                         </div>
@@ -44,26 +80,32 @@
                                 id="searchValue"
                                 class="form-control" 
                                 placeholder="Ingrese dato a buscar..."
+                                :disabled="searchParams.empty"
                             >
                         </div>
                         <div class="col-md-4">
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary flex-grow-1">
+                            <div class="d-flex gap-2 align-items-center">
+                                <button type="submit" class="btn btn-outline flex-grow-1">
                                     <i class="bi bi-search me-1"></i> Buscar
                                 </button>
-                                <!-- <button type="button" class="btn btn-outline-secondary" @click="resetSearch">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </button> -->
-                                <!-- <button type="button" @click="openModalCustomer()" class="btn btn-success">
-                                    <i class="bi bi-person-plus-fill me-1"></i> Nuevo Cliente
-                                </button> -->
+                                <button type="button" class="btn btn-danger" @click="resetSearch" title="Limpiar búsqueda">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
                             </div>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" v-model="searchParams.empty" id="searchEmpty" @change="onEmptyToggle">
+                            <label class="form-check-label text-muted" for="searchEmpty" style="font-size: 0.85rem;">
+                                <i class="bi bi-funnel me-1"></i> Buscar campos vacíos (clientes sin valor en el campo seleccionado)
+                            </label>
                         </div>
                     </div>
                 </form>
 
                 <!-- Quick Stats -->
-                <div class="row mt-4 g-3" v-if="customers.length > 0">
+                <!-- <div class="row mt-4 g-3" v-if="customers.length > 0">
                     <div class="col-md-4">
                         <div class="stat-card">
                             <div class="stat-icon bg-primary">
@@ -97,7 +139,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -127,6 +169,29 @@
             </div>
         </div> -->
         <div class="card data-card">
+            <!-- Dual-mode header -->
+            <div class="list-mode-header">
+                <div class="list-mode-left">
+                    <div class="list-mode-badge" :class="listMode === 'top' ? 'badge-top' : 'badge-search'">
+                        <i :class="listMode === 'top' ? 'bi bi-trophy-fill' : 'bi bi-search'"></i>
+                    </div>
+                    <div>
+                        <div class="list-mode-title">
+                            {{ listMode === 'top' ? 'Top 10 · Mayor Puntaje' : 'Resultados de búsqueda' }}
+                        </div>
+                        <div class="list-mode-subtitle" v-if="listMode === 'top'">
+                            Los clientes con más puntos acumulados
+                        </div>
+                        <div class="list-mode-subtitle" v-else>
+                            {{ customers.length }} cliente{{ customers.length !== 1 ? 's' : '' }} encontrado{{ customers.length !== 1 ? 's' : '' }}
+                        </div>
+                    </div>
+                </div>
+                <button v-if="listMode === 'search'" @click="resetSearch" class="btn-back-top">
+                    <i class="bi bi-trophy-fill me-1"></i> Ver ranking
+                </button>
+            </div>
+
             <div class="card-body p-0">
                 <DataTableComponent
                     :data="customers"
@@ -137,144 +202,173 @@
             </div>
         </div>
 
-        <!-- Modal Form -->
-        <ModalComponent 
-            ref="formModal" 
-            modalId="formModal" 
-            :modalTitle="modalTitle" 
-            class="modal-lg" 
-            @modalClosed="handleCloseModal"
+        <!-- Detail Modal (Create + Edit) -->
+        <ModalComponent
+            ref="detailModal"
+            modalId="detailModal"
+            :modalTitle="detailCustomer && detailCustomer.id ? '' : '➕ Nuevo Cliente'"
+            class="modal-xxl"
+            @modalClosed="detailCustomer = null"
         >
-            <div class="modal-body">
-
-                <!-- Referral Alert -->
-                <div v-if="isReferralMode" class="alert alert-info border-0 shadow-sm mb-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
-                        <div>
-                            <strong>Agregando Referido</strong>
-                            <p class="mb-0 small">
-                                Este nuevo cliente será referido por: 
-                                <strong>{{ currentReferrer?.nombre }} {{ currentReferrer?.apellido }}</strong>
-                            </p>
+            <div class="detail-horizontal" v-if="detailCustomer">
+                <!-- LEFT: Profile + Stats -->
+                <div class="detail-left">
+                    <div class="detail-profile">
+                        <div class="detail-avatar">
+                            <span>{{ (detailCustomer.firstname || '?')[0] }}</span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Form Card -->
-                <div class="card form-card mb-3">
-                    <div class="card-header-modal">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Información Personal
+                        <!-- <h4 class="detail-name">{{ detailCustomer.firstname }} {{ detailCustomer.lastname }}</h4> -->
+                        <span class="detail-doc"><i class="bi bi-credit-card me-1"></i>{{ detailCustomer.document }}</span>
+                        <span class="detail-since">Cliente desde {{ formatDate(detailCustomer.created_dt) }}</span>
                     </div>
 
-                    <div class="card-body">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">
-                                    <i class="bi bi-person me-1"></i>
-                                    Nombre *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    v-model="customerForm.nombre" 
-                                    class="form-control"
-                                    :class="{'is-invalid': validationErrors.nombre}"
-                                    placeholder="Ej: Juan"
-                                >
-                                <div v-if="validationErrors.nombre" class="invalid-feedback">
-                                    {{ validationErrors.nombre }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">
-                                    <i class="bi bi-person me-1"></i>
-                                    Apellido *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    v-model="customerForm.apellido" 
-                                    class="form-control"
-                                    :class="{'is-invalid': validationErrors.apellido}"
-                                    placeholder="Ej: Pérez"
-                                >
-                                <div v-if="validationErrors.apellido" class="invalid-feedback">
-                                    {{ validationErrors.apellido }}
-                                </div>
+                    <div class="detail-stats-vertical" v-if="detailCustomer.id">
+                        <div class="detail-stat-row stat-points">
+                            <div class="detail-stat-icon"><i class="bi bi-trophy-fill"></i></div>
+                            <div class="detail-stat-info">
+                                <div class="detail-stat-value">{{ formatNumber(detailCustomer.total_puntos) }}</div>
+                                <div class="detail-stat-label">Puntos</div>
                             </div>
                         </div>
-
-                        <h6 class="text-muted mb-3 mt-4">Información de Contacto</h6>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label">
-                                    <i class="bi bi-credit-card me-1"></i>
-                                    DNI *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    v-model="customerForm.dni" 
-                                    class="form-control"
-                                    :class="{'is-invalid': validationErrors.dni}"
-                                    placeholder="Ej: 12345678"
-                                    maxlength="8"
-                                >
-                                <div v-if="validationErrors.dni" class="invalid-feedback">
-                                    {{ validationErrors.dni }}
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">
-                                    <i class="bi bi-envelope me-1"></i>
-                                    Email *
-                                </label>
-                                <input 
-                                    type="email" 
-                                    v-model="customerForm.email" 
-                                    class="form-control"
-                                    :class="{'is-invalid': validationErrors.email}"
-                                    placeholder="cliente@email.com"
-                                >
-                                <div v-if="validationErrors.email" class="invalid-feedback">
-                                    {{ validationErrors.email }}
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">
-                                    <i class="bi bi-telephone me-1"></i>
-                                    Teléfono
-                                </label>
-                                <input 
-                                    type="text" 
-                                    v-model="customerForm.telefono" 
-                                    class="form-control"
-                                    placeholder="Ej: +54 11 1234-5678"
-                                >
+                        <div class="detail-stat-row stat-sales">
+                            <div class="detail-stat-icon"><i class="bi bi-bag-check-fill"></i></div>
+                            <div class="detail-stat-info">
+                                <div class="detail-stat-value">{{ detailCustomer.total_ventas || 0 }}</div>
+                                <div class="detail-stat-label">Ventas</div>
                             </div>
                         </div>
-
-                        <!-- Points Display (only when editing) -->
-                        <div v-if="editingIndex && customerForm.puntos !== undefined" class="mt-4">
-                            <h6 class="text-muted mb-3">Información de Puntos</h6>
-                            <div class="points-display">
-                                <i class="bi bi-trophy-fill text-warning me-2"></i>
-                                <span class="fw-bold">{{ customerForm.puntos }}</span> puntos acumulados
+                        <div class="detail-stat-row stat-total">
+                            <div class="detail-stat-icon"><i class="bi bi-cash-stack"></i></div>
+                            <div class="detail-stat-info">
+                                <div class="detail-stat-value">{{ formatCurrency(detailCustomer.total_facturado) }}</div>
+                                <div class="detail-stat-label">Facturado</div>
+                            </div>
+                        </div>
+                        <div class="detail-stat-row stat-avg">
+                            <div class="detail-stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div class="detail-stat-info">
+                                <div class="detail-stat-value">{{ formatCurrency(detailCustomer.promedio_venta) }}</div>
+                                <div class="detail-stat-label">Promedio</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- RIGHT: Tabs + Content -->
+                <div class="detail-right">
+                    <div class="detail-tabs">
+                        <button 
+                            class="detail-tab" 
+                            :class="{ active: detailTab === 'persona' }" 
+                            @click="detailTab = 'persona'"
+                        >
+                            <i class="bi bi-person-lines-fill me-1"></i> Datos Personales
+                        </button>
+                        <button 
+                            v-if="detailCustomer.id"
+                            class="detail-tab" 
+                            :class="{ active: detailTab === 'ventas' }" 
+                            @click="detailTab = 'ventas'"
+                        >
+                            <i class="bi bi-receipt-cutoff me-1"></i> Ventas
+                            <span class="detail-tab-badge" v-if="parsedSales.length">{{ parsedSales.length }}</span>
+                        </button>
+                    </div>
+
+                    <!-- Tab: Datos Personales -->
+                    <div v-if="detailTab === 'persona'" class="detail-edit-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-person me-1"></i>Nombre / Apellido *</label>
+                                <input type="text" v-model="detailCustomer.firstname" class="form-control"
+                                    :class="{'is-invalid': validationErrors.firstname}" placeholder="Ej: Juan">
+                                <div v-if="validationErrors.firstname" class="invalid-feedback">{{ validationErrors.firstname }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-envelope me-1"></i>Email *</label>
+                                <input type="email" v-model="detailCustomer.email" class="form-control"
+                                    :class="{'is-invalid': validationErrors.email}" placeholder="cliente@email.com">
+                                <div v-if="validationErrors.email" class="invalid-feedback">{{ validationErrors.email }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-credit-card me-1"></i>Documento *</label>
+                                <input type="text" v-model="detailCustomer.document" class="form-control"
+                                    :class="{'is-invalid': validationErrors.document}" placeholder="Ej: 12345678">
+                                <div v-if="validationErrors.document" class="invalid-feedback">{{ validationErrors.document }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-telephone me-1"></i>Teléfono</label>
+                                <input type="text" v-model="detailCustomer.phone" class="form-control" placeholder="Ej: +54 11 1234-5678">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label"><i class="bi bi-geo-alt me-1"></i>Dirección</label>
+                                <input type="text" v-model="detailCustomer.address" class="form-control" placeholder="Ej: Av. Corrientes 1234, CABA">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-calendar-event me-1"></i>Fecha de Nacimiento</label>
+                                <input type="date" v-model="detailCustomer.birth_date" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-gender-ambiguous me-1"></i>Género</label>
+                                <select v-model="detailCustomer.gender" class="form-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="detail-edit-actions mt-4 pt-4">
+                            <button type="button" class="btn btn-primary" @click="saveDetailCustomer">
+                                <i class="bi bi-check-circle me-1"></i> {{ detailCustomer.id ? 'Guardar Cambios' : 'Crear Cliente' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Ventas -->
+                    <div v-if="detailTab === 'ventas'" class="detail-sales-section">
+                        <div v-if="parsedSales.length === 0" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4"></i>
+                            <p class="mt-2">Este cliente no tiene ventas registradas</p>
+                        </div>
+                        <div v-else class="sales-table-container">
+                            <table class="table sales-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Detalle</th>
+                                        <th class="text-end">Importe</th>
+                                        <th class="text-end">Puntos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(sale, idx) in parsedSales" :key="sale.id">
+                                        <td class="sale-idx">{{ idx + 1 }}</td>
+                                        <td>{{ formatDate(sale.created_at) }}</td>
+                                        <td>
+                                            <span class="sale-type-badge" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
+                                                {{ sale.product_type }}
+                                            </span>
+                                        </td> 
+                                        <td>{{ sale.description }}</td>
+                                        <td class="text-end fw-bold">{{ formatCurrency(sale.sale_amount) }}</td>
+                                        <td class="text-end">
+                                            <span class="sale-points"><i class="bi bi-star-fill me-1"></i>{{ formatNumber(sale.points_awarded) }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="closeModalForm">
-                    <i class="bi bi-x-circle me-1"></i> Cancelar
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closeDetailModal">
+                    <i class="bi bi-x-circle me-1"></i> Cerrar
                 </button>
-                <button type="button" class="btn btn-primary" @click="saveCustomer">
-                    <i class="bi bi-check-circle me-1"></i> 
-                    {{ isReferralMode ? 'Guardar Referido' : 'Guardar Cliente' }}
-                </button>
-            </div>
+            </div> -->
         </ModalComponent>
 
         <!-- Toast Component -->
@@ -317,18 +411,19 @@ export default {
     setup() {
         // --- ESTADO ---
         const customers = ref([]);
-        const customerForm = ref(getEmptyCustomerForm());
-        const searchParams = ref({ type: 'dni', value: '' });
+        const topCustomers = ref([]);
+        const listMode = ref('top'); // 'top' | 'search'
+        const searchParams = ref({ type: 'document', value: '', empty: false });
         const validationErrors = ref({});
+        const customerStats = ref({});
         
         // Variables de control visual
         const isLoading = ref(false);
-        const editingIndex = ref(null);
-        const isReferralMode = ref(false);
-        const currentReferrer = ref(null);
 
         // Referencias a componentes
-        const formModal = ref(null);
+        const detailModal = ref(null);
+        const detailCustomer = ref(null);
+        const detailTab = ref('persona');
         const toastComponent = ref(null);
         const confirmPopup = ref(null);
         
@@ -342,43 +437,43 @@ export default {
 
         // --- APIS ---
         const token = ref(sessionStorage.getItem('token'));
-        const API_BASE = 'https://stage.powerflows.pilotcrm.io/api';
-        const endpoints = {
-            search: `${API_BASE}/customers/search`,
-            create: `${API_BASE}/customers/create`,
-            update: `${API_BASE}/customers/update`,
-            delete: `${API_BASE}/customers/delete`,
-            addReferral: `${API_BASE}/customers/referral`
-        };
+        const API_BASE = 'https://apis.madautomate.cloud/webhook/ab007c4d-b051-44b6-8c1e-fb8cfb518ca3';
+        // const endpoints = {
+        //     search: `${API_BASE}/customers/search`,
+        //     create: `${API_BASE}/customers/create`,
+        //     update: `${API_BASE}/customers/update`,
+        //     delete: `${API_BASE}/customers/delete`,
+        //     addReferral: `${API_BASE}/customers/referral`
+        // };
 
         // --- CONFIGURACIÓN TABLA ---
         const columns = [
-            { label: 'Nombre Completo', key: 'nombre', render: (row) => `${row.nombre} ${row.apellido}` },
-            { label: 'DNI', key: 'dni' },
-            { label: 'Email', key: 'email' },
-            { label: 'Teléfono', key: 'telefono' },
+            { label: 'Nombre Completo', key: 'firstname', render: (row) => `${row.firstname}` },
+            { label: 'Documento', key: 'document' },
+            { label: 'Email', key: 'email', render: (row) => row.email ? (row.email.length > 30 ? row.email.slice(0, 30) + '…' : row.email) : '—' },
+            { label: 'Teléfono', key: 'phone' },
             { 
                 label: 'Puntos', 
-                key: 'puntos',
-                render: (row) => `<span class="badge bg-warning text-dark fs-6"><i class="bi bi-trophy-fill me-1"></i>${row.puntos || 0}</span>`
+                key: 'total_puntos',
+                render: (row) => `<span style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-weight:700;font-size:0.85rem;padding:4px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(239,68,68,0.35);letter-spacing:0.3px"><i class="bi bi-trophy-fill" style="font-size:0.8rem"></i>${Number(row.total_puntos||0).toLocaleString('es-AR')}</span>`
             },
-            { 
-                label: 'Referidos', 
-                key: 'cantidad_referidos',
-                render: (row) => `<span class="badge bg-info text-dark">${row.cantidad_referidos || 0}</span>`
-            }
+            // { 
+            //     label: 'Referidos', 
+            //     key: 'cantidad_referidos',
+            //     render: (row) => `<span class="badge bg-info text-dark">${row.cantidad_referidos || 0}</span>`
+            // }
         ];
 
         const resultActions = [
-            { 
-                label: 'Agregar Referido', 
-                class: 'btn btn-sm btn-info text-white me-1', 
-                method: openAddReferralModal, 
-                icon: '<i class="bi bi-person-plus"></i>' 
-            },
+            // { 
+            //     label: 'Agregar Referido', 
+            //     class: 'btn btn-sm btn-info text-white me-1', 
+            //     method: openAddReferralModal, 
+            //     icon: '<i class="bi bi-person-plus"></i>' 
+            // },
             { 
                 label: 'Ver/Editar', 
-                class: 'btn btn-sm btn-primary me-1', 
+                class: 'btn btn-sm btn-outline me-1', 
                 method: editCustomer, 
                 icon: '<i class="bi bi-pencil-square"></i>' 
             },
@@ -391,11 +486,6 @@ export default {
         ];
 
         // --- COMPUTED ---
-        const modalTitle = computed(() => {
-            if (isReferralMode.value) return '👥 Nuevo Referido';
-            return editingIndex.value ? '✏️ Editar Cliente' : '➕ Nuevo Cliente';
-        });
-
         const totalPoints = computed(() => {
             return customers.value.reduce((sum, customer) => sum + (customer.puntos || 0), 0);
         });
@@ -405,32 +495,24 @@ export default {
         });
 
         // --- VALIDACIÓN ---
-        const validateForm = () => {
+        const validateDetailForm = () => {
             validationErrors.value = {};
             let isValid = true;
 
-            if (!customerForm.value.nombre?.trim()) {
-                validationErrors.value.nombre = 'El nombre es requerido';
+            if (!detailCustomer.value.firstname?.trim()) {
+                validationErrors.value.firstname = 'El nombre es requerido';
                 isValid = false;
             }
 
-            if (!customerForm.value.apellido?.trim()) {
-                validationErrors.value.apellido = 'El apellido es requerido';
+            if (!detailCustomer.value.document?.trim()) {
+                validationErrors.value.document = 'El documento es requerido';
                 isValid = false;
             }
 
-            if (!customerForm.value.dni?.trim()) {
-                validationErrors.value.dni = 'El DNI es requerido';
-                isValid = false;
-            } else if (!/^\d{7,8}$/.test(customerForm.value.dni)) {
-                validationErrors.value.dni = 'DNI inválido (7-8 dígitos)';
-                isValid = false;
-            }
-
-            if (!customerForm.value.email?.trim()) {
+            if (!detailCustomer.value.email?.trim()) {
                 validationErrors.value.email = 'El email es requerido';
                 isValid = false;
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerForm.value.email)) {
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(detailCustomer.value.email)) {
                 validationErrors.value.email = 'Email inválido';
                 isValid = false;
             }
@@ -439,22 +521,62 @@ export default {
         };
 
         // --- FUNCIONES PRINCIPALES ---
+        const fetchTopCustomers = async () => {
+            isLoading.value = true;
+            try {
+                const response = await axios.post(API_BASE, { action: 'topCustomers' }, {
+                    headers: { Authorization: `Bearer ${token.value}` }
+                });
+                console.log('Top clientes obtenidos:', response);
+                // Handle both raw array and wrapped formats
+                let data = response.data;
+                if (!Array.isArray(data)) {
+                    data = Array.isArray(data?.data) ? data.data
+                         : Array.isArray(data?.customers) ? data.customers
+                         : [];
+                }
+                topCustomers.value = data;
+                customers.value = [...data];
+                listMode.value = 'top';
+
+
+                // console.log('customers', customers.value);
+
+            } catch (err) {
+                console.error('Error al obtener top clientes:', err);
+                triggerToast('Error', 'No se pudo obtener el ranking de clientes', false);
+            } finally {
+                isLoading.value = false;
+            }
+        };
+
         const searchCustomers = async () => {
             isLoading.value = true;
             try {
                 const params = {};
-                if(searchParams.value.value) {
-                    params[searchParams.value.type] = searchParams.value.value;
+                if (searchParams.value.empty) {
+                    params.key = searchParams.value.type;
+                    params.value = '';
+                    params.empty = true;
+                } else if(searchParams.value.value) {
+                    params.key = searchParams.value.type;
+                    params.value = searchParams.value.value;
                 }
 
-                const response = await axios.get(endpoints.search, {
-                    params: params,
+                params.action = 'getCustomer';
+
+                const response = await axios.post(API_BASE, params, {
                     headers: { Authorization: `Bearer ${token.value}` },
                 });
 
-                customers.value = response.data.data || []; 
-                
-                if (customers.value.length === 0 && searchParams.value.value) {
+                let result = response.data;
+                if (!Array.isArray(result)) {
+                    result = Array.isArray(result?.data) ? result.data : [];
+                }
+                customers.value = [...result];
+                listMode.value = 'search';
+
+                if (customers.value.length === 0 && (searchParams.value.value || searchParams.value.empty)) {
                     triggerToast('Sin resultados', 'No se encontraron clientes con ese criterio', false);
                 }
                 
@@ -467,69 +589,121 @@ export default {
         };
 
         const resetSearch = () => {
-            searchParams.value = { type: 'dni', value: '' };
-            searchCustomers();
+            searchParams.value = { type: 'document', value: '', empty: false };
+            customers.value = topCustomers.value;
+            listMode.value = 'top';
+        };
+
+        const refreshList = () => {
+            if (listMode.value === 'top') {
+                fetchTopCustomers();
+            } else {
+                searchCustomers();
+            }
+        };
+
+        const onEmptyToggle = () => {
+            if (searchParams.value.empty) {
+                searchParams.value.value = '';
+            }
         };
 
         const openModalCustomer = () => {
-            cleanData();
-            formModal.value.openModal();
+            validationErrors.value = {};
+            detailCustomer.value = {
+                firstname: '',
+                lastname: '',
+                document: '',
+                email: '',
+                phone: '',
+                address: '',
+                birth_date: '',
+                gender: '',
+                total_puntos: 0,
+                total_ventas: 0,
+                total_facturado: 0,
+                promedio_venta: 0
+            };
+            detailTab.value = 'persona';
+            detailModal.value.openModal();
         };
 
         function openAddReferralModal(item) {
-            cleanData();
-            isReferralMode.value = true;
-            currentReferrer.value = item;
-            formModal.value.openModal();
+            openModalCustomer();
         }
+
+        const parsedSales = computed(() => {
+            if (!detailCustomer.value || !detailCustomer.value.sales) return [];
+            try {
+                const sales = typeof detailCustomer.value.sales === 'string'
+                    ? JSON.parse(detailCustomer.value.sales)
+                    : detailCustomer.value.sales;
+                return sales.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            } catch (e) {
+                return [];
+            }
+        });
 
         function editCustomer(item) {
-            cleanData();
-            customerForm.value = { ...item }; 
-            editingIndex.value = item.id;
-            formModal.value.openModal();
+            validationErrors.value = {};
+            detailCustomer.value = { ...item };
+            detailTab.value = 'persona';
+            detailModal.value.openModal();
         }
 
-        const saveCustomer = async () => {
-            if (!validateForm()) {
-                triggerToast('Validación', 'Por favor complete todos los campos requeridos', false);
+        const closeDetailModal = () => {
+            detailCustomer.value = null;
+            detailModal.value.closeModal();
+        };
+
+        const saveDetailCustomer = async () => {
+            if (!detailCustomer.value) return;
+            if (!validateDetailForm()) {
+                triggerToast('Validación', 'Por favor complete los campos requeridos', false);
                 return;
             }
-
             isLoading.value = true;
-            const payload = { ...customerForm.value };
-            let url = endpoints.create;
-
-            if (isReferralMode.value) {
-                payload.referrer_id = currentReferrer.value.id;
-                url = endpoints.create; 
-            } else if (editingIndex.value) {
-                url = endpoints.update;
-            }
-
             try {
-                const response = await axios.post(url, payload, {
-                    headers: { Authorization: `Bearer ${token.value}` },
+                const payload = {
+                    action: 'setCustomer',
+                    firstname: detailCustomer.value.firstname,
+                    document: String(detailCustomer.value.document || '').replace(/[.,]/g, '').trim(),
+                    email: detailCustomer.value.email || '',
+                    phone: detailCustomer.value.phone || '',
+                    address: detailCustomer.value.address || '',
+                    birth_date: detailCustomer.value.birth_date || '',
+                    gender: detailCustomer.value.gender || ''
+                };
+                if (detailCustomer.value.id) {
+                    payload.id = detailCustomer.value.id;
+                }
+                await axios.post(API_BASE, payload, {
+                    headers: { Authorization: `Bearer ${token.value}` }
                 });
-
-                closeModalForm();
-                await searchCustomers();
-                
-                const msg = isReferralMode.value 
-                    ? '¡Referido creado exitosamente! Puntos asignados al referente.' 
-                    : editingIndex.value 
-                    ? 'Cliente actualizado correctamente'
-                    : 'Cliente creado exitosamente';
-                    
+                const msg = detailCustomer.value.id ? 'Cliente actualizado correctamente' : 'Cliente creado exitosamente';
                 triggerToast('¡Éxito!', msg, true);
-
+                closeDetailModal();
+                await refreshList();
             } catch (err) {
                 console.error(err);
-                const errorMsg = err.response?.data?.message || 'Hubo un problema al guardar';
-                triggerToast('Error', errorMsg, false);
+                triggerToast('Error', err.response?.data?.message || 'No se pudo guardar el cliente', false);
             } finally {
                 isLoading.value = false;
             }
+        };
+
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+        };
+
+        const formatNumber = (val) => {
+            return new Intl.NumberFormat('es-AR').format(Number(val) || 0);
+        };
+
+        const formatCurrency = (val) => {
+            return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(val) || 0);
         };
 
         function confirmDelete(item) {
@@ -541,7 +715,7 @@ export default {
             if (isConfirmed && customerToDelete.id) {
                 isLoading.value = true;
                 try {
-                    await axios.post(endpoints.delete, { id: customerToDelete.id }, {
+                    await axios.post(API_BASE, { action: 'deleteCustomer', id: customerToDelete.id }, {
                         headers: { Authorization: `Bearer ${token.value}` },
                     });
                     
@@ -558,34 +732,6 @@ export default {
         };
 
         // --- UTILIDADES ---
-        const cleanData = () => {
-            editingIndex.value = null;
-            isReferralMode.value = false;
-            currentReferrer.value = null;
-            customerForm.value = getEmptyCustomerForm();
-            validationErrors.value = {};
-        };
-
-        const closeModalForm = () => {
-            cleanData();
-            formModal.value.closeModal();
-        };
-
-        const handleCloseModal = () => {
-            cleanData();
-        };
-
-        function getEmptyCustomerForm() {
-            return {
-                nombre: '',
-                apellido: '',
-                dni: '',
-                email: '',
-                telefono: '',
-                referrer_id: null
-            };
-        }
-
         const triggerToast = (title, message, success) => {
             toastTitle.value = title;
             toastMessage.value = message;
@@ -597,27 +743,41 @@ export default {
         };
 
         // --- INICIALIZACIÓN ---
+        const fetchCustomerStats = async () => {
+            try {
+                const response = await axios.post(API_BASE, { action: 'dataCustomers' }, {
+                    headers: { Authorization: `Bearer ${token.value}` }
+                });
+                customerStats.value = response.data?.[0] || response.data || {};
+            } catch (err) {
+                console.error('Error al obtener estadísticas:', err);
+            }
+        };
+
         onMounted(() => {
-            searchCustomers();
+            fetchCustomerStats();
+            fetchTopCustomers();
         });
 
         return {
             // State
             customers,
-            customerForm,
+            topCustomers,
+            listMode,
             searchParams,
             validationErrors,
+            customerStats,
             isLoading,
             columns,
             resultActions,
-            modalTitle,
-            isReferralMode,
-            currentReferrer,
             totalPoints,
             totalReferrals,
             
             // Refs
-            formModal,
+            detailModal,
+            detailCustomer,
+            detailTab,
+            parsedSales,
             toastComponent,
             confirmPopup,
             showToastFlag,
@@ -626,27 +786,79 @@ export default {
             isSuccess,
 
             // Methods
+            fetchTopCustomers,
             searchCustomers,
             resetSearch,
+            onEmptyToggle,
             openModalCustomer,
-            openAddReferralModal,
             editCustomer,
-            closeModalForm,
-            handleCloseModal,
-            saveCustomer,
+            closeDetailModal,
+            saveDetailCustomer,
             confirmDelete,
-            handleResponse
+            handleResponse,
+            formatDate,
+            formatNumber,
+            formatCurrency
         };
     }
 };
 </script>
 
 <style scoped>
+/* ===== REWARDS DESIGN SYSTEM ===== */
+/* Shared tokens: #1f2937 (text), #6b7280 (muted), #e5e7eb (border), #3939ff (primary), #f9fafb (bg-light) */
+
+/* Stat Cards */
+.stat-card-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 1.25rem 1.5rem;
+}
+
+.stat-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.stat-card-content {
+  min-width: 0;
+}
+
+.stat-card-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-card-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
 .header-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.5rem;
 }
 
 .header-section h2 {
@@ -654,129 +866,146 @@ export default {
   color: #1f2937;
   font-weight: 700;
 }
+
 .subtitle {
   color: #6b7280;
   margin: 0.5rem 0 0 0;
+  font-size: 0.95rem;
 }
+
 .header-divider {
   margin: 1.5rem 0;
   border-top: 2px solid #e5e7eb;
 }
 
-/* .card {
-    border-radius: 12px;
-    transition: transform 0.2s, box-shadow 0.2s;
-} */
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem!important;
+  border-radius: 8px;
+}
 
+/* Search Card */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* Form */
 .form-label {
   display: flex;
   align-items: center;
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.5rem;
+  font-size: 0.88rem;
 }
 
 .form-control, .form-select {
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
-    padding: 0.6rem 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.6rem 0.875rem;
+  font-size: 0.92rem;
+  color: #1f2937;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+  border-color: #3939ff;
+  box-shadow: 0 0 0 3px rgba(57, 57, 255, 0.1);
 }
 
 .btn {
-    border-radius: 8px;
-    padding: 0.5rem 1.2rem;
-    font-weight: 500;
-    transition: all 0.2s;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: all 0.2s;
 }
 
-/* .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-} */
-.btn-add {
+/* DataTable Card */
+.data-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* Dual-mode list header */
+.list-mode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid #f3f4f6;
+  background: #fafafa;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.list-mode-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.list-mode-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.badge-top {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.badge-search {
+  background: rgba(57, 57, 255, 0.1);
+  color: #3939ff;
+}
+
+.list-mode-title {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.97rem;
+  line-height: 1.2;
+}
+
+.list-mode-subtitle {
+  font-size: 0.79rem;
+  color: #9ca3af;
+  margin-top: 0.1rem;
+}
+
+.btn-back-top {
   display: inline-flex;
   align-items: center;
-  font-weight: 600;
-  padding: 0.625rem 1.25rem;
+  gap: 0.3rem;
+  padding: 0.45rem 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(57, 57, 255, 0.2);
+  border: 2px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
 }
 
-/* Stats Cards */
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: all 0.3s;
+.btn-back-top:hover {
+  border-color: #d97706;
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.06);
 }
 
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: white;
-    margin-right: 1rem;
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #2c3e50;
-    line-height: 1;
-    margin-bottom: 0.3rem;
-}
-
-.stat-label {
-    font-size: 0.85rem;
-    color: #6c757d;
-    font-weight: 500;
-}
-
-/* Points Display */
-.points-display {
-    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 10px;
-    font-size: 1.2rem;
-    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
-}
-
-/* Alert Improvements */
-.alert {
-    border-radius: 10px;
-    border-left: 4px solid;
-}
-
-.alert-info {
-    background-color: #e7f3ff;
-    border-left-color: #0dcaf0;
-    color: #055160;
-}
-
-/* Modal Styling */
-/* Form Cards */
+/* Form Modal */
 .form-card {
   border: 2px solid #e5e7eb;
   border-radius: 10px;
@@ -791,74 +1020,327 @@ export default {
   border-bottom: 2px solid #e5e7eb;
   display: flex;
   align-items: center;
+  font-size: 0.92rem;
 }
 
-.form-label {
-  display: flex;
-  align-items: center;
+/* Points Display */
+.points-display {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+}
+
+/* Modal Footer */
+.modal-footer {
+  border: 0;
+}
+
+.modal-footer .btn {
+  padding: 0.625rem 1.25rem;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.form-control, .form-select {
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.625rem 0.875rem;
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: #3939ff;
-  box-shadow: 0 0 0 3px rgba(57, 57, 255, 0.1);
-}
-
-/* Empty State */
-.bi-inbox {
-    opacity: 0.2;
-}
-
-/* Badge Styling */
-.badge {
-    padding: 0.5rem 0.8rem;
-    border-radius: 8px;
-    font-weight: 600;
+  border-radius: 8px;
 }
 
 /* Validation */
 .is-invalid {
-    border-color: #dc3545;
+  border-color: #dc3545;
 }
 
 .invalid-feedback {
-    display: block;
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
+  display: block;
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* ===== HORIZONTAL DETAIL MODAL ===== */
+.detail-horizontal {
+  display: flex;
+  min-height: 460px;
+  height: 100%;
+}
+
+.detail-left {
+  width: 280px;
+  min-width: 280px;
+  background: linear-gradient(180deg, #3939ff 0%, #5b21b6 100%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+}
+
+.detail-profile {
+  text-align: center;
+  padding: 2rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.detail-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  border: 3px solid rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.detail-name {
+  color: white;
+  font-weight: 800;
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.detail-doc {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.detail-since {
+  color: rgba(255,255,255,0.55);
+  font-size: 0.75rem;
+}
+
+/* Stats vertical */
+.detail-stats-vertical {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+
+.detail-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.15s;
+}
+
+.detail-stat-row:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.detail-stat-icon {
+  font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-points .detail-stat-icon { background: rgba(245,158,11,0.2); color: #fbbf24; }
+.stat-sales .detail-stat-icon { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.stat-total .detail-stat-icon { background: rgba(16,185,129,0.2); color: #34d399; }
+.stat-avg .detail-stat-icon { background: rgba(139,92,246,0.2); color: #a78bfa; }
+
+.detail-stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detail-stat-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Right panel */
+.detail-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Tabs */
+.detail-tabs {
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+.detail-tab {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.detail-tab:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.detail-tab.active {
+  color: #3939ff;
+  border-bottom-color: #3939ff;
+  background: white;
+}
+
+.detail-tab-badge {
+  background: #3939ff;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  min-width: 22px;
+  text-align: center;
+}
+
+/* Edit Section */
+.detail-edit-section {
+  padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.detail-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Sales Table */
+.detail-sales-section {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.sales-table-container {
+  overflow-x: auto;
+}
+
+.sales-table {
+  font-size: 0.88rem;
+}
+
+.sales-table thead {
+  background: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sales-table thead th {
+  font-weight: 700;
+  color: #374151;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.sales-table tbody tr {
+  transition: background 0.15s;
+}
+
+.sales-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.sales-table tbody td {
+  padding: 0.65rem 1rem;
+  vertical-align: middle;
+  color: #1f2937;
+}
+
+.sale-idx {
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.sale-type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.type-instrumento {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.type-accesorio {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.sale-points {
+  color: #d97706;
+  font-weight: 700;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .page-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .stat-value {
-        font-size: 1.5rem;
-    }
-    
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 1.4rem;
-    }
-}
-.modal-footer{
-  border: 0;
-}
-/* Modal Footer */
-.modal-footer .btn {
-  padding: 0.625rem 1.25rem;
-  font-weight: 600;
-  border-radius: 6px;
+  .detail-horizontal {
+    flex-direction: column;
+  }
+
+  .detail-left {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .detail-stats-vertical {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .detail-stat-row {
+    flex: 1;
+    min-width: 50%;
+    border-top: none;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
 }
 </style>

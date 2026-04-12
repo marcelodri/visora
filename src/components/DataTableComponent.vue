@@ -55,12 +55,12 @@
               <input type="checkbox" :value="row.id" v-model="selectedRows" class="custom-checkbox">
             </td>
 
-            <td v-for="column in columns" :key="column.key" v-html="formatCell(row[column.key], row, column.key)" :class="getColumnClass(column)"></td>
+            <td v-for="column in columns" :key="column.key" v-html="column.render ? column.render(row) : formatCell(row[column.key], row, column.key)" :class="getColumnClass(column)"></td>
 
             <td v-if="actions.length > 0" class="actions-col">
               <div class="action-buttons">
                 <button
-                  v-for="(action, index) in actions"
+                  v-for="(action, index) in getVisibleActions(row)"
                   :key="index"
                   :class="action.class"
                   @click="action.method(row)"
@@ -155,6 +155,7 @@ export default {
     };
   },
   computed: {
+    
     filteredData() {
       if (!this.searchQuery) {
         return this.data;
@@ -201,7 +202,7 @@ export default {
       if (this.inputAllSelected) count++;
       if (this.actions.length > 0) count++;
       return count;
-    }
+    },
   },
   methods: {
     prevPage() {
@@ -272,6 +273,9 @@ export default {
         return 'truncate-text';
       }
       return '';
+    },
+    getVisibleActions(row) {
+      return this.actions.filter(action => !action.show || action.show(row));
     }
   },
   watch: {

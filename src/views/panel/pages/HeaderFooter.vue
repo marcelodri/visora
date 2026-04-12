@@ -62,6 +62,33 @@
             </div>
         </div>
 
+        <!-- Preview del Footer -->
+        <div class="footer-preview-section">
+            <div class="preview-section-header">
+              <i class="bi bi-eye-fill me-2"></i>
+              Vista previa del footer
+            </div>
+            <div class="footer-preview" :style="{ background: formData.background, color: formData.color }">
+                <div class="footer-preview-col">
+                  <img 
+                    v-if="formData.image || formData.path"
+                    :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`"
+                    alt="Logo"
+                    class="footer-preview-logo"
+                  />
+                  <div v-else class="footer-placeholder">Logo</div>
+                </div>
+                <div class="footer-preview-col">
+                  <div v-if="formData.footer_left" v-html="sanitizeHtml(formData.footer_left)"></div>
+                  <p v-else class="text-muted">Contenido central vacío</p>
+                </div>
+                <div class="footer-preview-col footer-right">
+                  <div v-if="formData.footer_right" v-html="sanitizeHtml(formData.footer_right)"></div>
+                  <p v-else class="text-muted">Contenido derecho vacío</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Columna Izquierda - Imagen -->
         <div class="card settings-card mb-4">
             <div class="card-header-custom">
@@ -231,29 +258,6 @@
             </div>
         </div>
 
-        <!-- Preview del Footer -->
-        <div class="card settings-card mb-5">
-            <div class="card-header-custom">
-              <i class="bi bi-eye-fill me-2"></i>
-              Vista Previa del Footer
-            </div>
-            <div class="card-body p-4">
-                <div class="footer-preview" :style="{ background: formData.background, color: formData.color }">
-                    <div class="footer-preview-col">
-                      <img 
-                        v-if="formData.image || formData.path"
-                        :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`"
-                        alt="Logo"
-                        class="footer-preview-logo"
-                      />
-                      <div v-else class="footer-placeholder">Logo</div>
-                    </div>
-                    <div class="footer-preview-col" v-html="formData.footer_left || '<p class=\'text-muted\'>Contenido central vacío</p>'"></div>
-                    <div class="footer-preview-col footer-right" v-html="formData.footer_right || '<p class=\'text-muted\'>Contenido derecho vacío</p>'"></div>
-                </div>
-            </div>
-        </div>
-
         <ToastComponent 
           :title="toastTitle" 
           :message="toastMessage" 
@@ -322,6 +326,22 @@
                 ],
             },
         }
+
+        const sanitizeHtml = (html) => {
+            if (!html || typeof html !== 'string') return '';
+            
+            // Decodificar HTML escapado
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = html;
+            let decoded = textarea.value;
+            
+            // Si todavía contiene caracteres escapados, decodificar de nuevo
+            while (decoded !== decoded.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'")) {
+                decoded = decoded.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'");
+            }
+            
+            return decoded;
+        };
 
         const getToken = async () => {
           token.value = sessionStorage.getItem('token');
@@ -458,7 +478,8 @@
             toastComponent,
             removeImage,
             saveFormFooter,
-            editorOptions
+            editorOptions,
+            sanitizeHtml
         };
       }
     };
@@ -675,6 +696,25 @@
 }
 
 /* Footer Preview */
+.footer-preview-section {
+  width: 100%;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 2px solid #e5e7eb;
+}
+
+.preview-section-header {
+  color: #1f2937;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
 .footer-preview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -7,7 +7,7 @@
             <h5 class="modal-title" id="modalLabel">{{ modalTitle }}</h5>
             <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
           </div>
-          <div class="modal-body p-4">
+          <div class="modal-body p-0">
             <slot></slot>
           </div>
           <div v-if="isFooter" class="modal-footer">

@@ -8,7 +8,7 @@
         @click="saveMenuSettings"
         :disabled="isLoading"
       >
-        <i class="bi bi-floppy me-2"></i> Guardar configuración
+        <i class="bi bi-floppy me-2"></i> Guardar
       </button>
     </div>
     <hr class="header-divider">
@@ -57,6 +57,34 @@
             <p class="mb-0">
               Estas configuraciones se aplican automáticamente a todos los formularios que crees, manteniendo una estética homogénea y alineada con la identidad de tu empresa.
             </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW SECTION FIXED -->
+    <div class="preview-section-fixed">
+      <div class="preview-section">
+        <h5 class="preview-title">
+          <i class="bi bi-eye-fill me-2"></i>
+          Vista previa
+        </h5>
+        <div class="menu-preview" :style="{ background: formData.background, color: formData.menuColor }">
+          <div class="preview-logo">
+            <img 
+              v-if="formData.image || formData.path"
+              :src="formData.image || `${baseUrl}${formData.path}`"
+              alt="Logo preview"
+              class="preview-logo-img"
+            />
+            <span v-else class="preview-logo-placeholder">Logo</span>
+          </div>
+          <div class="preview-menu-items">
+            <span v-for="(item, index) in formData.extra_items" :key="index">
+              {{ item.label }}
+            </span>
+            <span>Acerca de</span>
+            <span>Contacto</span>
           </div>
         </div>
       </div>
@@ -173,26 +201,87 @@
             </div>
           </div>
 
-          <!-- PREVIEW SECTION -->
-          <div class="preview-section mt-5">
-            <h5 class="preview-title">
-              <i class="bi bi-eye-fill me-2"></i>
-              Vista previa del menú
-            </h5>
-            <div class="menu-preview" :style="{ background: formData.background, color: formData.menuColor }">
-              <div class="preview-logo">
-                <img 
-                  v-if="formData.image || formData.path"
-                  :src="formData.image || `${baseUrl}${formData.path}`"
-                  alt="Logo preview"
-                  class="preview-logo-img"
-                />
-                <span v-else class="preview-logo-placeholder">Logo</span>
-              </div>
-              <div class="preview-menu-items">
-                <span>Inicio</span>
-                <span>Contacto</span>
-                <span>Acerca de</span>
+          <!-- ITEMS PERSONALIZADOS -->
+          <div class="row g-4 mt-3">
+            <div class="col-12">
+              <div class="settings-group">
+                <label class="settings-label">
+                  <i class="bi bi-link-45deg me-2"></i>
+                  Items del Menú Personalizados
+                </label>
+                <p class="settings-description">
+                  Agregá hasta 2 items personalizados al menú (máximo 2)
+                </p>
+
+                <div class="custom-items-container">
+                  <div 
+                    v-for="(item, index) in formData.extra_items" 
+                    :key="index"
+                    class="custom-item-card mb-3"
+                  >
+                    <div class="custom-item-header">
+                      <h6 class="mb-0">Item {{ index + 1 }}</h6>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-danger"
+                        @click="removeCustomItem(index)"
+                      >
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    </div>
+
+                    <div class="row g-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Label</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          v-model="item.label"
+                          placeholder="Ej: Mi Sitio Web"
+                          maxlength="50"
+                        />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">URL</label>
+                        <input
+                          type="url"
+                          class="form-control"
+                          v-model="item.link"
+                          placeholder="Ej: https://miwebsite.com"
+                        />
+                      </div>
+
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input ml-1"
+                            :id="`blank-${index}`"
+                            v-model="item.blank"
+                          />
+                          <label class="form-check-label" :for="`blank-${index}`">
+                            Abrir en nueva pestaña
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    v-if="formData.extra_items.length < 2"
+                    type="button"
+                    class="btn btn-outline"
+                    @click="addCustomItem"
+                  >
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Agregar Item
+                  </button>
+                  <p v-else class="text-muted mt-2">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Límite máximo de 2 items alcanzado
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -237,6 +326,7 @@ export default {
       path: "",
       background: "#ffffff",
       menuColor: "#000000",
+      extra_items: [],
     });
 
     const getToken = () => {
@@ -263,6 +353,20 @@ export default {
       formData.value.path = "";
     };
 
+    const addCustomItem = () => {
+      if (formData.value.extra_items.length < 2) {
+        formData.value.extra_items.push({
+          label: "",
+          link: "",
+          blank: false,
+        });
+      }
+    };
+
+    const removeCustomItem = (index) => {
+      formData.value.extra_items.splice(index, 1);
+    };
+
     const saveMenuSettings = async () => {
       isLoading.value = true;
 
@@ -273,7 +377,8 @@ export default {
         path: formData.value.path,
         background: formData.value.background || "#ffffff",
         menuColor: formData.value.menuColor || "#000000",
-        imageDelete: formData.value.imageDelete
+        imageDelete: formData.value.imageDelete,
+        extra_items: JSON.stringify(formData.value.extra_items),
       };
 
       try {
@@ -299,6 +404,16 @@ export default {
         );
 
         if (data && typeof data === "object") {
+          if (typeof data.extra_items === 'string' && data.extra_items.trim()) {
+            try {
+              data.extra_items = JSON.parse(data.extra_items);
+            } catch (e) {
+              console.error("Error parsing extra_items:", e);
+              data.extra_items = [];
+            }
+          } else if (!data.extra_items) {
+            data.extra_items = [];
+          }
           formData.value = {
             ...formData.value,
             ...Object.fromEntries(
@@ -331,6 +446,8 @@ export default {
       baseUrl,
       handleImageUpload,
       removeImage,
+      addCustomItem,
+      removeCustomItem,
       saveMenuSettings,
       isLoading,
       toastTitle,
@@ -536,26 +653,35 @@ export default {
 }
 
 /* Preview Section */
+.preview-section-fixed {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
 .preview-section {
-  padding-top: 2rem;
-  border-top: 2px solid #f3f4f6;
+  padding: 2rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 2px solid #e5e7eb;
 }
 
 .preview-title {
   color: #1f2937;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
+  font-size: 1rem;
 }
 
 .menu-preview {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -574,7 +700,7 @@ export default {
   font-weight: 700;
   font-size: 1.25rem;
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 6px;
 }
 
@@ -582,6 +708,7 @@ export default {
   display: flex;
   gap: 2rem;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .preview-menu-items span {
@@ -589,8 +716,84 @@ export default {
   transition: opacity 0.2s ease;
 }
 
-.preview-menu-items span:hover {
-  opacity: 0.8;
+/* Custom Items */
+.custom-items-container {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px dashed #e5e7eb;
+}
+
+.custom-item-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.custom-item-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.custom-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.custom-item-header h6 {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-check {
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+
+.form-check-input {
+  margin-right: 0.5rem;
+  cursor: pointer;
+  border-color: #d1d5db;
+  accent-color: #3939ff;
+}
+
+.form-check-label {
+  cursor: pointer;
+  color: #374151;
+  font-weight: 500;
+}
+
+.btn-outline-primary {
+  color: #3939ff;
+  border-color: #3939ff;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background: #3939ff;
+  border-color: #3939ff;
+  color: white;
+}
+
+.custom-preview-item {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
 }
 
 /* Responsive */

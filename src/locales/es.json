@@ -59,15 +59,23 @@
         "social-pilotpost": "Pilot Post",
         "social-listpost": "Programaciones",
         "social-facebookmuro": "Facebook Muro",
+        "rewards-start": "Comenzar",
         "rewards-import": "Importar Ventas",
         "rewards-customers": "Clientes",
         "rewards-rules": "Reglas",
+        "rewards-sales": "Listado Ventas",
         "demos-advancedSearch": "Búsqueda avanzada",
         "demos-reports": "Reporte Historial",
         "demos-myagent": "Mi agente",
         "events-main": "Comenzar",
         "events-list": "Eventos",
-        "registrations-main": "Inscripciones"
+        "registrations-main": "Inscripciones",
+        "forms-start": "Comenzar",
+        "qr-access": "QR Access",
+        "lists-main": "Listas de contacto",
+        "EventWall": "Muro de eventos",
+        "EventWallComment": "Comentarios en tiempo real",
+        "migrate-customers": "Migrar Clientes"
     },
     "business_type":{
         "name": "Nombre",
@@ -80,11 +88,11 @@
         "modal_form_to": "Hasta",
         "modal_form_button": "Generar"
     },
-    "marketing.title": "Impulsa tu Negocio con IA<br>Datos Inteligentes, Decisiones Precisas",
-    "marketing.message": "Descubre el poder de la IA para buscar, organizar y manejar tus datos de forma automática. Resultados rápidos, análisis inteligente y decisiones acertadas en tiempo récord. ¡Lleva tu gestión de datos al siguiente nivel con nuestra tecnología",
+    "marketing.title": "Una Plataforma que Crece con tu Negocio<br>Módulos Inteligentes, Soluciones Adaptables",
+    "marketing.message": "Visora es la plataforma modular que se adapta a tu negocio. <br>Empezá con Landing Pages y Formularios, sumá eventos y expandí con recompensas. Escalá solo cuando lo necesites, con todo integrado a Pilot.",
     "home": {
-        "title": "Transforma tus datos en información clave",
-        "subtitle": "Conecta, analiza y genera reportes en minutos",
+        "title": "Tu plataforma digital que crece con tu negocio",
+        "subtitle": "Centralizá tus procesos, automatizá captación, eventos y recompensas, y sumá nuevos módulos a medida que tu empresa lo necesita.",
         "subtitle2": "Gestiona tus datos con facilidad, sin necesidad de ser un experto",
         "text1": "Imagina tener el poder de ver y analizar toda la información de tu base de datos de manera rápida y sencilla, en un solo lugar. <br>Con nuestra plataforma, puedes conectar cualquier base de datos, generar filtros personalizados, crear reportes y almacenarlos para futuras consultas. <br>Todo en una interfaz intuitiva y sin complicaciones.",
         "text2": "Conexión instantánea a cualquier base de datos. <br>Filtros personalizados para consultas específicas que puedes guardar y reutilizar. <br>Generación de reportes rápidos y almacenamiento para visualizar datos cuando los necesites. <br>Accesibilidad desde cualquier dispositivo: <br>trabaja desde donde estés.",
@@ -134,13 +142,20 @@
         "list_edit": "Editar",
         "list_delete": "Borrar"
     },
-    "limit_forms": "Cantidad de formularios permitidos",
+    "limit_forms": "Cantidad de páginas permitidas",
     "events": {
         "button_new": "Nuevo Evento",
         "title": "Gestión de Eventos",
         "list_edit": "Editar",
         "list_delete": "Borrar",
         "list_qr": "Ver QR",
+        "list_status": "Cambiar estado"
+    },
+    "lists": {
+        "button_new": "Nueva Lista",
+        "title": "Listas de Contacto",
+        "list_edit": "Editar",
+        "list_delete": "Borrar",
         "list_status": "Cambiar estado"
     }
     

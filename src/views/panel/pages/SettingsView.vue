@@ -2,7 +2,7 @@
   <div class="settings-container p-6 max-w-5xl mx-auto">
     <div class="header-section mb-6">
       <h2 class="main-title">Bienvenido a <span class="brand">Visora landing pages</span></h2>
-      <p class="subtitle">Configurá y gestioná tus formularios de manera simple y profesional</p>
+      <p class="subtitle">Configurá y gestioná tus páginas de manera simple y profesional</p>
     </div>
 
     <!-- Card de Configuración -->
@@ -28,19 +28,16 @@
                 />
               </div>
             </div>
-
             <div class="col-12 col-md-3">
-              <div 
-                v-for="(detail, index) in settings.details"
-                :key="detail.id || index"
-                class="form-group">
+              <div v-if="limitEventDetail" class="form-group">
                 <label class="field-label">
                   <i class="bi bi-info-circle me-1"></i>
-                  {{ $t(detail.key) }}
+                  Cantidad de páginas permitidas
                 </label>
+
                 <input
                   type="text"
-                  :value="detail.value"
+                  :value="limit"
                   readonly
                   class="form-control readonly-input"
                 />
@@ -261,7 +258,8 @@ export default {
       copying: false,
       copied: false,
       copyTimeoutId: null,
-      isLoading: {value: true}
+      isLoading: {value: true},
+      limit: 0
     };
   },
   methods: {
@@ -299,9 +297,14 @@ export default {
         this.copying = false;
       }
     },
+
+    limitEventDetail() {
+      this.limit = this.settings.details.find(d => d.key == "limit_pages").value;
+    }
   },
   mounted() {
     this.fetchSettings();
+    this.limitEventDetail();
   },
   beforeUnmount() {
     clearTimeout(this.copyTimeoutId);

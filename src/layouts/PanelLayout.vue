@@ -1,7 +1,11 @@
 <template>
-    <SidebarComponent :isSidebarVisible="isSidebarVisible"/>
+    <SidebarComponent 
+      :isVisible="isSidebarVisible" 
+      @closeSidebar="isSidebarVisible = false"
+    />
     <ToastComponent v-if="toastMessage" :message="toastMessage" :isSuccess="isSuccess" />
     <MenuPanelComponent @toggleSidebar="toggleSidebar"/>
+    
 
     <div id="main">
         <div class="container-fluid">

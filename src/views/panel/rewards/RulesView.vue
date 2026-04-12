@@ -77,15 +77,55 @@
               <div class="col-12 col-md-6">
                 <label class="form-label">
                   <i class="bi bi-star-fill me-2"></i>
-                  Puntos por Venta Referida
+                  Tipo de Cálculo
                 </label>
-                <input 
-                  v-model.number="formData.points_per_sale" 
-                  type="number" 
-                  class="form-control" 
-                  placeholder="Ej: 100"
-                  min="0"
-                />
+                <div class="type-selector mb-3">
+                  <div 
+                    class="type-option" 
+                    :class="{ active: formData.points_type === 'fixed' }" 
+                    @click="formData.points_type = 'fixed'"
+                  >
+                    <i class="bi bi-hash"></i>
+                    <span>Valor fijo</span>
+                  </div>
+                  <div 
+                    class="type-option" 
+                    :class="{ active: formData.points_type === 'percentage' }" 
+                    @click="formData.points_type = 'percentage'"
+                  >
+                    <i class="bi bi-percent"></i>
+                    <span>Porcentaje</span>
+                  </div>
+                </div>
+
+                <!-- Valor fijo -->
+                <div v-if="formData.points_type === 'fixed'">
+                  <label class="form-label-sm">Puntos por venta referida</label>
+                  <input 
+                    v-model.number="formData.points_per_sale" 
+                    type="number" 
+                    class="form-control" 
+                    placeholder="Ej: 100"
+                    min="0"
+                  />
+                </div>
+
+                <!-- Porcentaje -->
+                <div v-else>
+                  <label class="form-label-sm">Porcentaje a aplicar</label>
+                  <div class="input-group">
+                    <input
+                      v-model.number="formData.points_percentage"
+                      type="number"
+                      class="form-control"
+                      placeholder="Ej: 10"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                    />
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label">
@@ -101,8 +141,19 @@
           </div>
         </div>
 
-        <!-- Condiciones -->
-        <div class="card form-card mb-3">
+        <!-- Info box para porcentaje -->
+        <div v-if="formData.points_type === 'percentage'" class="alert alert-percentage mb-3">
+          <div class="alert-percentage-icon">
+            <i class="bi bi-percent"></i>
+          </div>
+          <div>
+            <strong>Regla de porcentaje</strong>
+            <p class="mb-0 mt-1">Se aplicará el <strong>{{ formData.points_percentage || '...' }}%</strong> sobre la columna que selecciones al momento de importar las ventas en <strong>"Importar Ventas"</strong>. No se requieren condiciones adicionales.</p>
+          </div>
+        </div>
+
+        <!-- Condiciones (solo para valor fijo) -->
+        <div v-if="formData.points_type === 'fixed'" class="card form-card mb-3">
           <div class="card-header-modal">
             <i class="bi bi-funnel-fill me-2"></i>
             Condiciones de Aplicación
@@ -117,7 +168,7 @@
           <div class="card-body">
             <p class="conditions-hint">
               <i class="bi bi-lightbulb me-2"></i>
-              Las ventas deben cumplir <strong>TODAS</strong> las condiciones configuradas para otorgar puntos
+              Las ventas deben cumplir TODAS las condiciones para otorgar los <strong>{{ formData.points_per_sale || '...' }} puntos</strong>
             </p>
 
             <div v-if="formData.conditions.length === 0" class="empty-conditions">
@@ -317,11 +368,13 @@ export default {
     const token = ref(null);
     const confirmPopup = ref(null);
     let ruleToDelete = null;
+    const URL_API = "https://apis.madautomate.cloud/webhook/942395a6-0734-43bd-b43f-61072ff867aa";
 
     const columns = [
       { label: 'Nombre', key: 'name' },
       { label: 'Descripción', key: 'description' },
-      { label: 'Puntos', key: 'points_per_sale' },
+      { label: 'Tipo', key: 'points_type_label' },
+      { label: 'Valor', key: 'points_display' },
       { label: 'Condiciones', key: 'conditions_count' },
       { 
         label: 'Estado', 
@@ -356,40 +409,35 @@ export default {
       token.value = sessionStorage.getItem('token');
     };
 
+    // Nota: la columna para aplicar el porcentaje se selecciona desde SalesView
+
     const fetchRules = async () => {
       isLoading.value = true;
       try {
-        // const response = await axios.get('URL_API', {
-        //   headers: { Authorization: `Bearer ${token.value}` }
-        // });
-        // rules.value = response.data;
-        
-        // MOCK DATA
-        rules.value = [
-          {
-            id: 1,
-            name: 'Regla Verano 2025',
-            description: 'Promoción especial para ventas de verano',
-            points_per_sale: 150,
-            conditions_count: 2,
-            is_active: true,
-            conditions: [
-              { field: 'importe', operator: '>', value: 1000 },
-              { field: 'date', operator: '>=', value: '2025-01-01' }
-            ]
-          },
-          {
-            id: 2,
-            name: 'Regla VIP',
-            description: 'Solo para clientes VIP',
-            points_per_sale: 200,
-            conditions_count: 1,
-            is_active: false,
-            conditions: [
-              { field: 'importe', operator: '>=', value: 5000 }
-            ]
-          }
-        ];
+
+        const response = await axios.post(URL_API, {action: "dataRules"}, {
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
+        console.log('response', response);
+
+        // La API puede devolver un objeto o un array dentro de response.data.data
+        const raw = response.data.data || response.data;
+        const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+        rules.value = [];
+
+        // Normalizar cada regla para la tabla
+        rules.value = list.map(rule => ({
+          ...rule,
+          is_active: rule.is_active === 1 || rule.is_active === true,
+          points_percentage: rule.points_percentage ? Number(rule.points_percentage) : null,
+          conditions: rule.conditions ? (typeof rule.conditions === 'string' ? JSON.parse(rule.conditions) : rule.conditions) : [],
+          conditions_count: rule.conditions_count || 0,
+          points_type_label: rule.points_type === 'fixed' ? 'Fijo' : 'Porcentaje',
+          points_display: rule.points_type === 'fixed'
+            ? `${rule.points_per_sale} pts`
+            : `${Number(rule.points_percentage)}%`
+        }));
+
       } catch (err) {
         console.error('Error al obtener reglas', err);
         triggerToast('Error', 'No se pudieron cargar las reglas', false);
@@ -402,7 +450,10 @@ export default {
       return {
         name: '',
         description: '',
+        points_type: 'fixed',
         points_per_sale: 100,
+        points_percentage: null,
+        
         is_active: false,
         conditions: []
       };
@@ -526,9 +577,10 @@ export default {
       
       isLoading.value = true;
       try {
-        // await axios.delete(`URL_API/${ruleToDelete.id}`, {
-        //   headers: { Authorization: `Bearer ${token.value}` }
-        // });
+
+        await axios.post(URL_API, {action: 'deleteRule', id: ruleToDelete.id}, {
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
         
         const index = rules.value.findIndex(r => r.id === ruleToDelete.id);
         if (index !== -1) {
@@ -551,28 +603,48 @@ export default {
         return;
       }
 
+      // Validaciones para tipo de puntos
+      if (formData.value.points_type === 'percentage') {
+        if (!formData.value.points_percentage && formData.value.points_percentage !== 0) {
+          triggerToast('Error', 'Ingresá el porcentaje para el cálculo de puntos', false);
+          return;
+        }
+        // asegurarse que el porcentaje está en rango
+        const pct = Number(formData.value.points_percentage);
+        if (isNaN(pct) || pct < 0) {
+          triggerToast('Error', 'El porcentaje debe ser un número válido mayor o igual a 0', false);
+          return;
+        }
+        formData.value.points_percentage = pct;
+      }
+
       isLoading.value = true;
+      rules.value = [];
+
       try {
         const dataToSend = {
+          action: "saveRule",
           ...formData.value,
-          conditions_count: formData.value.conditions.length
+          conditions_count: formData.value.conditions.length,
+          points_type_label: formData.value.points_type === 'fixed' ? 'Fijo' : 'Porcentaje',
+          points_display: formData.value.points_type === 'fixed'
+            ? `${formData.value.points_per_sale} pts`
+            : `${formData.value.points_percentage}%`
         };
 
-        if (editingIndex.value) {
-          // UPDATE
-          const index = rules.value.findIndex(r => r.id === editingIndex.value.id);
-          if (index !== -1) {
-            rules.value[index] = { ...dataToSend, id: editingIndex.value.id };
-          }
-          triggerToast('Éxito', 'Regla actualizada correctamente', true);
-        } else {
-          // CREATE
-          dataToSend.id = Date.now();
+        console.log('dataToSend', dataToSend);
+          
+        const response = await axios.post(URL_API, dataToSend, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+        console.log('response', response);
+
+        if(response.data.success == true) {
           rules.value.push(dataToSend);
           triggerToast('Éxito', 'Regla creada correctamente', true);
+          closeModalForm();
         }
-
-        closeModalForm();
+        
       } catch (err) {
         console.error(err);
         triggerToast('Error', 'No se pudo guardar la regla', false);
@@ -622,12 +694,11 @@ export default {
 </script>
 
 <style scoped>
-/* Headers y basics ya definidos en otros componentes */
+/* ===== REWARDS DESIGN SYSTEM ===== */
 .header-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.5rem;
 }
 
 .header-section h2 {
@@ -639,6 +710,7 @@ export default {
 .subtitle {
   color: #6b7280;
   margin: 0.5rem 0 0 0;
+  font-size: 0.95rem;
 }
 
 .btn-add {
@@ -647,7 +719,6 @@ export default {
   font-weight: 600;
   padding: 0.625rem 1.25rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(57, 57, 255, 0.2);
 }
 
 .header-divider {
@@ -670,7 +741,7 @@ export default {
 .data-card {
   border: none;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   overflow: hidden;
 }
 
@@ -689,6 +760,7 @@ export default {
   border-bottom: 2px solid #e5e7eb;
   display: flex;
   align-items: center;
+  font-size: 0.92rem;
 }
 
 .form-label {
@@ -697,12 +769,15 @@ export default {
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.5rem;
+  font-size: 0.88rem;
 }
 
 .form-control, .form-select {
   border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.625rem 0.875rem;
+  border-radius: 8px;
+  padding: 0.6rem 0.875rem;
+  font-size: 0.92rem;
+  color: #1f2937;
 }
 
 .form-control:focus, .form-select:focus {
@@ -795,6 +870,70 @@ export default {
 .modal-footer .btn {
   padding: 0.625rem 1.25rem;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 8px;
+}
+
+/* Type Selector */
+.type-selector {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.type-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f9fafb;
+  transition: all 0.2s ease;
+}
+
+.type-option:hover {
+  border-color: #d1d5db;
+  background: #f3f4f6;
+}
+
+.type-option.active {
+  border-color: #3939ff;
+  color: #3939ff;
+  background: #eef2ff;
+  box-shadow: 0 0 0 3px rgba(57, 57, 255, 0.1);
+}
+
+.type-option i {
+  font-size: 1.2rem;
+}
+
+/* Percentage Alert */
+.alert-percentage {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
+  border-radius: 10px;
+  color: #166534;
+  font-size: 0.925rem;
+}
+
+.alert-percentage-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
 }
 </style>

@@ -1,7 +1,17 @@
 <template>
   <div>
-    <div id="sidebar" aria-labelledby="sidebar-title" no-header shadow>
+    <div 
+      v-if="isVisible" 
+      class="sidebar-overlay d-md-none" 
+      @click="$emit('closeSidebar')"
+    ></div>
+    <div id="sidebar" aria-labelledby="sidebar-title" no-header shadow :class="['sidebar', { 'show': isVisible }]">
       <div class="p-3 pl-1 d-flex flex-column justify-content-between h-100">
+        <button 
+          class="btn-close d-md-none mb-3 ms-auto" 
+          @click="$emit('closeSidebar')"
+          aria-label="Cerrar menú"
+        ></button>
         <div class="menu">
           <ul>
             <!-- HOME (siempre visible) -->
@@ -34,7 +44,7 @@
                     v-for="route in category.routes"
                     :key="route.name"
                     class="mb-2"
-                    :class="['/panel/forms/settings', '/panel/forms/templates', '/panel/events/start'].includes(route.path) ? 'border-b pb-2' : ''"
+                    :class="['/panel/pages/settings', '/panel/pages/templates', '/panel/events/start', '/panel/forms/started', '/panel/events/qr-access', '/panel/rewards/start'].includes(route.path) ? 'border-b pb-2' : ''"
                   >
                     <router-link
                       :to="route.path"
@@ -42,11 +52,7 @@
                       @click="setActive(route.path)"
                       v-html="$t(`menu.${route.name}`) || route.name"
                     ></router-link>
-                    <!-- <router-link
-                      :to="route.path"
-                      :class="{ active: $route.path === route.path }"
-                      v-html="$t(`menu.${route.name}`) || route.name"
-                    ></router-link> -->
+                    
                   </li>
                 </ul>
               </div>
@@ -59,11 +65,17 @@
 </template>
 
 <script>
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 export default {
   name: "SidebarComponent",
+  props: {
+    isVisible: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       groupedMenu: [],
@@ -75,13 +87,7 @@ export default {
   mounted() {
     this.loadPermissions();
     this.loadMenu();
-    //this.setActive(this.$route.path);
   },
-  // watch: {
-  //   $route(to) {
-  //     this.setActive(to.path);
-  //   },
-  // },
   methods: {
     loadPermissions() {
       // 🔥 Cargar permisos desde sessionStorage
@@ -137,47 +143,6 @@ export default {
       this.openDropdown = this.openDropdown === name ? null : name;
     },
 
-    setActive(path) {
-
-
-      // setTimeout(() => {
-      //   const activeLinks = document.querySelectorAll('a.router-link-active');
-      //   console.log('activeLinks', activeLinks);
-
-      //   activeLinks.forEach(link => {
-      //     // Verifica si la única clase del elemento es "router-link-active"
-      //     if (link.classList.length === 1 && link.classList.contains('router-link-active')) {
-      //       link.classList.remove('router-link-active');
-      //     }
-      //   });
-      // }, 1);
-
-      // console.log('path', path)
-      // this.activeRoute = path;
-
-
-      // 🔹 Busca la categoría a la que pertenece la ruta
-      // const parentCategory = this.groupedMenu.find((cat) =>
-      //   cat.routes.some((r) => r.path === path)
-      // );
-
-      // 🔹 Si pertenece a una categoría, abre ese dropdown
-      // if (parentCategory) {
-      //   this.openDropdown = parentCategory.name;
-      // } else {
-      //   this.openDropdown = null; // Si no pertenece a ninguna, cerrar dropdowns
-      // }
-
-
-      // 🔹 Asegura que el home solo quede activo cuando estás exactamente en /panel
-      // if (path !== '/panel') {
-      //   // Esto hace que el home no quede "pegado" como activo
-      //   const homeLink = document.querySelector('a[href="/panel"]');
-      //   if (homeLink) homeLink.classList.remove('router-link-active');
-      // }
-    },
-
-
     capitalize(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     },
@@ -191,6 +156,33 @@ export default {
 </script>
 
 <style scoped>
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+/* Sidebar base */
+#sidebar {
+  z-index: 1050;
+}
+
+@media(max-width: 769px) {
+  #sidebar {
+    left: -1000px;
+  }
+  #sidebar.show {
+    top: 0
+  }
+}
+#sidebar.show {
+  transition: transform 0.3s ease-in-out;
+  left: 0px!important;
+}
 .dropdown-toggle {
   background: none;
   border: none;

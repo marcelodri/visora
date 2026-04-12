@@ -2,9 +2,9 @@
   <div class="container-fluid mt-4 page registrations">
     <div class="header-section mb-4">
       <h2>Gestión de Inscripciones</h2>
-      <button class="btn btn-primary btn-add">
+      <!-- <button class="btn btn-primary btn-add">
         <i class="bi bi-plus-circle me-2"></i> {{ $t('events.button_new') }}
-      </button>
+      </button> -->
     </div>
     <hr class="header-divider">
 
@@ -73,9 +73,9 @@
             </label>
             <select v-model="statusFilter" class="form-select" @change="filterRegistrations">
               <option value="">Todos</option>
-              <option value="confirmed">Confirmados</option>
-              <option value="attended">Asistieron</option>
-              <option value="cancelled">Anulados</option>
+              <option value="Creado">Creados</option>
+              <option value="Asistió">Asistieron</option>
+              <option value="Anulado">Anulados</option>
             </select>
           </div>
 
@@ -151,29 +151,30 @@
     >
       <div class="modal-body text-center">
         <div v-if="selectedRegistration">
-          <h5 class="mb-3">{{ selectedRegistration.participant_name }}</h5>
+
+          <h5 class="mb-3">{{ selectedRegistration.first_name }}</h5>
           <p class="text-muted mb-4">{{ selectedRegistration.participant_email }}</p>
           
           <!-- QR Code -->
           <div class="qr-container mb-4">
             <img 
-              :src="`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${selectedRegistration.qr_code}`" 
+              :src="`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${selectedRegistration.guid}`" 
               alt="QR Code"
               class="img-fluid"
             />
           </div>
 
           <div class="alert alert-info">
-            <strong>Código:</strong> {{ selectedRegistration.qr_code }}
+            <strong>Código:</strong> {{ selectedRegistration.code }}
           </div>
 
           <div class="registration-details mt-4 text-start">
             <h6><strong>Detalles de la Inscripción:</strong></h6>
             <ul class="list-unstyled">
               <li><i class="bi bi-calendar-event me-2"></i><strong>Evento:</strong> {{ selectedEvent?.name }}</li>
-              <li><i class="bi bi-clock me-2"></i><strong>Sesión:</strong> {{ selectedRegistration.session_description }}</li>
-              <li><i class="bi bi-calendar3 me-2"></i><strong>Fecha:</strong> {{ formatDate(selectedRegistration.session_date) }}</li>
-              <li><i class="bi bi-shield-check me-2"></i><strong>Estado:</strong> 
+              <li><i class="bi bi-clock me-2"></i><strong>Sesión:</strong> {{ selectedRegistration.session.description }}</li>
+              <li><i class="bi bi-calendar3 me-2"></i><strong>Fecha:</strong> {{ formatDate(selectedRegistration.session.event_date) }}</li>
+              <li><i class="bi bi-shield-check me-2"></i><strong>Estado: </strong> 
                 <span :class="getStatusBadgeClass(selectedRegistration.status)">
                   {{ getStatusLabel(selectedRegistration.status) }}
                 </span>
@@ -200,26 +201,23 @@
       class="modal-xl"
     >
       <div class="modal-body">
+
         <div v-if="selectedRegistration">
           <!-- Información del Participante -->
           <div class="section-card mb-4">
-            <h5 class="section-title"><i class="bi bi-person-circle me-2"></i>Información del Participante</h5>
+            <h5 class="section-title">
+              <i class="bi bi-person-circle me-2"></i>Información del Participante
+            </h5>
             <div class="row g-3">
-              <div class="col-md-6">
-                <label class="text-muted small">Nombre Completo:</label>
-                <p class="mb-0"><strong>{{ selectedRegistration.participant_name }}</strong></p>
-              </div>
-              <div class="col-md-6">
-                <label class="text-muted small">Email:</label>
-                <p class="mb-0"><strong>{{ selectedRegistration.participant_email }}</strong></p>
-              </div>
-              <div class="col-md-6">
-                <label class="text-muted small">DNI:</label>
-                <p class="mb-0"><strong>{{ selectedRegistration.participant_dni || 'No proporcionado' }}</strong></p>
-              </div>
-              <div class="col-md-6">
-                <label class="text-muted small">Teléfono:</label>
-                <p class="mb-0"><strong>{{ selectedRegistration.participant_phone || 'No proporcionado' }}</strong></p>
+              <div 
+                v-for="field in selectedRegistration.fields" 
+                :key="field.field_name"
+                class="col-md-6"
+              >
+                <label class="text-muted small">{{ field.field_label }}:</label>
+                <p class="mb-0">
+                  <strong>{{ field.field_value || 'No proporcionado' }}</strong>
+                </p>
               </div>
             </div>
           </div>
@@ -230,11 +228,11 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="text-muted small">Sesión:</label>
-                <p class="mb-0"><strong>{{ selectedRegistration.session_description }}</strong></p>
+                <p class="mb-0"><strong>{{ selectedRegistration.session.description }}</strong></p>
               </div>
               <div class="col-md-6">
                 <label class="text-muted small">Fecha y Hora:</label>
-                <p class="mb-0"><strong>{{ formatDate(selectedRegistration.session_date) }}</strong></p>
+                <p class="mb-0"><strong>{{ formatDate(selectedRegistration.session.event_date) }}</strong></p>
               </div>
             </div>
           </div>
@@ -243,6 +241,8 @@
           <div class="section-card mb-4">
             <h5 class="section-title"><i class="bi bi-clock-history me-2"></i>Estado y Timeline</h5>
             <div class="timeline">
+
+              <!-- Creado -->
               <div class="timeline-item completed">
                 <div class="timeline-marker"><i class="bi bi-check-circle-fill"></i></div>
                 <div class="timeline-content">
@@ -250,9 +250,11 @@
                   <p class="text-muted small mb-0">{{ formatDate(selectedRegistration.registered_at) }}</p>
                 </div>
               </div>
-              <div class="timeline-item" :class="{ completed: selectedRegistration.status === 'attended' }">
+
+              <!-- Atendido -->
+              <div class="timeline-item" :class="{ completed: selectedRegistration.status === 'Asistió' }">
                 <div class="timeline-marker">
-                  <i :class="selectedRegistration.status === 'attended' ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i>
+                  <i :class="selectedRegistration.status === 'Asistió' ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i>
                 </div>
                 <div class="timeline-content">
                   <strong>Asistencia confirmada</strong>
@@ -262,6 +264,22 @@
                   <p class="text-muted small mb-0" v-else>Pendiente</p>
                 </div>
               </div>
+
+              <!-- Anulados -->
+              <div class="timeline-item" :class="{ completed: selectedRegistration.status === 'Anulado' }">
+                <div class="timeline-marker">
+                  <i :class="selectedRegistration.status === 'Anulado' ? 'bi bi-check-circle-fill' : 'bi bi-circle'"></i>
+                </div>
+                <div class="timeline-content">
+                  <strong>Asistencia Anulada</strong>
+                  <p class="text-muted small mb-0" v-if="selectedRegistration.cancelled_at">
+                    {{ formatDate(selectedRegistration.cancelled_at) }}
+                  </p>
+                  <p class="text-muted small mb-0" v-else>Pendiente</p>
+                </div>
+              </div>
+
+
             </div>
           </div>
 
@@ -297,8 +315,8 @@
 
     <ConfirmPopup 
       ref="confirmPopup" 
-      :title="confirmTitle"
-      :question="confirmQuestion"
+      :title="confirmTitle" 
+      :question="confirmQuestion" 
       @response="handleConfirmResponse" 
     />
 
@@ -308,7 +326,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import DataTableComponent from '@/components/DataTableComponent.vue';
 import ModalComponent from '@/components/ModalComponent.vue';
@@ -345,44 +363,26 @@ export default {
     const toastMessage = ref('');
     const isSuccess = ref(true);
     
-    const confirmTitle = ref('');
-    const confirmQuestion = ref('');
+    const confirmTitle = ref("");
+    const confirmQuestion = ref("");
     const pendingAction = ref(null);
+    const token = ref("")
 
-    const columns = [
-      { key: 'participant_name', label: 'Participante' },
-      { key: 'participant_email', label: 'Email' },
-      { key: 'session_description', label: 'Sesión' },
-      { key: 'registered_at', label: 'Fecha Inscripción', format: 'date' },
-      { key: 'status', label: 'Estado', format: 'badge' }
-    ];
+    let columns = [];
 
-    
-    // const resultActions = [
-    //   { label: 'Ver QR', icon: 'bi-qr-code', variant: 'primary', action: 'qr' },
-    //   { label: 'Ver Detalles', icon: 'bi-eye', variant: 'info', action: 'details' },
-    //   { label: 'Marcar Asistencia', icon: 'bi-check-circle', variant: 'success', action: 'attend', condition: (item) => item.status !== 'attended' && item.status !== 'cancelled' },
-    //   { label: 'Reenviar Email', icon: 'bi-envelope', variant: 'secondary', action: 'resend' },
-    //   { label: 'Anular', icon: 'bi-x-circle', variant: 'danger', action: 'cancel', condition: (item) => item.status !== 'cancelled' }
-    // ];
-
-    const resultActions = [
-        { label: t('events.list_status'), class: 'btn btn-outline btn-sm', icon: '<i class="bi bi-play-circle"></i>' },
-        { label: t('events.list_edit'), class: 'btn btn-outline btn-sm', icon: '<i class="bi bi-pencil-square"></i>' },
-        { label: t('events.list_delete'), class: 'btn btn-danger btn-sm', icon: '<i class="bi bi-trash3"></i>' },
-    ];
+    const url = 'https://apis.madautomate.cloud/webhook/1090f10d-aafd-4c67-bc72-c3365187d6df';
 
     // Computed properties para estadísticas
     const confirmedCount = computed(() => 
-      registrations.value.filter(r => r.status === 'confirmed').length
+      registrations.value.filter(r => r.status === 'Creado').length
     );
 
     const attendedCount = computed(() => 
-      registrations.value.filter(r => r.status === 'attended').length
+      registrations.value.filter(r => r.status === 'Asistió').length
     );
 
     const cancelledCount = computed(() => 
-      registrations.value.filter(r => r.status === 'cancelled').length
+      registrations.value.filter(r => r.status === 'Anulado').length
     );
 
     // Cargar eventos disponibles
@@ -396,7 +396,7 @@ export default {
         // Datos de ejemplo
         events.value = [
           {
-            id: 'evt_001',
+            id: 1,
             name: 'Maratón Buenos Aires 2025',
             event_dates: [
               { id: 'session_001', description: '42K Elite' },
@@ -404,7 +404,7 @@ export default {
             ]
           },
           {
-            id: 'evt_002',
+            id: 2,
             name: 'Evento Corporativo Anual',
             event_dates: [
               { id: 'session_003', description: 'Cena de Gala' }
@@ -412,7 +412,7 @@ export default {
           }
         ];
       } catch (error) {
-        showToast('Error', 'No se pudieron cargar los eventos', false);
+        triggerToast('Error', 'No se pudieron cargar los eventos', false);
       } finally {
         isLoading.value = false;
       }
@@ -420,85 +420,73 @@ export default {
 
     // Cargar inscripciones del evento seleccionado
     const loadRegistrations = async () => {
-      if (!selectedEventId.value) {
-        registrations.value = [];
-        filteredRegistrations.value = [];
-        selectedEvent.value = null;
-        return;
-      }
 
-      try {
-        isLoading.value = true;
-        selectedEvent.value = events.value.find(e => e.id === selectedEventId.value);
-        
-        // Aquí iría tu llamada al API
-        // const response = await axios.get(`/api/events/${selectedEventId.value}/registrations`);
-        // registrations.value = response.data;
+        // ❗ limpiar columnas correctamente
+        columns.splice(0, columns.length);
 
-        // Datos de ejemplo
-        registrations.value = [
-          {
-            id: 'reg_001',
-            event_id: selectedEventId.value,
-            participant_name: 'Juan Pérez',
-            participant_email: 'juan.perez@email.com',
-            participant_dni: '12345678',
-            participant_phone: '+54 11 1234-5678',
-            session_id: 'session_001',
-            session_description: '42K Elite',
-            session_date: '2025-12-15T07:00:00',
-            status: 'confirmed',
-            qr_code: 'REG001-EVT001-SES001',
-            registered_at: '2025-10-15T10:30:00',
-            attended_at: null,
-            documents: [
-              { id: 'doc_001', name: 'Apto Médico.pdf', url: '/documents/apto_001.pdf' }
-            ]
-          },
-          {
-            id: 'reg_002',
-            event_id: selectedEventId.value,
-            participant_name: 'María González',
-            participant_email: 'maria.gonzalez@email.com',
-            participant_dni: '87654321',
-            participant_phone: '+54 11 8765-4321',
-            session_id: 'session_001',
-            session_description: '42K Elite',
-            session_date: '2025-12-15T07:00:00',
-            status: 'attended',
-            qr_code: 'REG002-EVT001-SES001',
-            registered_at: '2025-10-20T14:20:00',
-            attended_at: '2025-12-15T06:45:00',
-            documents: []
-          },
-          {
-            id: 'reg_003',
-            event_id: selectedEventId.value,
-            participant_name: 'Carlos Rodríguez',
-            participant_email: 'carlos.rodriguez@email.com',
-            participant_dni: '11223344',
-            participant_phone: '+54 11 1122-3344',
-            session_id: 'session_002',
-            session_description: '21K',
-            session_date: '2025-12-15T07:15:00',
-            status: 'cancelled',
-            qr_code: 'REG003-EVT001-SES002',
-            registered_at: '2025-11-01T09:15:00',
-            attended_at: null,
-            documents: []
-          }
-        ];
+        try {
+            isLoading.value = true;
 
-        filterRegistrations();
-      } catch (error) {
-        showToast('Error', 'No se pudieron cargar las inscripciones', false);
-      } finally {
-        isLoading.value = false;
-      }
+            selectedEvent.value = events.value.find(e => e.id === selectedEventId.value);
+
+            const response = await axios.post(url, {
+                action: "dataforms",
+                selectedEventId: selectedEvent.value.id
+            }, {
+                headers: { Authorization: `Bearer ${token.value}` }
+            });
+
+            // Crear columnas dinámicas
+            const dynamicCols = await getForm(response.data[0]);
+            dynamicCols.push({key: "status", label: "Estado"})
+
+            // ❗ agregar las columnas
+            columns.push(...dynamicCols);
+
+            // Procesar registros
+            registrations.value = response.data.map(registration => {
+              let parsedFields = [];
+
+              try {
+                parsedFields = JSON.parse(registration.fields);
+              } catch (e) {
+                parsedFields = [];
+              }
+
+              const flatFields = parsedFields.reduce((acc, f) => {
+                  acc[f.field_name] = f.field_value;
+                  return acc;
+              }, {});
+
+              return {
+                ...registration,
+                ...flatFields,
+                fields: JSON.parse(registration.fields),
+                registered_at: registration.created_at,
+                session: JSON.parse(registration.session),
+                event: JSON.parse(registration.event),
+                status: getStatusLabel(registration.status)
+              };
+            });
+
+            filterRegistrations();
+
+        } catch (error) {
+            triggerToast('Error', 'No se pudieron cargar las inscripciones', false);
+        } finally {
+            isLoading.value = false;
+        }
     };
 
+    const getToken = async () => {
+        token.value = sessionStorage.getItem('token');
+    };
+  
     // Filtrar inscripciones por estado
     const filterRegistrations = () => {
+
+      console.log('filterRegistrations statusFilter', statusFilter.value);
+      
       if (!statusFilter.value) {
         filteredRegistrations.value = registrations.value;
       } else {
@@ -506,6 +494,7 @@ export default {
           r => r.status === statusFilter.value
         );
       }
+      
     };
 
     // Ver QR
@@ -528,7 +517,7 @@ export default {
       link.download = `QR_${selectedRegistration.value.qr_code}.png`;
       link.click();
       
-      showToast('Éxito', 'QR descargado correctamente', true);
+      triggerToast('Éxito', 'QR descargado correctamente', true);
     };
 
     // Ver detalles
@@ -543,59 +532,73 @@ export default {
     };
 
     // Marcar asistencia
-    const markAttendance = (registration) => {
+    const markAttendance = async (registration) => {
+
       confirmTitle.value = 'Confirmar Asistencia';
-      confirmQuestion.value = `¿Confirmar que ${registration.participant_name} asistió al evento?`;
-      pendingAction.value = { action: 'attend', data: registration };
-      confirmPopup.value.openModal();
+      confirmQuestion.value = `¿Confirmar que ${registration.first_name} asistió al evento?`;
+      pendingAction.value = { action: 'attend_registration', data: registration };
+      
+      // Esperar a que Vue actualice los props
+      await nextTick();
+
+      confirmPopup.value.showConfirmPopup();
     };
 
     const executeMarkAttendance = async (registration) => {
+      console.log('executeMarkAttendance', pendingAction.value.data.registration_id)
       try {
         isLoading.value = true;
         // Aquí iría tu llamada al API
-        // await axios.post(`/api/registrations/${registration.id}/attend`);
+        
 
-        // Actualizar localmente
-        const index = registrations.value.findIndex(r => r.id === registration.id);
-        if (index !== -1) {
-          registrations.value[index].status = 'attended';
-          registrations.value[index].attended_at = new Date().toISOString();
-        }
+        const response = await axios.post(url, {
+            action: "changeregistration",
+            registration_id: pendingAction.value.data.registration_id,
+            pendingAction: pendingAction.value.action
+        }, {
+            headers: { Authorization: `Bearer ${token.value}` }
+        });
 
-        filterRegistrations();
-        showToast('Éxito', 'Asistencia registrada correctamente', true);
+        loadRegistrations();
+        
+        triggerToast('Éxito', 'Asistencia registrada correctamente', true);
       } catch (error) {
-        showToast('Error', 'No se pudo registrar la asistencia', false);
+        triggerToast('Error', 'No se pudo registrar la asistencia', false);
       } finally {
         isLoading.value = false;
       }
     };
 
     // Anular inscripción
-    const cancelRegistration = (registration) => {
+    const cancelRegistration = async (registration) => {
       confirmTitle.value = 'Anular Inscripción';
-      confirmQuestion.value = `¿Está seguro de anular la inscripción de ${registration.participant_name}? Esta acción liberará el cupo.`;
-      pendingAction.value = { action: 'cancel', data: registration };
-      confirmPopup.value.openModal();
+      confirmQuestion.value = `¿Está seguro de anular la inscripción de ${registration.first_name }? Esta acción liberará el cupo.`;
+      pendingAction.value = { action: 'cancel_registration', data: registration };
+
+      // Esperar a que Vue actualice los props
+      await nextTick();
+
+      confirmPopup.value.showConfirmPopup();
     };
 
     const executeCancelRegistration = async (registration) => {
       try {
         isLoading.value = true;
         // Aquí iría tu llamada al API
-        // await axios.post(`/api/registrations/${registration.id}/cancel`);
+        const response = await axios.post(url, {
+            action: "changeregistration",
+            registration_id: pendingAction.value.data.registration_id,
+            pendingAction: pendingAction.value.action
+        }, {
+            headers: { Authorization: `Bearer ${token.value}` }
+        });
 
         // Actualizar localmente
-        const index = registrations.value.findIndex(r => r.id === registration.id);
-        if (index !== -1) {
-          registrations.value[index].status = 'cancelled';
-        }
+        loadRegistrations();
 
-        filterRegistrations();
-        showToast('Éxito', 'Inscripción anulada correctamente', true);
+        triggerToast('Éxito', 'Inscripción anulada correctamente', true);
       } catch (error) {
-        showToast('Error', 'No se pudo anular la inscripción', false);
+        triggerToast('Error', 'No se pudo anular la inscripción', false);
       } finally {
         isLoading.value = false;
       }
@@ -608,9 +611,9 @@ export default {
         // Aquí iría tu llamada al API
         // await axios.post(`/api/registrations/${registration.id}/resend-email`);
 
-        showToast('Éxito', `Email reenviado a ${registration.participant_email}`, true);
+        triggerToast('Éxito', `Email reenviado a ${registration.email}`, true);
       } catch (error) {
-        showToast('Error', 'No se pudo reenviar el email', false);
+        triggerToast('Error', 'No se pudo reenviar el email', false);
       } finally {
         isLoading.value = false;
       }
@@ -618,39 +621,22 @@ export default {
 
     // Exportar a Excel
     const exportToExcel = () => {
-      showToast('Info', 'Exportando a Excel...', true);
+      triggerToast('Info', 'Exportando a Excel...', true);
       // Aquí iría la lógica para exportar
     };
 
-    // Manejar acciones desde DataTable
-    const handleAction = (action, item) => {
-      switch (action) {
-        case 'qr':
-          showQR(item);
-          break;
-        case 'details':
-          showDetails(item);
-          break;
-        case 'attend':
-          markAttendance(item);
-          break;
-        case 'resend':
-          resendEmail(item);
-          break;
-        case 'cancel':
-          cancelRegistration(item);
-          break;
-      }
-    };
 
     // Manejar respuesta del confirm popup
     const handleConfirmResponse = (confirmed) => {
+      console.log('confirmed', confirmed);
+      console.log('pendingAction', pendingAction.value);
+
       if (confirmed && pendingAction.value) {
         const { action, data } = pendingAction.value;
         
-        if (action === 'attend') {
+        if (action === "attend_registration") {
           executeMarkAttendance(data);
-        } else if (action === 'cancel') {
+        } else if (action === "cancel_registration") {
           executeCancelRegistration(data);
         }
       }
@@ -673,6 +659,7 @@ export default {
 
     const getStatusLabel = (status) => {
       const labels = {
+        created: 'Creado',
         confirmed: 'Confirmado',
         attended: 'Asistió',
         cancelled: 'Anulado'
@@ -693,16 +680,103 @@ export default {
       window.open(doc.url, '_blank');
     };
 
-    const showToast = (title, message, success) => {
+    const triggerToast = (title, message, success) => {
       toastTitle.value = title;
       toastMessage.value = message;
       isSuccess.value = success;
-      showToastFlag.value = true;
-      toastComponent.value?.showToast();
+      //showToastFlag.value = true;
+      toastComponent.value.showToas();
     };
+
+
+    // función para agregar 3 columnas dinámicas
+    async function getForm(register) {
+
+      const response = await axios.post("https://apis.madautomate.cloud/webhook/81d62e39-5785-4ca3-8efc-735a72e05302", {
+          action: "dataForm",
+          form_id: register.form_id
+      }, {
+          headers: { Authorization: `Bearer ${token.value}` }
+      });
+
+      // ⚠️ copiar sin tocar "data"
+      let fieldsParsed = [];
+
+      try {
+        fieldsParsed = JSON.parse(response.data.fields);
+      } catch (e) {
+        console.error("Error al parsear fields para columnas:", e);
+        return [];
+      }
+
+      // Asegurar array real
+      const fieldsArray = Array.isArray(fieldsParsed) ? fieldsParsed : [];
+
+      // Filtrar válidos
+      const validFields = fieldsArray.filter(
+        f => f?.name && f?.label
+      );
+
+      // Primeros 3
+      const firstThree = validFields.slice(0, 3);
+
+      // Crear columnas dinámicas
+      return firstThree.map(f => ({
+        key: f.name,
+        label: f.label
+      }));
+    }
+
+    const resultActions = [
+      { 
+        label: 'Ver QR', 
+        icon: '<i class="bi bi-qr-code"></i>', 
+        variant: 'primary', 
+        class: 'btn btn-outline btn-sm',
+        method: showQR 
+      },
+      { 
+        label: 'Ver Detalles', 
+        icon: '<i class="bi bi-eye"></i>', 
+        variant: 'info', 
+        class: 'btn btn-outline btn-sm',
+        method: showDetails 
+      },
+      { 
+        label: 'Reenviar Email', 
+        icon: '<i class="bi bi-envelope"></i>', 
+        variant: 'secondary', 
+        class: 'btn btn-warning btn-sm',
+        action: 'resend', 
+        method: resendEmail 
+      },
+      { 
+        label: 'Marcar Asistencia', 
+        icon: '<i class="bi bi-check-circle"></i>', 
+        variant: 'success', 
+        class: 'btn btn-style btn-sm',
+        method: markAttendance,
+        show: (item) => item.status !== 'Asistió'
+      },
+      { 
+        label: 'Anular', 
+        icon: '<i class="bi bi-x-circle"></i>', 
+        variant: 'danger', 
+        class: 'btn btn-danger btn-sm',
+        action: 'cancel', 
+        method: cancelRegistration,
+        show: (item) => item.status === 'Asistió'
+      }
+    ];
+
+
+
+
+
 
     onMounted(async () => {
       await loadEvents();
+      await getToken();
     });
 
     return {
@@ -741,9 +815,13 @@ export default {
       getStatusLabel,
       getStatusBadgeClass,
       downloadDocument,
-      handleAction,
       handleConfirmResponse,
-      t
+      t,
+      getToken,
+      token,
+      getForm,
+      pendingAction,
+      triggerToast
     };
   }
 };

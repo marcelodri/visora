@@ -24,7 +24,7 @@
               <i class="bi bi-lightbulb-fill"></i>
             </div>
             <div class="tip-text">
-              <strong>Tip:</strong> Creá y gestioná tus eventos con inscripciones, validaciones y control de acceso inteligente.
+              <strong>Tip:</strong> Creá eventos con múltiples sesiones, cada una con su propia fecha, formulario y reglas de inscripción.
             </div>
           </button>
         </h2>
@@ -35,21 +35,37 @@
           data-bs-parent="#accordionEvents"
         >
           <div class="accordion-body tip-expanded">
-            <p>Esta sección te permite <strong>crear y gestionar eventos</strong> con inscripciones y validaciones automáticas.</p>
-            <h6 class="mt-3"><strong>1. Datos Básicos del Evento</strong></h6>
+            <p>Esta sección te permite <strong>crear eventos con múltiples sesiones</strong>, cada una con configuración independiente de inscripciones y validaciones.</p>
+            
+            <h6 class="mt-3"><strong>1. Crear el Evento Principal</strong></h6>
             <ul>
-              <li><strong>Nombre</strong> y descripción del evento</li>
-              <li><strong>Fecha, hora</strong> y ubicación</li>
+              <li><strong>Nombre</strong> y descripción del evento (ejemplo: "Recital de Rock 2025")</li>
+              <li><strong>Imagen</strong> del evento (una por evento)</li>
               <li><strong>Categoría</strong> del evento</li>
             </ul>
-            <h6 class="mt-3"><strong>2. Configuración de Inscripciones</strong></h6>
+
+            <h6 class="mt-3"><strong>2. Configurar Sesiones (Fechas)</strong></h6>
+            <p>Cada evento puede tener múltiples sesiones. Por ejemplo, un recital puede tener 2 fechas diferentes.</p>
             <ul>
-              <li><strong>Tipo de inscripción:</strong> Pública o Privada</li>
-              <li><strong>Cupos:</strong> Limitados o ilimitados</li>
-              <li><strong>Formulario:</strong> Asocia un formulario existente</li>
+              <li><strong>Fecha de publicación:</strong> Cuándo se hace visible la sesión</li>
+              <li><strong>Fecha del evento:</strong> Cuándo ocurre la sesión</li>
+              <li><strong>Hora</strong> y ubicación de la sesión</li>
             </ul>
-            <h6 class="mt-3"><strong>3. Reglas y Validaciones</strong></h6>
-            <p>Configurá reglas automáticas como edad mínima, documentación requerida y límites por usuario.</p>
+
+            <h6 class="mt-3"><strong>3. Configuración de Inscripciones por Sesión</strong></h6>
+            <ul>
+              <li><strong>Formulario:</strong> Asocia un formulario existente a cada sesión (pueden ser diferentes)</li>
+              <li><strong>Tipo de inscripción:</strong>
+                <ul class="mt-2">
+                  <li><strong>Pública:</strong> Cualquiera puede registrarse</li>
+                  <li><strong>Privada:</strong> Requiere asociar un listado de contactos (crealo antes o ve a "Listado de Contactos")</li>
+                </ul>
+              </li>
+              <li><strong>Cupos:</strong> Limitados o ilimitados por sesión</li>
+            </ul>
+
+            <h6 class="mt-3"><strong>4. Reglas y Validaciones por Sesión</strong></h6>
+            <p>Configurá reglas automáticas específicas para cada sesión: edad mínima, documentación requerida, límites por usuario, etc.</p>
           </div>
         </div>
       </div>
@@ -136,7 +152,6 @@
 
                             <!-- FECHAS MÚLTIPLES / SESIONES -->
                             <div class="col-12">
-                                <!-- <hr class="my-4"> -->
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div>
                                         <small class="text-muted">Configura las fechas de publicación y realización del evento con sus respectivos cupos</small>
@@ -155,6 +170,16 @@
                                         <div class="card-body">
                                             <div class="row g-3">
                                             
+                                            <!-- Fecha de publicación -->
+                                            <div class="col-12 col-md-6">
+                                                <label class="form-label">
+                                                <i class="bi bi-calendar-plus me-2"></i>
+                                                <strong>Fecha de Publicación (desde):</strong>
+                                                </label>
+                                                <input v-model="dateItem.publication_date_start" type="datetime-local" class="form-control" />
+                                                <small class="text-muted">Cuándo se abre la publicación para esta sesión</small>
+                                            </div>
+
                                             <!-- Fecha del evento -->
                                             <div class="col-12 col-md-6">
                                                 <label class="form-label">
@@ -162,19 +187,29 @@
                                                 <strong>Fecha del Evento:</strong>
                                                 </label>
                                                 <input v-model="dateItem.event_date" type="datetime-local" class="form-control" />
-                                                <small class="text-muted">Cuándo se realiza la sesión</small>
+                                                <small class="text-muted">(Informativo) Cuándo se realiza la sesión</small>
                                             </div>
 
-                                            <!-- Fecha de publicación -->
+                                            
                                             <div class="col-12 col-md-6">
                                                 <label class="form-label">
                                                 <i class="bi bi-calendar-plus me-2"></i>
-                                                <strong>Fecha de Publicación:</strong>
+                                                <strong>Fecha de inscripción (desde):</strong>
                                                 </label>
-                                                <input v-model="dateItem.publication_date" type="datetime-local" class="form-control" />
-                                                <small class="text-muted">Cuándo se abre la inscripción para esta sesión</small>
+                                                <input v-model="dateItem.registration_start" type="datetime-local" class="form-control" />
+                                                <small class="text-muted">Cuándo se abre la inscripción</small>
                                             </div>
-                                            
+
+                                            <!-- Hasta cuando se puede registrar -->
+                                            <div class="col-12 col-md-6">
+                                                <label class="form-label">
+                                                <i class="bi bi-calendar-event me-2"></i>
+                                                <strong>Fecha de inscripción (hasta):</strong>
+                                                </label>
+                                                <input v-model="dateItem.registration_deadline" type="datetime-local" class="form-control" />
+                                                <small class="text-muted">Hasta cuando se puede registrar</small>
+                                            </div>
+
                                             <!-- Cupo -->
                                             <div class="col-12 col-md-6">
                                                 <label class="form-label">
@@ -207,70 +242,133 @@
                                             <!-- Tipo de Inscripción -->
                                             <div class="col-12 col-md-6">
                                                 <label class="form-label"><i class="bi bi-lock-fill me-2"></i>Tipo de Inscripción:</label>
-                                                <select v-model="dateItem.registration_type" class="form-select">
+                                                <select v-model="dateItem.registration_type" class="form-select" @change="() => onRegistrationTypeChange(dateItem)">
                                                     <option value="public">Pública</option>
                                                     <option value="private">Privada (validación por Excel)</option>
                                                 </select>
                                             </div>
+
                                             <!-- Si es privada -->
                                             <div v-if="dateItem.registration_type === 'private'" class="col-12">
-                                                <label class="form-label"><i class="bi bi-file-earmark-excel me-2"></i>Archivo Excel con datos autorizados:</label>
-                                                <input type="file" class="form-control" accept=".xlsx,.xls,.csv" @change="handleExcelUpload" ref="excelInput" />
-                                                <small class="text-muted">Formatos soportados: .xlsx, .xls, .csv</small>
-
-                                                <!-- Configuración del campo validador -->
-                                                <div v-if="excelColumns.length > 0" class="mt-4 p-3 border rounded bg-light">
-                                                    <h6 class="mb-3"><i class="bi bi-gear-fill me-2"></i>Configuración del Validador</h6>
+                                                <div class="card border-warning">
+                                                  <div class="card-header bg-warning">
+                                                    <i class="bi bi-shield-lock-fill me-2"></i>
+                                                    <strong>Configuración de Inscripción Privada</strong>
+                                                  </div>
+                                                  <div class="card-body">
                                                     
-                                                    <div class="row g-3">
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label">Columna a usar como validador:</label>
-                                                        <select v-model="dateItem.validator_column" class="form-select">
-                                                        <option value="">Seleccione una columna</option>
-                                                        <option v-for="col in excelColumns" :key="col" :value="col">{{ col }}</option>
-                                                        </select>
-                                                        <small class="text-muted">Esta columna se usará para validar inscripciones</small>
-                                                    </div>
-                                                    
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label">Nombre del campo (Key):</label>
-                                                        <input 
-                                                        v-model="dateItem.validator_key" 
-                                                        type="text" 
-                                                        class="form-control" 
-                                                        placeholder="Ej: DNI, Cliente, Socio, etc."
-                                                        />
-                                                        <small class="text-muted">Este nombre se mostrará en el formulario de inscripción</small>
-                                                    </div>
+                                                    <!-- Select para elegir la lista -->
+                                                    <div class="mb-3">
+                                                      <label class="form-label">
+                                                        <i class="bi bi-list-check me-2"></i>
+                                                        <strong>Seleccionar Lista de Validación:</strong>
+                                                      </label>
+                                                      <select 
+                                                        v-model="dateItem.list_id" 
+                                                        class="form-select"
+                                                        @change="() => onListChange(dateItem)"
+                                                      >
+                                                        <option value="">Seleccione una lista</option>
+                                                        <option v-for="list in availableLists" :key="list.id" :value="list.id">
+                                                          {{ list.name }} ({{ list.records_count }} registros)
+                                                        </option>
+                                                      </select>
+                                                      <small class="text-muted">
+                                                        Selecciona una lista existente con los datos autorizados para inscripción
+                                                      </small>
                                                     </div>
 
-                                                    <!-- Preview de datos -->
-                                                    <div v-if="dateItem.validator_column && excelPreview.length > 0" class="mt-3">
-                                                    <label class="form-label"><i class="bi bi-eye me-2"></i>Vista previa (primeras 5 filas):</label>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm table-bordered">
-                                                        <thead class="table-primary">
-                                                            <tr>
-                                                            <th v-for="col in excelColumns" :key="col" :class="{ 'table-success': col === dateItem.validator_column }">
+                                                    <!-- Configuración del validador (solo si hay lista seleccionada) -->
+                                                    <div v-if="dateItem.list_id && dateItem.selected_columns && dateItem.selected_columns.length > 0" class="card border-primary mb-3">
+                                                      <div class="card-header bg-primary text-white">
+                                                        <i class="bi bi-gear-fill me-2"></i>
+                                                        <strong>Configuración del Validador</strong>
+                                                      </div>
+                                                      <div class="card-body">
+                                                        <div class="row g-3">
+                                                          
+                                                          <!-- Seleccionar columna validadora -->
+                                                          <div class="col-12 col-md-6">
+                                                            <label class="form-label">Columna a usar como validador:</label>
+                                                            <select v-model="dateItem.validator_column" class="form-select" @change="() => onValidatorChange(dateItem)">
+                                                              <option value="">Seleccione una columna</option>
+                                                              <option v-for="col in dateItem.selected_columns" :key="col" :value="col">
                                                                 {{ col }}
-                                                                <i v-if="col === dateItem.validator_column" class="bi bi-check-circle-fill ms-1"></i>
-                                                            </th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr v-for="(row, idx) in excelPreview.slice(0, 5)" :key="idx">
-                                                            <td v-for="col in excelColumns" :key="col" :class="{ 'table-success': col === dateItem.validator_column }">
-                                                                {{ row[col] }}
-                                                            </td>
-                                                            </tr>
-                                                        </tbody>
-                                                        </table>
+                                                              </option>
+                                                            </select>
+                                                            <small class="text-muted">Esta columna se usará para validar inscripciones</small>
+                                                          </div>
+                                                          
+                                                          <!-- Nombre del campo (Key) -->
+                                                          <div class="col-12 col-md-6">
+                                                            <label class="form-label">Nombre del campo (Key):</label>
+                                                            <input 
+                                                              v-model="dateItem.validator_key" 
+                                                              type="text" 
+                                                              class="form-control" 
+                                                              placeholder="Ej: DNI, Email, Código de Cliente"
+                                                              @input="() => onValidatorChange(dateItem)"
+                                                            />
+                                                            <small class="text-muted">Este nombre se mostrará en el formulario de inscripción</small>
+                                                          </div>
+
+                                                        </div>
+                                                      </div>
                                                     </div>
-                                                    <div class="alert alert-info mt-2">
-                                                        <i class="bi bi-info-circle me-2"></i>
-                                                        Se detectaron <strong>{{ excelPreview.length }}</strong> registros en el archivo
+
+                                                    <!-- Preview de la lista seleccionada -->
+                                                    <div v-if="dateItem.validator_column && dateItem.excel_data && dateItem.excel_data.length > 0" class="card">
+                                                      <div class="card-header bg-light">
+                                                        <i class="bi bi-eye me-2"></i>
+                                                        <strong>Vista Previa (primeras 5 filas)</strong>
+                                                      </div>
+                                                      <div class="card-body p-0">
+                                                        <div class="table-responsive">
+                                                          <table class="table table-sm table-bordered mb-0">
+                                                            <thead class="table-primary">
+                                                              <tr>
+                                                                <th 
+                                                                  v-for="col in dateItem.selected_columns" 
+                                                                  :key="col" 
+                                                                  :class="{ 'table-success': col === dateItem.validator_column }"
+                                                                >
+                                                                  {{ col }}
+                                                                  <i v-if="col === dateItem.validator_column" class="bi bi-check-circle-fill ms-1"></i>
+                                                                </th>
+                                                              </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                              <tr v-for="(row, idx) in dateItem.excel_data.slice(0, 5)" :key="idx">
+                                                                <td 
+                                                                  v-for="col in dateItem.selected_columns" 
+                                                                  :key="col" 
+                                                                  :class="{ 'table-success': col === dateItem.validator_column }"
+                                                                >
+                                                                  {{ row[col] }}
+                                                                </td>
+                                                              </tr>
+                                                            </tbody>
+                                                          </table>
+                                                        </div>
+                                                      </div>
+                                                      <!-- <div class="card-footer">
+                                                        <div class="alert alert-info mb-0">
+                                                          <i class="bi bi-info-circle me-2"></i>
+                                                          Se detectaron <strong>{{ dateItem.excel_data.length }}</strong> registros en el archivo
+                                                        </div>
+                                                      </div> -->
                                                     </div>
+
+                                                    <!-- Link para crear nueva lista -->
+                                                    <div class="alert alert-info mt-3 mb-0">
+                                                      <i class="bi bi-info-circle me-2"></i>
+                                                      ¿No encontrás la lista que necesitás? 
+                                                      <router-link to="/lists" class="alert-link">
+                                                        <strong>Ir a Gestión de Listas</strong>
+                                                      </router-link>
                                                     </div>
+                                                    
+                                                  </div>
                                                 </div>
                                             </div>
 
@@ -305,8 +403,6 @@
                                     </div>
                                     </div>
                                 </div>
-                                
-
 
                             </div>
                         </div>
@@ -326,10 +422,10 @@
                     <div class="accordion-body">
                     <h6 class="mb-3">Reglas Generales</h6>
                     <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
+                        <!-- <div class="col-12 col-md-6">
                         <label class="form-label"><i class="bi bi-calendar-x me-2"></i>Fecha límite de inscripción:</label>
                         <input v-model="eventData.registration_deadline" type="date" class="form-control" />
-                        </div>
+                        </div> -->
                         <div class="col-12 col-md-6">
                         <label class="form-label"><i class="bi bi-person-badge me-2"></i>Edad mínima:</label>
                         <input v-model.number="eventData.min_age" type="number" class="form-control" min="0" placeholder="Ej: 18" />
@@ -456,7 +552,6 @@
                 </div>
             </div>
 
-        
         </div>
       </div>
 
@@ -499,7 +594,6 @@ import ModalComponent from '@/components/ModalComponent.vue';
 import ToastComponent from '@/components/ToastComponent.vue';
 import ConfirmPopup from '@/components/ConfirmPopup.vue';
 import { useI18n } from "vue-i18n";
-import * as XLSX from 'xlsx';
 
 export default {
   name: 'EventsManagement',
@@ -511,8 +605,11 @@ export default {
   },
   setup() {
     const { t } = useI18n();
+    
+    // State
     const events = ref([]);
     const forms = ref([]);
+    const availableLists = ref([]);
     const editingIndex = ref(null);
     const eventModal = ref(null);
     const toastComponent = ref(null);
@@ -522,14 +619,14 @@ export default {
     const toastMessage = ref('');
     const isSuccess = ref(true);
     const token = ref(null);
-    const excelColumns = ref([]);
-    const excelPreview = ref([]);
-    const excelInput = ref(null);
     const isLoading = ref(false);
-    let formDelete = {};
+
+    // URLs
     const url = "https://apis.madautomate.cloud/webhook/9ff4a876-1944-4643-b41d-37450e37e3e2";
     const url_forms = "https://apis.madautomate.cloud/webhook/81d62e39-5785-4ca3-8efc-735a72e05302";
+    const url_lists = "https://apis.madautomate.cloud/webhook/9ff4a876-1944-4643-b41d-37450e37e3e2";
 
+    // Event data
     const eventData = ref({
       name: '',
       description: '',
@@ -538,7 +635,7 @@ export default {
       event_dates_delete: [],
       physical_address: '',
       virtual_link: '',
-      registration_deadline: '2010-01-01T00:00:00',
+      // registration_deadline: '2010-01-01T00:00:00',
       min_age: null,
       registrations_per_user: 1,
       requires_medical_certificate: false,
@@ -552,11 +649,10 @@ export default {
       image: '',
       path: '',
       fileName: '',
-      excel_file: null,
-      excel_data: [],
       status: 'draft'
     });
 
+    // Columns for DataTable
     const columns = [
       { key: 'name', label: 'Nombre del Evento' },
       { key: 'category', label: 'Categoría' },
@@ -564,43 +660,71 @@ export default {
       { key: 'status', label: 'Estado' }
     ];
 
-    const resultActions = [
-        { 
-            label: t('events.list_edit'),
-            class: 'btn btn-outline btn-sm',
-            method: editForm,
-            icon: () => '<i class="bi bi-pencil-square"></i>' 
-        },
-        { 
-            label: t('events.list_status'),
-            class: 'btn btn-outline btn-sm',
-            method: changeStatusForm,
-            icon: (item) => 
-                item.status === 'published'
-                    ? '<i class="bi bi-cloud-check-fill"></i>'
-                    : '<i class="bi bi-cloud-arrow-up"></i>'
-        },
-        { 
-            label: t('events.list_status'),
-            class: 'btn btn-danger btn-sm',
-            method: archivaForm,
-            icon: (item) => 
-                item.status === 'archived'
-                    ? '<i class="bi bi-cloud-minus-fill"></i>'
-                    : '<i class="bi bi-cloud-download"></i>'
-        }
-    ];
-
-
-
-    // Computed para calcular el total de cupos de todas las fechas
+    // Computed
     const totalCapacity = computed(() => {
-      if (!eventData.value.has_multiple_dates) return 0;
       return eventData.value.event_dates.reduce((sum, date) => sum + (date.capacity || 0), 0);
     });
 
+    // ============================================
+    // FUNCIONES PARA GESTIÓN DE LISTAS
+    // ============================================
+
+    const loadLists = async () => {
+      try {
+        const response = await axios.post(url_lists, { action: "getlists" }, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+
+        availableLists.value = response.data.map(item => ({
+          ...item,
+          excel_data: item.excel_data ? JSON.parse(item.excel_data) : [],
+          selected_columns: item.selected_columns ? JSON.parse(item.selected_columns) : []
+        }));
+
+      } catch (err) {
+        console.error('Error al obtener listas', err);
+      }
+    };
+
+    const onListChange = (dateItem) => {
+      const selectedList = availableLists.value.find(list => list.id == dateItem.list_id);
+      
+      if (selectedList) {
+        // Cargar datos de la lista seleccionada
+        dateItem.excel_data = selectedList.excel_data || [];
+        dateItem.selected_columns = selectedList.selected_columns || [];
+        
+        // Resetear validador al cambiar de lista
+        dateItem.validator_column = '';
+        dateItem.validator_key = '';
+
+        console.log('Lista seleccionada:', {
+          list_id: selectedList.id,
+          records: dateItem.excel_data.length,
+          columns: dateItem.selected_columns
+        });
+      } else {
+        // Limpiar si no hay lista
+        dateItem.excel_data = [];
+        dateItem.selected_columns = [];
+        dateItem.validator_column = '';
+        dateItem.validator_key = '';
+      }
+    };
+
+    const onValidatorChange = (dateItem) => {
+      console.log('Validador configurado:', {
+        list_id: dateItem.list_id,
+        validator_column: dateItem.validator_column,
+        validator_key: dateItem.validator_key
+      });
+    };
+
+    // ============================================
+    // FUNCIONES PARA GESTIÓN DE EVENTOS
+    // ============================================
+
     const openModalEvent = (event = null) => {
-        console.log('event', event)
       if (event) {
         editingIndex.value = events.value.findIndex(e => e.id === event.id);
         eventData.value = { ...event };
@@ -608,12 +732,7 @@ export default {
         editingIndex.value = null;
         resetEventData();
       }
-    //   eventModal.value.openModal();
-        // if(!editingIndex.value){
-        //     eventData.value = resetEventData();
-        //     editingIndex.value = null;
-        // }
-        eventModal.value.openModal();
+      eventModal.value.openModal();
     };
 
     const closeModalEvent = () => {
@@ -630,7 +749,7 @@ export default {
         event_dates_delete: [],
         physical_address: '',
         virtual_link: '',
-        registration_deadline: '2010-01-01T00:00:00',
+        // registration_deadline: '2010-01-01T00:00:00',
         min_age: null,
         registrations_per_user: 1,
         requires_medical_certificate: 0,
@@ -644,16 +763,8 @@ export default {
         image: '',
         path: '',
         fileName: '',
-        excel_file: null,
-        excel_data: [],
-        
         status: 'draft'
       };
-      excelColumns.value = [];
-      excelPreview.value = [];
-      if (excelInput.value) {
-        excelInput.value.value = '';
-      }
     };
 
     const handleImageUpload = (event) => {
@@ -674,94 +785,269 @@ export default {
       eventData.value.fileName = '';
     };
 
-    const handleExcelUpload = async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
+    const saveEvent = async () => {
+      isLoading.value = true;
 
-      eventData.value.excel_file = file;
+      const dataToSend = { ...eventData.value };
+      dataToSend.action = "saveform";
+
+      // Convertir booleans a 1/0
+      const booleanFields = [
+        'requires_medical_certificate',
+        'requires_dni',
+        'requires_insurance',
+        'requires_consent',
+        'enable_ai_validation',
+        'requires_payment'
+      ];
+
+      booleanFields.forEach(field => {
+        if (field in dataToSend) {
+          dataToSend[field] = dataToSend[field] ? 1 : 0;
+        }
+      });
+
+      // Preparar event_dates para envío
+      const preparedDates = dataToSend.event_dates.map(date => ({
+        ...date,
+        // Convertir arrays/objetos a JSON strings
+        excel_data: date.excel_data ? JSON.stringify(date.excel_data) : '[]',
+        selected_columns: date.selected_columns ? JSON.stringify(date.selected_columns) : '[]'
+      }));
+
+      dataToSend.event_dates = JSON.stringify(preparedDates);
+
+      console.log('Datos a enviar:', dataToSend);
 
       try {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+        const response = await axios.post(url, dataToSend, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
 
-        if (jsonData.length === 0) {
-          showToast('Error', 'El archivo está vacío o no tiene el formato correcto', false);
-          return;
-        }
+        await loadEvents();
+        showToast('Ok!', t('forms.message_success'), true);
 
-        // Extraer columnas del Excel
-        excelColumns.value = Object.keys(jsonData[0]);
-        excelPreview.value = jsonData;
-        eventData.value.excel_data = jsonData;
+      } catch (err) {
+        console.error(err);
+        showToast('Error!', t('forms.message_error'), false);
 
-        showToast('Éxito', `Archivo cargado correctamente. ${jsonData.length} registros encontrados.`, true);
-      } catch (error) {
-        console.error('Error al procesar Excel:', error);
-        showToast('Error', 'No se pudo procesar el archivo Excel', false);
+      } finally {
+        closeModalEvent();
+        isLoading.value = false;
       }
     };
 
+    const loadEvents = async () => {
+      isLoading.value = true;
+      try {
+        const response = await axios.post(url, { action: "dataforms" }, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
 
-    const saveEvent = async () => {
-        isLoading.value = true;
-
-        // Copia del evento para enviar
-        const dataToSend = { ...eventData.value };
-        dataToSend.action = "saveform";
-
-        // Convertir booleans a 1/0
-        const booleanFields = [
+        const data = response.data.map(item => {
+          // Convertir 1/0 a true/false
+          const booleanFields = [
             'requires_medical_certificate',
             'requires_dni',
             'requires_insurance',
             'requires_consent',
             'enable_ai_validation',
             'requires_payment'
-        ];
+          ];
 
-        booleanFields.forEach(field => {
-            if (field in dataToSend) {
-                dataToSend[field] = dataToSend[field] ? 1 : 0;
+          booleanFields.forEach(field => {
+            if (field in item) {
+              item[field] = item[field] == 1;
             }
+          });
+
+          // Procesar event_dates
+          const parsedDates = (JSON.parse(item.event_dates || '[]') || [])
+          .filter(d => d)
+          .map(date => {
+            
+            // Si tiene list_data, procesarlo
+            let selected_columns = [];
+            let excel_data = [];
+
+            if (date.list_data) {
+
+              // Config
+              date.list_id = date.list_data.id;
+
+
+              try {
+                selected_columns = date.list_data.selected_columns 
+                  ? JSON.parse(date.list_data.selected_columns) 
+                  : [];
+              } catch { selected_columns = []; }
+
+              try {
+                excel_data = date.list_data.excel_data 
+                  ? JSON.parse(date.list_data.excel_data) 
+                  : [];
+              } catch { excel_data = []; }
+            }
+
+            return {
+              ...date,
+              selected_columns,
+              excel_data
+            };
+          });
+
+
+          return {
+            ...item,
+            event_dates: parsedDates,
+            event_dates_delete: [],
+            sessions_count: parsedDates.length
+          };
         });
 
-        // Convertir fechas del evento
-        dataToSend.event_dates = JSON.stringify(dataToSend.event_dates || []);
+        events.value = data;
 
-        console.log('editingIndex.value', editingIndex.value);
-        console.log('dataToSend', dataToSend);
-
-        if (editingIndex.value !== null) {
-            eventData.value[editingIndex.value] = dataToSend;
-        }
-
-        try {
-            const response = await axios.post(url, dataToSend, {
-                headers: { Authorization: `Bearer ${token.value}` },
-            });
-
-            await loadEvents();
-            showToast('Ok!', t('forms.message_success'), true);
-
-        } catch (err) {
-            console.error(err);
-            showToast('Error!', t('forms.message_error'), false);
-
-        } finally {
-            closeModalEvent();
-            isLoading.value = false;
-        }
+      } catch (err) {
+        console.error('Error al obtener eventos', err);
+      } finally {
+        isLoading.value = false;
+      }
     };
 
+    const changeStatusForm = async (item) => {
+      isLoading.value = true;
+      const dataToSend = { ...item };
+      dataToSend.action = "setstatus";
+
+      if (dataToSend.status == "draft") {
+        dataToSend.new_status = "published";
+      } else {
+        dataToSend.new_status = "draft";
+      }
+
+      try {
+        await axios.post(url, dataToSend, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+
+        await loadEvents();
+        showToast('Ok!', t('forms.message_success'), true);
+
+      } catch (err) {
+        console.error(err);
+        showToast('Error!', t('forms.message_error'), false);
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    const archivaForm = async (item) => {
+      isLoading.value = true;
+      const dataToSend = { ...item };
+      dataToSend.new_status = "draft";
+      dataToSend.action = "setstatus";
+
+      try {
+        await axios.post(url, dataToSend, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+
+        await loadEvents();
+        showToast('Ok!', t('forms.message_success'), true);
+
+      } catch (err) {
+        console.error(err);
+        showToast('Error!', t('forms.message_error'), false);
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    function editForm(item) {
+      editingIndex.value = item.id;
+      eventData.value = { ...item };
+      console.log('item', item)
+      openModalEvent(item);
+    }
+
+    // ============================================
+    // FUNCIONES PARA FECHAS/SESIONES
+    // ============================================
+
+    const addEventDate = () => {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+
+      const dateString = `${yyyy}-${mm}-${dd} 00:00:00`;
+
+      eventData.value.event_dates.push({
+        publication_date_start: dateString,
+        registration_start: dateString,
+        event_date: dateString,
+        capacity: null,
+        description: '',
+        status: 'open',
+        form_id: 0,
+        registration_type: 'public',
+        list_id: null,
+        validator_column: '',
+        validator_key: '',
+        excel_data: [],
+        selected_columns: [],
+        registration_deadline: dateString
+      });
+    };
+
+
+    const removeEventDate = (dateItem, index) => {
+      eventData.value.event_dates.splice(index, 1);
+      if (dateItem.id) {
+        eventData.value.event_dates_delete.push(dateItem);
+      }
+    };
+
+    // ============================================
+    // FUNCIONES PARA FORMULARIOS
+    // ============================================
+
+    const getForms = async () => {
+      isLoading.value = true;
+
+      try {
+        const response = await axios.post(url_forms, { action: "dataforms" }, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+
+        if (response.data.length > 0 && Object.keys(response.data[0]).length > 0) {
+          forms.value = await Promise.all(
+            response.data.map(async (form) => {
+              return {
+                ...form,
+                fields: form.fields ? JSON.parse(form.fields) : [],
+                colorOptions: form.colorOptions ? JSON.parse(form.colorOptions) : [],
+                images: form.images ? JSON.parse(form.images) : []
+              };
+            })
+          );
+        }
+      } catch (error) {
+        console.error('Error al obtener formularios:', error);
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
 
     const showToast = (title, message, success) => {
       toastTitle.value = title;
       toastMessage.value = message;
       isSuccess.value = success;
       showToastFlag.value = true;
-      //toastComponent.value?.showToast();
     };
 
     const handleCloseModal = () => {
@@ -774,200 +1060,78 @@ export default {
       }
     };
 
-    // Funciones para manejar fechas múltiples
-    const addEventDate = () => {
-      eventData.value.event_dates.push({
-        publication_date: '',
-        event_date: '',
-        capacity: null,
-        description: '',
-        status: 'open',
-        form_id: 0,
-        registration_type: 'public',
-        validator_column: '',
-        validator_key: ''
-      });
-    };
-
-    const removeEventDate = (dateItem, index) => {
-      eventData.value.event_dates.splice(index, 1);
-      eventData.value.event_dates_delete.push(dateItem);
-    };
-
     const getToken = async () => {
-        token.value = sessionStorage.getItem('token');
-    };
-  
-
-    const loadEvents = async () => {
-
-        isLoading.value = true;
-        try {
-            const response = await axios.post(url, {action: "dataforms"}, {
-                headers: {
-                    Authorization: `Bearer ${token.value}`,
-                },
-            });
-
-            // console.log('response', response)
-
-            const data = response.data.map(item => {
-                
-                // Convertir 1/0 a true/false (solo si existen en el item)
-                const booleanFields = [
-                    'requires_medical_certificate',
-                    'requires_dni',
-                    'requires_insurance',
-                    'requires_consent',
-                    'enable_ai_validation',
-                    'requires_payment'
-                ];
-
-                booleanFields.forEach(field => {
-                    if (field in item) {
-                        item[field] = item[field] == 1;
-                    }
-                });
-
-                // Procesar event_dates
-                const parsedDates = (JSON.parse(item.event_dates || '[]') || [])
-                    .filter(d => d); // eliminamos null
-
-                return {
-                    ...item,
-                    event_dates: parsedDates,
-                    event_dates_delete: [],
-                    sessions_count: parsedDates.length
-                };
-            });
-
-
-            events.value = data;
-        } catch (err) {
-            console.error('Error al obtener productos', err);
-            //triggerToast('Error!', t('forms.message_error'), false);
-        } finally {
-            isLoading.value = false;
-        }
-
-
+      token.value = sessionStorage.getItem('token');
     };
 
-    async function changeStatusForm (item) {
-        isLoading.value = true;         
-        const dataToSend = item;
-        dataToSend.action= "setstatus"
+    const onRegistrationTypeChange = (dateItem) => {
+      if (dateItem.registration_type === "public") {
+        dateItem.list_id = null;
+        dateItem.validator_column = "";
+        dateItem.validator_key = "";
 
-        if(dataToSend.status == "draft") {
-            dataToSend.new_status= "published"
-        } else {
-            dataToSend.new_status= "draft"
-        }
-
-        console.log('changeStatusForm', dataToSend);
-
-        try {
-            const response = await axios.post(url,dataToSend, {
-                headers: { Authorization: `Bearer ${token.value}` },
-            });
-            
-            await loadEvents();
-            showToast('Ok!', t('forms.message_success'), true);
-
-        } catch (err) {
-            console.error(err);
-            showToast('Error!', t('forms.message_error'), false);
-        } finally {
-            isLoading.value = false;
-        }
-
-    }
-
-    async function archivaForm (item) {
-        isLoading.value = true;         
-        const dataToSend = item;
-        dataToSend.new_status= "archived"
-        dataToSend.action= "setstatus"
-
-        console.log('changeStatusForm', dataToSend);
-
-        try {
-            const response = await axios.post(url,dataToSend, {
-                headers: { Authorization: `Bearer ${token.value}` },
-            });
-            
-            await loadEvents();
-            showToast('Ok!', t('forms.message_success'), true);
-
-        } catch (err) {
-            console.error(err);
-            showToast('Error!', t('forms.message_error'), false);
-        } finally {
-            isLoading.value = false;
-        }
-
-    }
-
-    
-    function editForm(item) {
-        console.log('item', item)
-        editingIndex.value = item.id; // O el índice según tu lógica
-        
-        // Hacer una copia profunda del objeto
-        eventData.value = item;
-        
-        openModalEvent(item);
-    }
-  
-    // function confirmDelete(item, index) {
-    //     formDelete = item;
-    //     //confirmPopup.value.showConfirmPopup();
-    // }
-
-    const getForms = async () => {
-        isLoading.value = true;
-
-        try {
-          const response = await axios.post(url_forms, {action: "dataforms"}, {
-            headers: {
-              Authorization: `Bearer ${token.value}`,
-            },
-          });
-
-          console.log('getForms', response.data);
-
-          if (response.data.length > 0 && Object.keys(response.data[0]).length > 0) {
-            // Función para convertir imagen a base64
-            forms.value = await Promise.all(
-              response.data.map(async (form) => {
-                return {
-                  ...form,
-                  fields: form.fields ? JSON.parse(form.fields) : [],
-                  colorOptions: form.colorOptions ? JSON.parse(form.colorOptions) : [],
-                  images: form.images ? JSON.parse(form.images) : [] // Parsear images
-                };
-              })
-            );
-          }
-        } catch (error) {
-          console.error('Error al obtener las columnas:', error);
-        } finally {
-          isLoading.value = false;
-        }
+        // Limpio el objeto completo
+        dateItem.list_data = {
+          id: null,
+          selected_columns: [],
+          excel_data: [],
+          validator_column: "",
+          validator_key: ""
+        };
+      }
     };
 
+    // Actions for DataTable
+    const resultActions = [
+      { 
+        label: t('events.list_edit'),
+        class: 'btn btn-outline btn-sm',
+        method: editForm,
+        icon: () => '<i class="bi bi-pencil-square"></i>' 
+      },
+      { 
+        label: t('events.list_status'),
+        class: 'btn btn-outline btn-sm',
+        method: changeStatusForm,
+        icon: (item) => 
+          item.status === 'published'
+            ? '<i class="bi bi-cloud-check-fill"></i>'
+            : '<i class="bi bi-cloud-arrow-up"></i>',
+        show: (item) => item.status !== 'published'
+      },
+      { 
+        label: t('events.list_archive'),
+        class: 'btn btn-danger btn-sm',
+        method: archivaForm,
+        icon: (item) => 
+          item.status === 'draft'
+            ? '<i class="bi bi-cloud-minus-fill"></i>'
+            : '<i class="bi bi-cloud-download"></i>',
+        show: (item) => item.status === 'published'
+      }
+    ];
 
+
+    // ============================================
+    // LIFECYCLE
+    // ============================================
 
     onMounted(async () => {
-      // Cargar eventos y formularios disponibles
       await getToken();
+      await loadLists();
       await getForms();
       await loadEvents();
     });
 
+    // ============================================
+    // RETURN
+    // ============================================
+
     return {
+      // State
       events,
       forms,
+      availableLists,
       eventData,
       columns,
       resultActions,
@@ -979,27 +1143,36 @@ export default {
       toastTitle,
       toastMessage,
       isSuccess,
-      excelColumns,
-      excelPreview,
-      excelInput,
+      isLoading,
       totalCapacity,
+      token,
+      
+      // Funciones de eventos
       openModalEvent,
       closeModalEvent,
       saveEvent,
-      handleImageUpload,
-      removeImage,
-      handleExcelUpload,
-      handleCloseModal,
-      handleResponse,
-      addEventDate,
-      removeEventDate,
-      t,
       editForm,
-      isLoading,
-      getToken,
       changeStatusForm,
       archivaForm,
-      getForms
+      
+      // Funciones de sesiones
+      addEventDate,
+      removeEventDate,
+      
+      // Funciones de listas
+      onListChange,
+      onValidatorChange,
+      
+      // Funciones de imágenes
+      handleImageUpload,
+      removeImage,
+      
+      // Utilidades
+      handleCloseModal,
+      handleResponse,
+      onRegistrationTypeChange,
+      // i18n
+      t
     };
   }
 };

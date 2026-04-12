@@ -394,6 +394,17 @@
   border: none;
 } */
 
+.btn-warning {
+  border: 1px solid #d1e706;
+  background: transparent !important;
+  color: #d1e706;
+  border-radius: 10px !important;
+}
+.btn-warning:hover {
+  background: #d1e706 !important;
+  color: white!important;
+}
+
 /* ========== FORM CONTROLS ========== */
 .form-select,
 .form-control {

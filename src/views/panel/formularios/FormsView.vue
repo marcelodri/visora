@@ -8,6 +8,23 @@
     </div>
     <hr class="header-divider">
 
+    <!-- Link a documentación de Pilot -->
+    <div class="card tip-link-card mb-5">
+      <div class="card-body">
+        <div class="tip-link-content">
+          <div class="tip-icon">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </div>
+          <div class="tip-text-section">
+            <strong>Integración con Pilot Solution:</strong> Para integrar correctamente los formularios de Pilot Solution, fíjate en los nombres de los campos en la siguiente documentación.
+          </div>
+          <a href="https://www.pilotsolution.net/es/como-integrarse#pilot-webhook" target="_blank" class="btn btn-sm btn-primary ms-auto">
+            Ver documentación <i class="bi bi-box-arrow-up-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- Tip Accordion -->
     <div class="accordion mb-5" id="accordionForms">
       <div class="accordion-item tip-banner-style">
@@ -127,7 +144,7 @@
                 Título:
               </label>
               <input 
-                v-model="formData.header_text" 
+                v-model="formData.form_header_text" 
                 type="text" 
                 class="form-control" 
                 placeholder="Ingrese título del formulario (opcional)" 
@@ -136,6 +153,24 @@
           </div>
         </div>
         
+        <!-- Título del formulario -->
+        <div class="card form-card mb-3">
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-type-h1 me-2"></i>
+                SubTítulo:
+              </label>
+              <input 
+                v-model="formData.form_header_subtext" 
+                type="text" 
+                class="form-control" 
+                placeholder="Ingrese subtítulo del formulario (opcional)" 
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Descripción -->
         <div class="card form-card mb-3">
           <div class="card-body">
@@ -145,7 +180,7 @@
                 Descripción (opcional):
               </label>
               <textarea 
-                v-model="formData.header_descript" 
+                v-model="formData.form_header_descript" 
                 class="form-control" 
                 rows="4" 
                 placeholder="Ingrese descripción del formulario (opcional)"
@@ -175,7 +210,7 @@
                 </div>
                 
                 <div class="field-body">
-                  <div class="row g-3 mb-3">
+                  <div v-if="field.type !== 'title'" class="row g-3 mb-3">
                     <div class="col-6">
                       <div class="form-check">
                         <input type="checkbox" class="form-check-input" v-model="field.hidden" :id="'hidden' + fieldIndex" />
@@ -196,28 +231,39 @@
                     </div>
                   </div>
 
-                  <div class="row g-3 mb-3">
-                    <div class="col-4">
+                  <div v-if="field.type === 'title'" class="mb-3">
+                    <label class="form-label">Texto del título:</label>
+                    <input v-model="field.label" class="form-control" placeholder="Ej: Información de contacto" />
+                  </div>
+
+                  <div v-else class="row g-3 mb-3">
+                    <div class="col-3">
                       <label class="form-label">Etiqueta:</label>
                       <input v-model="field.label" class="form-control" placeholder="Ej: Nombre completo" />
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                       <label class="form-label">Nombre del campo:</label>
                       <input v-model="field.name" class="form-control" placeholder="Ej: full_name" />
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                       <label class="form-label">Valor por defecto:</label>
                       <input v-model="field.value" class="form-control" placeholder="Opcional" />
+                    </div>
+                    <div class="col-3">
+                      <label class="form-label">Ancho (%):</label>
+                      <input v-model.number="field.width" type="number" min="1" max="100" class="form-control" placeholder="100" />
                     </div>
                   </div>
 
                   <div class="mb-3">
                     <label class="form-label">Tipo de campo:</label>
                     <select v-model="field.type" class="form-select">
+                      <option value="title">Título</option>
                       <option value="text">Texto</option>
                       <option value="number">Número</option>
                       <option value="email">Email</option>
                       <option value="textarea">Área de texto</option>
+                      <option value="date">Fecha</option>
                       <option value="select">Lista desplegable</option>
                     </select>
                   </div>
@@ -343,6 +389,79 @@
       </div>
     </ModalComponent>
 
+    <!-- MODAL REORDENAR CAMPOS -->
+    <ModalComponent 
+      ref="orderFieldsModal" 
+      modalId="orderFieldsModal" 
+      :modalTitle="'Reordenar campos'" 
+      class="modal-lg"
+    >
+      <div class="modal-body">
+        <div class="alert alert-info mb-4">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          Arrastra los campos para reordenarlos o usa los botones de flecha. Los cambios se guardan automáticamente.
+        </div>
+
+        <div v-if="formDataForOrdering.fields && formDataForOrdering.fields.length > 0" class="fields-order-list">
+          <div 
+            v-for="(field, index) in formDataForOrdering.fields" 
+            :key="index"
+            class="field-order-item"
+            :draggable="true"
+            @dragstart="dragStartField = index"
+            @dragover.prevent="dragOverIndex = index"
+            @drop="dropField(index)"
+            @dragend="dragStartField = null; dragOverIndex = null"
+            :class="{ 'dragging-over': dragOverIndex === index }"
+          >
+            <div class="field-order-header">
+              <span class="drag-handle">
+                <i class="bi bi-grip-vertical"></i>
+              </span>
+              <span class="field-order-number">
+                {{ index + 1 }}
+              </span>
+              <span class="field-order-name">
+                <strong>{{ field.label || field.name || 'Sin nombre' }}</strong>
+                <small class="text-muted ms-2">({{ field.type }})</small>
+              </span>
+              <div class="field-order-actions">
+                <button 
+                  v-if="index > 0"
+                  class="btn btn-sm btn-outline"
+                  @click="moveFieldUp(index)"
+                  title="Mover arriba"
+                >
+                  <i class="bi bi-arrow-up"></i>
+                </button>
+                <button 
+                  v-if="index < formDataForOrdering.fields.length - 1"
+                  class="btn btn-sm btn-outline"
+                  @click="moveFieldDown(index)"
+                  title="Mover abajo"
+                >
+                  <i class="bi bi-arrow-down"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Este formulario no tiene campos.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" @click="saveFieldsOrder">
+          <i class="bi bi-floppy me-2"></i>Guardar orden
+        </button>
+        <button type="button" class="btn btn-outline-secondary" @click="closeOrderFieldsModal">
+          <i class="bi bi-x-circle me-2"></i>Cancelar
+        </button>
+      </div>
+    </ModalComponent>
+
     <!-- Componentes auxiliares -->
     <ToastComponent 
       :title="toastTitle" 
@@ -388,9 +507,9 @@ export default {
       name: '', 
       images: [],
       fields: [], 
-      header_text: "",
-      header_subtext: "",
-      header_descript: "",
+      form_header_text: "",
+      form_header_subtext: "",
+      form_header_descript: "",
       success: "",
       error: "",
       service: "",
@@ -410,6 +529,7 @@ export default {
     const isLoading = ref(false);
     const formModal = ref(null);
     const styleModal = ref(null);
+    const orderFieldsModal = ref(null);
     const toastTitle = ref('');
     const toastMessage = ref('');
     const isSuccess = ref(true);
@@ -418,6 +538,9 @@ export default {
     const confirmPopup = ref(null);
     const actionToExecute = ref(null);
     const selectedForm = ref(null);
+    const formDataForOrdering = ref({ fields: [] });
+    const dragStartField = ref(null);
+    const dragOverIndex = ref(null);
     let formDelete = {};
     
     const url = "https://apis.madautomate.cloud/webhook/81d62e39-5785-4ca3-8efc-735a72e05302";
@@ -427,7 +550,8 @@ export default {
     });
 
     const services = ref([
-      { id: 1, name: "pilot" },
+      { id: 1, name: "pilot_lead" },
+      { id: 1, name: "pilot_service" },
       { id: 2, name: "event" }
     ]);
 
@@ -462,9 +586,9 @@ export default {
         name: '', 
         images: [],
         fields: [], 
-        header_text: "",
-        header_subtext: "",
-        header_descript: "",
+        form_header_text: "",
+        form_header_subtext: "",
+        form_header_descript: "",
         success: "",
         error: "",
         service: "",
@@ -502,6 +626,7 @@ export default {
         type: 'text', 
         hidden: false, 
         required: false, 
+        width: 100,
         options: [] 
       });
     };
@@ -700,6 +825,48 @@ export default {
       instance.proxy.updateForm(formDataToSend);
     };
 
+    const openOrderFieldsModal = (form) => {
+      formDataForOrdering.value = JSON.parse(JSON.stringify(form));
+      orderFieldsModal.value.openModal();
+    };
+
+    const closeOrderFieldsModal = () => {
+      orderFieldsModal.value.closeModal();
+      formDataForOrdering.value = { fields: [] };
+    };
+
+    const moveFieldUp = (index) => {
+      if (index > 0) {
+        const temp = formDataForOrdering.value.fields[index];
+        formDataForOrdering.value.fields[index] = formDataForOrdering.value.fields[index - 1];
+        formDataForOrdering.value.fields[index - 1] = temp;
+      }
+    };
+
+    const moveFieldDown = (index) => {
+      if (index < formDataForOrdering.value.fields.length - 1) {
+        const temp = formDataForOrdering.value.fields[index];
+        formDataForOrdering.value.fields[index] = formDataForOrdering.value.fields[index + 1];
+        formDataForOrdering.value.fields[index + 1] = temp;
+      }
+    };
+
+    const dropField = (dropIndex) => {
+      if (dragStartField.value !== null && dragStartField.value !== dropIndex) {
+        const draggedField = formDataForOrdering.value.fields[dragStartField.value];
+        formDataForOrdering.value.fields.splice(dragStartField.value, 1);
+        formDataForOrdering.value.fields.splice(dropIndex, 0, draggedField);
+      }
+    };
+
+    const saveFieldsOrder = () => {
+      instance.proxy.updateForm(JSON.parse(JSON.stringify(formDataForOrdering.value)));
+      closeOrderFieldsModal();
+      setTimeout(() => {
+        triggerToast('Realizado!', 'Orden de campos actualizado!', true);
+      }, 500);
+    };
+
     const triggerToast = (title, message, success) => {
       toastTitle.value = title;
       toastMessage.value = message;
@@ -713,6 +880,12 @@ export default {
         class: 'btn btn-sm btn-outline',
         method: openModalForm,
         icon: '<i class="bi bi-pencil-square"></i>'
+      },
+      {
+        label: "Reordenar",
+        class: 'btn btn-sm btn-outline',
+        method: openOrderFieldsModal,
+        icon: '<i class="bi bi-arrow-down-up"></i>'
       },
       {
         label: t("forms.action_style"),
@@ -751,6 +924,7 @@ export default {
       isLoading,
       formModal,
       styleModal,
+      orderFieldsModal,
       colorOptions,
       closeStyleModalForm,
       saveStyleForm,
@@ -767,8 +941,130 @@ export default {
       handleCloseModal,
       duplicateClick,
       services,
-      styleForm
+      styleForm,
+      openOrderFieldsModal,
+      closeOrderFieldsModal,
+      moveFieldUp,
+      moveFieldDown,
+      dropField,
+      saveFieldsOrder,
+      formDataForOrdering,
+      dragStartField,
+      dragOverIndex
     };
   },
 };
 </script>
+
+<style scoped>
+.tip-link-card {
+  border: 1px solid #e8f4f8;
+  background: linear-gradient(135deg, #f0f9fc 0%, #ffffff 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.05);
+}
+
+.tip-link-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #007bff;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.3em;
+  flex-shrink: 0;
+}
+
+.tip-text-section {
+  flex: 1;
+  font-size: 0.95em;
+  color: #333;
+}
+
+.fields-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-order-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafafa;
+  transition: all 0.2s;
+  cursor: move;
+}
+
+.field-order-item:hover {
+  background: #fff;
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.field-order-item.dragging-over {
+  background: #e7f1ff;
+  border-color: #007bff;
+  border-width: 2px;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2), inset 0 0 0 1px #007bff;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #999;
+  cursor: grab;
+  font-size: 1.2em;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.field-order-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.field-order-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #007bff;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.field-order-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-order-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.field-order-actions .btn {
+  padding: 6px 12px;
+  font-size: 0.85em;
+}
+</style>

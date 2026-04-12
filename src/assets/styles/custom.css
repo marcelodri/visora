@@ -59,6 +59,7 @@
   border-radius: 10px !important;
 }
 
+
 .btn-danger:hover {
   background: #dc3545 !important;
   color: #ffffff;
@@ -97,7 +98,6 @@
   left: 0;
   bottom: 0;
   max-width: 300px;
-  z-index: 0;
   box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
   background: rgb(255, 255, 255);
   border-radius: 4px;
@@ -301,3 +301,4 @@ h1 {
   scrollbar-width: thin; /* Tamaño del scrollbar */
   scrollbar-color: rgba(100, 100, 100, 0.4) rgba(0, 0, 0, 0.1); /* thumb | track */
 }/*# sourceMappingURL=custom.css.map */
+

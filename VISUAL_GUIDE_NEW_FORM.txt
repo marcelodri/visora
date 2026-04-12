@@ -1,0 +1,112 @@
+╔════════════════════════════════════════════════════════════════╗
+║        EVENTOS - MURO DE POSTS (Instagram Style)              ║
+╚════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────┬────────────────────────────┐
+│                                     │                            │
+│      FEED (Posts en vivo)           │   CREATOR (Tu post)        │
+│                                     │                            │
+│  ┌───────────────────────────────┐  │  ┌──────────────────────┐  │
+│  │ Post de Usuario 1             │  │  │  [✏️ Editar] [👁 Preview] │
+│  │ ├─ Avatar + Nombre            │  │  └──────────────────────┘  │
+│  │ ├─ Imagen 1:1 (600x600)       │  │                            │
+│  │ ├─ Descripción                │  │  ┌──────────────────────┐  │
+│  │ ├─ ❤️ 💬 📤                    │  │  │   TAB: EDITAR        │  │
+│  │ └─ 5 personas lo aman         │  │  ├──────────────────────┤  │
+│  │                               │  │  │ 🔵 Juan              │  │
+│  │ ┌───────────────────────────┐ │  │  │    juan              │  │
+│  │ │ Post de Usuario 2         │ │  │  │    12/50             │  │
+│  │ │ ├─ Avatar + Nombre        │ │  │  ├──────────────────────┤  │
+│  │ │ ├─ Imagen 1:1 (600x600)   │ │  │  │ ┌──────────────────┐ │  │
+│  │ │ ├─ Descripción            │ │  │  │ │   [+] Agrega     │ │  │
+│  │ │ ├─ ❤️ 💬 📤                │ │  │  │ │       una foto   │ │  │
+│  │ │ └─ 2 personas lo aman     │ │  │  │ │ (1:1 aspect)    │ │  │
+│  │ └───────────────────────────┘ │  │  │ └──────────────────┘ │  │
+│  │                               │  │  ├──────────────────────┤  │
+│  │ [Scroll para más posts...]    │  │  │ Escribe tu          │  │
+│  │                               │  │  │ comentario...        │  │
+│  └───────────────────────────────┘  │  │ 0/500                │  │
+│                                     │  ├──────────────────────┤  │
+│                                     │  │ [😊] Emojis         │  │
+│                                     │  ├──────────────────────┤  │
+│                                     │  │ 🟢 Conectado         │  │
+│                                     │  │ [Compartir]          │  │
+│                                     │  └──────────────────────┘  │
+│                                     │                            │
+└─────────────────────────────────────┴────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════
+
+TAB PREVIEW - Vista Cómo Se Vería:
+
+  ┌──────────────────────────────────┐
+  │ 🔵 juan                          │
+  │    Hace unos segundos            │
+  ├──────────────────────────────────┤
+  │                                  │
+  │     [Imagen 1:1 aquí]            │
+  │                                  │
+  ├──────────────────────────────────┤
+  │ ❤️  💬  📤                        │
+  │ 0 personas lo aman              │
+  │                                  │
+  │ juan Escribe tu comentario...    │
+  │      0/500                       │
+  └──────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════
+
+CAMBIOS IMPORTANTES:
+
+1. TABS: Ahora hay dos pestaña
+   - Editar: Crear el post
+   - Preview: Ver cómo se verá
+
+2. IMAGEN PROTAGONISTA: 
+   - Ocupa todo el ancho (100%)
+   - Proporción 1:1 (cuadrada)
+   - Grande e importante (como en IG)
+   - NO es obligatoria (puedes dejar sin imagen)
+
+3. FORMULARIO LIMPIO:
+   - Nombre arriba
+   - Imagen grande en medio
+   - Comentario debajo
+   - Emojis al final
+
+4. CONFIRMACIÓN VISUAL:
+   - Tab "Preview" muestra exactamente cómo se verá
+   - Antes de clickear "Compartir"
+   - Simula perfectamente el post en el muro
+
+════════════════════════════════════════════════════════════════════
+
+FLUJO DE USO:
+
+1. Ingresa tu nombre
+2. Haz clic en el área de imagen (OPCIONAL)
+3. Selecciona una foto de tu computadora
+4. Escribe tu comentario (o deja espacio para imagen)
+5. Haz clic en "Preview" para ver cómo se verá
+6. Vuelve a "Editar" si quieres cambiar algo
+7. Haz clic en "Compartir"
+8. ¡Tu post aparece en el muro de la izquierda!
+
+════════════════════════════════════════════════════════════════════
+
+SOLUCIÓN A PROBLEMAS:
+
+❌ "No veo las imágenes en el muro"
+→ Abre DevTools (F12) → Console
+→ Verifica que diga: "🖼️ Imagen: SÍ (125.50 KB)"
+→ Si dice "NO", el archivo no se envió correctamente
+→ Si dice "SÍ" pero no aparece, hay problema de renderizado
+
+❌ "El botón Compartir está deshabilitado"
+→ Necesitas: nombre + comentario (imagen es opcional)
+→ No dejes campos vacíos
+
+❌ "La vista previa no se actualiza"
+→ Es normal, cambia entre tabs "Editar" y "Preview" para actualizar
+
+════════════════════════════════════════════════════════════════════

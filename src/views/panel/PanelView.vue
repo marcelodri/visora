@@ -31,9 +31,10 @@ export default {
   height: fit-content;
   overflow: hidden;
   border-radius: 10px;
-  margin-top: 30px;
+  margin-top: 0px;
   box-shadow: 0 1px 15px rgba(0, 0, 0, .04), 0 1px 6px rgba(0, 0, 0, .04);
-  padding-bottom: 80px
+  padding-bottom: 90px;
+  margin-bottom: 40px;
 }
 
 .background-image {
@@ -42,7 +43,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/images/data5-min-min.jpg');
+  background-image: url('../../assets/images/formulario.jpg');
   background-size: cover;
   background-position: center;
   z-index: 1;
@@ -54,7 +55,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
 
@@ -74,11 +75,23 @@ h1, p {
   margin: 0;
   padding: 0.5rem;
   text-align: right;
+  /* text-shadow: 
+    -1px -1px 0 rgba(0, 0, 0, 0.1),
+    1px -1px 0 rgba(0, 0, 0, 0.1),
+    -1px 1px 0 rgba(0, 0, 0, 0.1),
+    1px 1px 0 rgba(0, 0, 0, 0.1),
+    -2px 0 0 rgba(0, 0, 0, 0.1),
+    2px 0 0 rgba(0, 0, 0, 0.1),
+    0 -2px 0 rgba(0, 0, 0, 0.1),
+    0 2px 0 rgba(0, 0, 0, 0.1),
+    0 0 10px rgba(0, 0, 0, 0.1); */
 }
 
 p {
-  max-width: 650px;
+  max-width: 700px;
   float: right;
   margin-top: 10px;
+  font-size: 1.2rem;
+  line-height: 1.2;
 }
 </style>
