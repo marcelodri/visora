@@ -64,6 +64,7 @@
         "rewards-customers": "Clientes",
         "rewards-rules": "Reglas",
         "rewards-sales": "Listado Ventas",
+        "rewards-logs": "Logs",
         "demos-advancedSearch": "Búsqueda avanzada",
         "demos-reports": "Reporte Historial",
         "demos-myagent": "Mi agente",
@@ -75,7 +76,11 @@
         "lists-main": "Listas de contacto",
         "EventWall": "Muro de eventos",
         "EventWallComment": "Comentarios en tiempo real",
-        "migrate-customers": "Migrar Clientes"
+        "migrate-customers": "Migrar Clientes",
+        "emails-start": "Comenzar",
+        "emails-templates": "Templates",
+        "emails-campaigns": "Campañas",
+        "emails-builder": "Nueva Campaña"
     },
     "business_type":{
         "name": "Nombre",

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div :id="modalId" class="modal fade" tabindex="-1" aria-labelledby="modalLabel" >
-      <div class="modal-dialog" :class="class">
+      <div class="modal-dialog" :class="modalDialogClass">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalLabel">{{ modalTitle }}</h5>
@@ -37,6 +37,10 @@ export default {
       type: String,
       default: 'modal-sm'
     },
+    dialogClass: {
+      type: [String, Array, Object],
+      default: ''
+    },
     showSaveSearchButton: {
       type: Boolean,
       required: false // Aseguramos que el ID sea pasado como prop
@@ -51,15 +55,26 @@ export default {
       modalInstance: null
     };
   },
+  computed: {
+    modalDialogClass() {
+      if (Array.isArray(this.dialogClass) && this.dialogClass.length) return this.dialogClass;
+      if (typeof this.dialogClass === 'string' && this.dialogClass.trim()) return this.dialogClass;
+      if (this.dialogClass && typeof this.dialogClass === 'object' && Object.keys(this.dialogClass).length) return this.dialogClass;
+      return this.class;
+    }
+  },
   methods: {
     openModal() {
       this.$nextTick(() => {
         const modalEl = document.getElementById(this.modalId);
         if (modalEl) {
-          this.modalInstance = new Modal(modalEl, {
+          const options = {
             backdrop: 'static', // Evita el cierre al hacer clic fuera del modal
             keyboard: false     // Evita el cierre al presionar "Esc"
-          });
+          };
+          this.modalInstance = Modal.getOrCreateInstance
+            ? Modal.getOrCreateInstance(modalEl, options)
+            : new Modal(modalEl, options);
           this.modalInstance.show();
         } else {
           console.error('No se encontró el elemento del modal con el ID:', this.modalId);
@@ -88,6 +103,26 @@ export default {
       .modal-body {
         overflow: scroll;
       }
+    }
+  }
+
+  .modal-fullscreen-fixed {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0;
+
+    .modal-content {
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .modal-body {
+      height: calc(100vh - 58px);
+      overflow: hidden;
+      background: #f8f9fa;
     }
   }
   

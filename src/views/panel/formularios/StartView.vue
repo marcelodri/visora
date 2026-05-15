@@ -33,7 +33,7 @@
               <div v-if="limitEventDetail" class="form-group">
                   <label class="field-label">
                   <i class="bi bi-info-circle me-1"></i>
-                  Cantidad de forms permitidos
+                  Formularios permitidos
                   </label>
 
                   <input

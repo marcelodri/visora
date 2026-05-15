@@ -60,9 +60,14 @@
         "social-facebookmuro": "Facebook Wall",
         "incolmotos-import": "Import sales",
         "incolmotos-customers": "Customers",
+        "rewards-logs": "Logs",
         "demos-advancedSearch": "Advanced Search",
         "demos-reports": "History reports",
-        "demos-myagent": "Mi agente"
+        "demos-myagent": "Mi agente",
+        "emails-start": "Start",
+        "emails-templates": "Templates",
+        "emails-campaigns": "Campaigns",
+        "emails-builder": "New Campaign"
         
     },
     "reports": {

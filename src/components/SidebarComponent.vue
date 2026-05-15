@@ -16,24 +16,33 @@
           <ul>
             <!-- HOME (siempre visible) -->
             <li>
-              <!-- <router-link to="/panel" v-slot="{ navigate }"> -->
-              <a href="/panel" class="home-link" >
-                <span class="mr-2"><i class="bi bi-house"></i></span>
-                {{ $t('menu.home') || 'Home' }}
-              </a>
-            <!-- </router-link> -->
+              <router-link :to="{ name: 'panelHome' }" custom v-slot="{ href, navigate, isExactActive }">
+                <a
+                  :href="href"
+                  class="home-link"
+                  :class="{ active: isExactActive }"
+                  @click="navigate"
+                >
+                  <span class="mr-2"><i class="bi bi-house"></i></span>
+                  {{ $t('menu.home') || 'Home' }}
+                </a>
+              </router-link>
             </li>
 
             <!-- Dropdowns por categoría (filtrados por permisos) -->
             <li v-for="category in groupedMenu" :key="category.name">
               <div v-if="category.routes.length" class="dropdown">
                 <a
-                  class="dropdown-toggle flex items-center"
+                  :class="[
+                    'dropdown-toggle flex items-center',
+                    { 'dropdown-toggle--open': openDropdown === category.name }
+                  ]"
                   type="button"
                   @click="toggleDropdown(category.name)"
                 >
                   <span v-html="category.icon" class="mr-0"></span>
                   {{ capitalize(category.name) }}
+                  <i class="bi bi-chevron-right dropdown-icon ms-auto"></i>
                 </a>
 
                 <ul
@@ -44,7 +53,7 @@
                     v-for="route in category.routes"
                     :key="route.name"
                     class="mb-2"
-                    :class="['/panel/pages/settings', '/panel/pages/templates', '/panel/events/start', '/panel/forms/started', '/panel/events/qr-access', '/panel/rewards/start'].includes(route.path) ? 'border-b pb-2' : ''"
+                    :class="['/panel/pages/settings', '/panel/pages/templates', '/panel/events/start', '/panel/forms/started', '/panel/events/qr-access', '/panel/rewards/start', '/panel/rewards/rules', '/panel/rewards/sales', '/panel/rewards/MigrateCustomers', '/panel/emails/start'].includes(route.path) ? 'border-b pb-2' : ''"
                   >
                     <router-link
                       :to="route.path"
@@ -126,7 +135,7 @@ export default {
           name: parent.meta.category,
           icon: parent.meta.icon || '<i class="fas fa-folder"></i>',
           routes: parent.children
-            .filter((child) => child.name && child.path)
+            .filter((child) => child.name && child.path && !child.meta?.hideInMenu)
             .map((child) => ({
               name: child.name,
               path: `${parent.path}/${child.path}`.replace(/\/+$/, ""),
@@ -141,6 +150,9 @@ export default {
 
     toggleDropdown(name) {
       this.openDropdown = this.openDropdown === name ? null : name;
+    },
+    setActive(path) {
+      this.activeRoute = path;
     },
 
     capitalize(str) {
@@ -192,6 +204,30 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.dropdown-toggle span {
+  font-size: 0.7rem;
+}
+
+.dropdown-toggle span i,
+.dropdown-toggle span svg {
+  font-size: 0.7rem;
+}
+
+.dropdown-icon {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease-in-out;
+  transform: rotate(0deg);
+}
+
+.dropdown-toggle--open .dropdown-icon {
+  transform: rotate(90deg);
 }
 
 .dropdown ul {

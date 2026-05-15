@@ -41,6 +41,32 @@
       </div>
     </div>
 
+    <!-- Breakdown por sucursal -->
+    <div class="location-breakdown mb-4" v-if="locationStats.length > 1 || (locationStats.length === 1 && locationStats[0].location !== '—')">
+      <div class="location-section-title">
+        <i class="bi bi-geo-alt-fill me-2"></i>Facturado por Sucursal
+      </div>
+      <div class="location-cards">
+        <div
+          v-for="(loc, idx) in locationStats"
+          :key="loc.location"
+          class="location-card"
+          :class="`loc-color-${idx % 4}`"
+        >
+          <div class="location-card-name">
+            <i class="bi bi-shop me-1"></i>{{ loc.location }}
+          </div>
+          <div class="location-card-amount">{{ formatCurrency(loc.total_facturado) }}</div>
+          <div class="location-card-meta">
+            <i class="bi bi-bag-check me-1"></i>{{ formatNumber(loc.total_ventas) }} ventas
+          </div>
+          <div class="location-card-pct" v-if="totalFacturado > 0">
+            {{ Math.round(loc.total_facturado / totalFacturado * 100) }}% del total
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- DataTable de batches -->
     <div class="card sales-card">
       <div class="card-header-custom">
@@ -94,6 +120,7 @@
                 <th>ID</th>
                 <th>Cliente ID</th>
                 <th>Fecha</th>
+                <th>Sede</th>
                 <th>Tipo</th>
                 <th>Detalle</th>
                 <th class="text-end">Importe</th>
@@ -106,6 +133,10 @@
                 <td class="fw-bold">{{ sale.id }}</td>
                 <td>{{ sale.customer_id }}</td>
                 <td>{{ formatDate(sale.created_at) }}</td>
+                <td>
+                  <span v-if="sale.location" class="location-pill">{{ sale.location }}</span>
+                  <span v-else class="text-muted" style="font-size:0.8rem">—</span>
+                </td>
                 <td>
                   <span class="sale-type-pill" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
                     {{ sale.product_type || '—' }}
@@ -202,6 +233,11 @@ export default {
         render: (row) => `<code class="batch-code-cell">${row.batch_id}</code>`
       },
       {
+        label: 'Sucursal',
+        key: 'location',
+        render: (row) => `<span class="text-primary">${row.location}</span>`
+      },
+      {
         label: 'Ventas',
         key: 'total_ventas',
         render: (row) => `<span class="badge bg-primary">${row.total_ventas}</span>`
@@ -232,6 +268,17 @@ export default {
     // Computed
     const totalVentas = computed(() => batches.value.reduce((sum, b) => sum + (Number(b.total_ventas) || 0), 0));
     const totalFacturado = computed(() => batches.value.reduce((sum, b) => sum + (Number(b.total_facturado) || 0), 0));
+
+    const locationStats = computed(() => {
+      const map = {};
+      for (const b of batches.value) {
+        const loc = b.location || '—';
+        if (!map[loc]) map[loc] = { location: loc, total_ventas: 0, total_facturado: 0 };
+        map[loc].total_ventas += Number(b.total_ventas) || 0;
+        map[loc].total_facturado += Number(b.total_facturado) || 0;
+      }
+      return Object.values(map).sort((a, b) => b.total_facturado - a.total_facturado);
+    });
 
     const parsedSales = computed(() => {
       if (!selectedBatch.value || !selectedBatch.value.sales) return [];
@@ -378,6 +425,7 @@ export default {
       showToastFlag,
       totalVentas,
       totalFacturado,
+      locationStats,
       fetchBatches,
       viewBatch,
       closeDetailModal,
@@ -619,6 +667,85 @@ export default {
 .sale-points {
   color: #d97706;
   font-weight: 700;
+}
+
+/* ===== LOCATION BREAKDOWN ===== */
+.location-breakdown {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 1.1rem 1.25rem;
+}
+
+.location-section-title {
+  font-weight: 700;
+  color: #374151;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.85rem;
+}
+
+.location-cards {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.location-card {
+  flex: 1;
+  min-width: 160px;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.loc-color-0 { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; }
+.loc-color-1 { background: linear-gradient(135deg, #faf5ff, #ede9fe); border: 1px solid #ddd6fe; }
+.loc-color-2 { background: linear-gradient(135deg, #fff7ed, #fed7aa); border: 1px solid #fdba74; }
+.loc-color-3 { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; }
+
+.location-card-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #374151;
+}
+
+.location-card-amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-top: 0.1rem;
+}
+
+.location-card-meta {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.location-card-pct {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 0.15rem;
+}
+
+.location-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 /* Responsive */

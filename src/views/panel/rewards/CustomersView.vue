@@ -247,7 +247,7 @@
                         <div class="detail-stat-row stat-avg">
                             <div class="detail-stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
                             <div class="detail-stat-info">
-                                <div class="detail-stat-value">{{ formatCurrency(detailCustomer.promedio_venta) }}</div>
+                                <div class="detail-stat-value">{{ formatCurrency(averageSale) }}</div>
                                 <div class="detail-stat-label">Promedio</div>
                             </div>
                         </div>
@@ -273,6 +273,19 @@
                             <i class="bi bi-receipt-cutoff me-1"></i> Ventas
                             <span class="detail-tab-badge" v-if="parsedSales.length">{{ parsedSales.length }}</span>
                         </button>
+                        <button 
+                            v-if="detailCustomer.id && detailCustomer.validaciones"
+                            class="detail-tab" 
+                            :class="{ active: detailTab === 'validaciones' }" 
+                            @click="detailTab = 'validaciones'"
+                        >
+                            <i class="bi bi-shield-check me-1"></i> Condiciones
+                            <span class="detail-tab-badge val-tab-badge" v-if="parsedValidaciones.filter(v => v.cumple).length">
+                                {{ parsedValidaciones.filter(v => v.cumple).length }}/{{ parsedValidaciones.length }}
+                            </span>
+                        </button>
+                        
+
                     </div>
 
                     <!-- Tab: Datos Personales -->
@@ -324,6 +337,75 @@
                         </div>
                     </div>
 
+                    <!-- Tab: Condiciones -->
+                    <div v-if="detailTab === 'validaciones'" class="detail-validaciones-section">
+                        <div v-if="parsedValidaciones.length === 0" class="text-center py-5 text-muted">
+                            <i class="bi bi-shield-x display-4"></i>
+                            <p class="mt-2">No hay validaciones disponibles</p>
+                        </div>
+                        <div v-else class="val-list">
+                            <div v-for="val in parsedValidaciones" :key="val.key" class="val-card" :class="val.cumple ? 'val-ok' : 'val-fail'">
+                                <!-- Header -->
+                                <div class="val-header">
+                                    <div class="val-icon-wrap" :class="val.cumple ? 'val-icon-ok' : 'val-icon-fail'">
+                                        <i :class="`bi ${val.icono}`"></i>
+                                    </div>
+                                    <div class="val-title-wrap">
+                                        <div class="val-title">{{ val.nombre }}</div>
+                                        <div class="val-desc">{{ val.descripcion }}</div>
+                                    </div>
+                                    <div class="val-status" :class="val.cumple ? 'val-status-ok' : 'val-status-fail'">
+                                        <i :class="val.cumple ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill'"></i>
+                                        {{ val.cumple ? 'CUMPLIDO' : 'NO CUMPLIDO' }}
+                                    </div>
+                                </div>
+                                <!-- Métricas con barras de progreso -->
+                                <div class="val-metrics">
+                                    <div v-for="m in val.metricas" :key="m.label" class="val-metric-row">
+                                        <div class="val-metric-label">{{ m.label }}</div>
+                                        <div class="val-metric-bar-wrap">
+                                            <div class="val-metric-bar"
+                                                :class="m.calc >= m.des ? 'bar-ok' : 'bar-fail'"
+                                                :style="{ width: m.des > 0 ? Math.min(100, Math.round(m.calc / m.des * 100)) + '%' : '0%' }">
+                                            </div>
+                                        </div>
+                                        <div class="val-metric-nums" :class="m.calc >= m.des ? 'nums-ok' : 'nums-fail'">
+                                            {{ m.calc }} / {{ m.des }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Detalle de referidos -->
+                                <div v-if="val.detalle && val.detalle.length" class="val-detail-wrap">
+                                    <div class="val-detail-title">
+                                        <i class="bi bi-people me-1"></i> Detalle de Referidos
+                                    </div>
+                                    <table class="val-detail-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Documento</th>
+                                                <th class="text-center">Compras</th>
+                                                <th class="text-center">Instrumento</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="ref in val.detalle" :key="ref.referred_document">
+                                                <td>{{ ref.buyer_name }}</td>
+                                                <td class="text-muted">{{ ref.referred_document }}</td>
+                                                <td class="text-center">{{ ref.total_compras }}</td>
+                                                <td class="text-center">
+                                                    <span :class="ref.tiene_instrumento ? 'ref-badge-ok' : 'ref-badge-fail'">
+                                                        <i :class="ref.tiene_instrumento ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill'"></i>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Tab: Ventas -->
                     <div v-if="detailTab === 'ventas'" class="detail-sales-section">
                         <div v-if="parsedSales.length === 0" class="text-center py-5 text-muted">
@@ -337,6 +419,7 @@
                                         <th>#</th>
                                         <th>Fecha</th>
                                         <th>Tipo</th>
+                                        <th>Referido</th>
                                         <th>Detalle</th>
                                         <th class="text-end">Importe</th>
                                         <th class="text-end">Puntos</th>
@@ -347,10 +430,24 @@
                                         <td class="sale-idx">{{ idx + 1 }}</td>
                                         <td>{{ formatDate(sale.created_at) }}</td>
                                         <td>
-                                            <span class="sale-type-badge" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
-                                                {{ sale.product_type }}
-                                            </span>
-                                        </td> 
+                                            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+                                                <span class="sale-type-badge" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
+                                                    {{ sale.product_type }}
+                                                </span>
+                                                <span v-if="sale.is_purchase == 1" class="sale-propia-badge">
+                                                    <i class="bi bi-person-fill"></i> propia
+                                                </span>
+                                                <span v-else class="sale-referida-badge">
+                                                    <i class="bi bi-person-up"></i> referida
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="sale-referido-cell">
+                                                <span class="sale-referido-dni">{{ sale.referred_document }}</span>
+                                                <span class="sale-referido-nombre">{{ sale.buyer_name }}</span>
+                                            </div>
+                                        </td>
                                         <td>{{ sale.description }}</td>
                                         <td class="text-end fw-bold">{{ formatCurrency(sale.sale_amount) }}</td>
                                         <td class="text-end">
@@ -361,6 +458,7 @@
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -451,11 +549,33 @@ export default {
             { label: 'Nombre Completo', key: 'firstname', render: (row) => `${row.firstname}` },
             { label: 'Documento', key: 'document' },
             { label: 'Email', key: 'email', render: (row) => row.email ? (row.email.length > 30 ? row.email.slice(0, 30) + '…' : row.email) : '—' },
-            { label: 'Teléfono', key: 'phone' },
             { 
                 label: 'Puntos', 
                 key: 'total_puntos',
                 render: (row) => `<span style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-weight:700;font-size:0.85rem;padding:4px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(239,68,68,0.35);letter-spacing:0.3px"><i class="bi bi-trophy-fill" style="font-size:0.8rem"></i>${Number(row.total_puntos||0).toLocaleString('es-AR')}</span>`
+            },
+            {
+                label: 'Condiciones',
+                key: 'validaciones',
+                render: (row) => {
+                    const v = row.validaciones;
+                    if (!v || typeof v !== 'object') return '<span style="color:#9ca3af;font-size:0.8rem">—</span>';
+                    const items = [
+                        { key: 'validacion_compras_anuales', short: 'Compras' },
+                        { key: 'validacion_referidos_anuales', short: 'Referidos' },
+                        { key: 'validacion_mixta', short: 'Mixta' },
+                    ];
+                    return `<div style="display:flex;flex-direction:column;gap:4px">${items.map(i => {
+                        const item = v[i.key];
+                        if (!item) return '';
+                        const ok = item.cumple;
+                        const c = ok ? '#059669' : '#dc2626';
+                        const bg = ok ? '#ecfdf5' : '#fef2f2';
+                        const border = ok ? '#d1fae5' : '#fee2e2';
+                        const icon = ok ? '✓' : '✗';
+                        return `<span style="display:inline-flex;align-items:center;gap:4px;background:${bg};color:${c};font-weight:700;font-size:0.71rem;padding:2px 8px;border-radius:10px;border:1px solid ${border}">${icon} ${i.short}</span>`;
+                    }).join('')}</div>`;
+                }
             },
             // { 
             //     label: 'Referidos', 
@@ -492,6 +612,12 @@ export default {
 
         const totalReferrals = computed(() => {
             return customers.value.reduce((sum, customer) => sum + (customer.cantidad_referidos || 0), 0);
+        });
+
+        const averageSale = computed(() => {
+            const totalFacturado = Number(detailCustomer.value?.total_facturado) || 0;
+            const totalVentas = Number(detailCustomer.value?.total_ventas) || 0;
+            return totalVentas > 0 ? totalFacturado / totalVentas : 0;
         });
 
         // --- VALIDACIÓN ---
@@ -644,7 +770,59 @@ export default {
             }
         });
 
+        const parsedValidaciones = computed(() => {
+            if (!detailCustomer.value?.validaciones) return [];
+            const v = detailCustomer.value.validaciones;
+            const cfg = [
+                {
+                    key: 'validacion_compras_anuales',
+                    nombre: 'Compras Anuales',
+                    icono: 'bi-bag-check-fill',
+                    metricas: (d) => [
+                        { label: 'Compras realizadas', calc: d.valor_calculado.total_compras, des: d.valor_deseado.total_compras },
+                        { label: 'Instrumentos comprados', calc: d.valor_calculado.instrumentos, des: d.valor_deseado.instrumentos_minimos },
+                    ],
+                    detalleKey: null,
+                },
+                {
+                    key: 'validacion_referidos_anuales',
+                    nombre: 'Referidos Anuales',
+                    icono: 'bi-people-fill',
+                    metricas: (d) => [
+                        { label: 'Referidos totales', calc: d.valor_calculado.total_referidos, des: d.valor_deseado.total_referidos },
+                        { label: 'Con instrumento', calc: d.valor_calculado.referidos_con_instrumento, des: d.valor_deseado.total_referidos },
+                    ],
+                    detalleKey: 'detalle',
+                },
+                {
+                    key: 'validacion_mixta',
+                    nombre: 'Validación Mixta',
+                    icono: 'bi-intersect',
+                    metricas: (d) => [
+                        { label: 'Instrumentos propios', calc: d.valor_calculado.instrumentos_propios, des: d.valor_deseado.instrumentos_propios },
+                        { label: 'Referidos con instrumento', calc: d.valor_calculado.referidos_con_instrumento, des: d.valor_deseado.referidos_con_instrumento },
+                    ],
+                    detalleKey: 'detalle_referidos',
+                },
+            ];
+            return cfg
+                .filter(c => v[c.key])
+                .map(c => {
+                    const data = v[c.key];
+                    return {
+                        key: c.key,
+                        nombre: c.nombre,
+                        icono: c.icono,
+                        descripcion: data.descripcion,
+                        cumple: data.cumple,
+                        metricas: c.metricas(data),
+                        detalle: c.detalleKey ? (data.valor_calculado?.[c.detalleKey] || []) : [],
+                    };
+                });
+        });
+
         function editCustomer(item) {
+            console.log('customer', item);
             validationErrors.value = {};
             detailCustomer.value = { ...item };
             detailTab.value = 'persona';
@@ -695,7 +873,11 @@ export default {
         const formatDate = (dateStr) => {
             if (!dateStr) return '—';
             const d = new Date(dateStr);
-            return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+            return d.toLocaleDateString('es-AR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
         };
 
         const formatNumber = (val) => {
@@ -772,12 +954,14 @@ export default {
             resultActions,
             totalPoints,
             totalReferrals,
+            averageSale,
             
             // Refs
             detailModal,
             detailCustomer,
             detailTab,
             parsedSales,
+            parsedValidaciones,
             toastComponent,
             confirmPopup,
             showToastFlag,
@@ -1063,8 +1247,8 @@ export default {
 }
 
 .detail-left {
-  width: 280px;
-  min-width: 280px;
+  width: 230px;
+  min-width: 230px;
   background: linear-gradient(180deg, #3939ff 0%, #5b21b6 100%);
   display: flex;
   flex-direction: column;
@@ -1315,9 +1499,275 @@ export default {
   color: #2563eb;
 }
 
+.sale-propia-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid #fde68a;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.sale-referida-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd6fe;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.sale-referido-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sale-referido-dni {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.sale-referido-nombre {
+  font-size: 0.74rem;
+  color: #6b7280;
+}
+
 .sale-points {
   color: #d97706;
   font-weight: 700;
+}
+
+/* ===== VALIDACIONES ===== */
+.detail-validaciones-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  max-height: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.val-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.val-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid;
+}
+
+.val-ok {
+  border-color: #d1fae5;
+  background: #f0fdf4;
+}
+
+.val-fail {
+  border-color: #fee2e2;
+  background: #fff5f5;
+}
+
+.val-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.val-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.val-icon-ok {
+  background: rgba(16,185,129,0.15);
+  color: #059669;
+}
+
+.val-icon-fail {
+  background: rgba(239,68,68,0.12);
+  color: #dc2626;
+}
+
+.val-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.val-title {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.92rem;
+}
+
+.val-desc {
+  font-size: 0.77rem;
+  color: #6b7280;
+  margin-top: 0.1rem;
+}
+
+.val-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.val-status-ok {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.val-status-fail {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Progress metrics */
+.val-metrics {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.val-metric-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.val-metric-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+  width: 170px;
+  flex-shrink: 0;
+}
+
+.val-metric-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.val-metric-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.bar-ok {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.bar-fail {
+  background: linear-gradient(90deg, #f87171, #dc2626);
+}
+
+.val-metric-nums {
+  font-size: 0.82rem;
+  font-weight: 700;
+  width: 46px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.nums-ok {
+  color: #059669;
+}
+
+.nums-fail {
+  color: #dc2626;
+}
+
+/* Referidos detail table */
+.val-detail-wrap {
+  border-top: 1px solid rgba(0,0,0,0.07);
+  padding: 0.75rem 1rem;
+}
+
+.val-detail-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.5rem;
+}
+
+.val-detail-table {
+  width: 100%;
+  font-size: 0.8rem;
+  border-collapse: collapse;
+}
+
+.val-detail-table thead th {
+  padding: 0.4rem 0.6rem;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.val-detail-table tbody td {
+  padding: 0.45rem 0.6rem;
+  color: #1f2937;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  vertical-align: middle;
+}
+
+.val-detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ref-badge-ok {
+  color: #059669;
+  font-size: 1rem;
+}
+
+.ref-badge-fail {
+  color: #dc2626;
+  font-size: 1rem;
+}
+
+.val-tab-badge {
+  background: #10b981 !important;
 }
 
 /* Responsive */

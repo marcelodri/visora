@@ -388,8 +388,8 @@ export default {
         class: 'btn btn-sm btn-outline',
         method: toggleActive,
         icon: (row) => row.is_active 
-          ? '<i class="bi bi-toggle-on"></i>' 
-          : '<i class="bi bi-toggle-off"></i>'
+          ? '<i class="bi bi-star-fill"></i>' 
+          : '<i class="bi bi-star"></i>'
       },
       { 
         label: 'Editar', 

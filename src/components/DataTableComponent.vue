@@ -29,8 +29,25 @@
             <th v-if="inputAllSelected" class="checkbox-col">
               <input type="checkbox" @change="toggleSelectAll" :checked="allSelected" class="custom-checkbox">
             </th>
-            <th v-for="column in columns" :key="column.label" scope="col">
-              {{ column.label }}
+            <th
+              v-for="column in columns"
+              :key="column.key || column.label"
+              scope="col"
+              :class="{
+                'sortable-header': isColumnSortable(column),
+                'is-sorted': sortKey === column.key
+              }"
+              :tabindex="isColumnSortable(column) ? 0 : undefined"
+              @click="handleSort(column)"
+              @keydown.enter.prevent="handleSort(column)"
+            >
+              <div class="th-content" :class="{ 'th-content-sortable': isColumnSortable(column) }">
+                <span>{{ column.label }}</span>
+                <i
+                  v-if="isColumnSortable(column)"
+                  :class="['sort-icon', getSortIconClass(column.key), { active: sortKey === column.key }]"
+                ></i>
+              </div>
             </th>
             <th v-if="actions.length > 0" class="actions-col">
               {{ $t('search_view.table_thead_actions') }}
@@ -38,7 +55,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-if="filteredData.length === 0" class="empty-row">
+          <tr v-if="sortedData.length === 0" class="empty-row">
             <td :colspan="columnsCount" class="text-center">
               <div class="empty-state">
                 <div>
@@ -50,7 +67,13 @@
               </div>
             </td>
           </tr>
-          <tr v-for="row in paginatedData" :key="row.id" class="data-row">
+          <tr
+            v-for="row in paginatedData"
+            :key="row.id"
+            class="data-row"
+            :class="{ 'row-clickable': clickableRows }"
+            @click="handleRowClick(row, $event)"
+          >
             <td v-if="inputAllSelected" class="checkbox-col">
               <input type="checkbox" :value="row.id" v-model="selectedRows" class="custom-checkbox">
             </td>
@@ -126,11 +149,19 @@ export default {
       type: Array,
       default: () => []
     },
+    enableSorting: {
+      type: Boolean,
+      default: true
+    },
     itemsPerPage: {
       type: Number,
       default: 10
     },
     showDownloadButton: {
+      type: Boolean,
+      default: false
+    },
+    clickableRows: {
       type: Boolean,
       default: false
     },
@@ -151,7 +182,9 @@ export default {
     return {
       currentPage: 1,
       selectedRows: [],
-      searchQuery: ''
+      searchQuery: '',
+      sortKey: null,
+      sortDirection: 'asc'
     };
   },
   computed: {
@@ -175,22 +208,38 @@ export default {
         });
       });
     },
+    sortedData() {
+      if (!this.sortKey) {
+        return this.filteredData;
+      }
+
+      const sorted = [...this.filteredData];
+      const direction = this.sortDirection === 'asc' ? 1 : -1;
+
+      sorted.sort((a, b) => {
+        const comparison = this.compareValues(a?.[this.sortKey], b?.[this.sortKey]);
+        return comparison * direction;
+      });
+
+      return sorted;
+    },
     paginatedData() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.filteredData.slice(start, end);
+      return this.sortedData.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.filteredData.length / this.itemsPerPage);
+      const pages = Math.ceil(this.sortedData.length / this.itemsPerPage);
+      return pages > 0 ? pages : 1;
     },
     allSelected() {
       return this.paginatedData.length > 0 && this.paginatedData.every(row => this.selectedRows.includes(row.id));
     },
     totalRecords() {
-      return this.filteredData.length;
+      return this.sortedData.length;
     },
     startRecord() {
-      if (this.filteredData.length === 0) return 0;
+      if (this.sortedData.length === 0) return 0;
       return (this.currentPage - 1) * this.itemsPerPage + 1;
     },
     endRecord() {
@@ -205,6 +254,103 @@ export default {
     },
   },
   methods: {
+    isColumnSortable(column) {
+      return Boolean(this.enableSorting && column?.key && column.sortable !== false);
+    },
+    handleSort(column) {
+      if (!this.isColumnSortable(column)) return;
+
+      const columnKey = column.key;
+
+      if (this.sortKey === columnKey) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortKey = columnKey;
+        this.sortDirection = this.getDefaultSortDirection(columnKey);
+      }
+
+      this.currentPage = 1;
+    },
+    getSortIconClass(columnKey) {
+      if (this.sortKey !== columnKey) {
+        return 'bi bi-arrow-down-up';
+      }
+      return this.sortDirection === 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill';
+    },
+    getDefaultSortDirection(columnKey) {
+      const firstNonEmpty = this.filteredData.find((row) => {
+        const value = row?.[columnKey];
+        return value !== null && value !== undefined && String(value).trim() !== '';
+      });
+
+      if (!firstNonEmpty) return 'asc';
+
+      const parsed = this.parseComparableValue(firstNonEmpty[columnKey]);
+      return parsed.type === 'number' ? 'desc' : 'asc';
+    },
+    parseComparableValue(value) {
+      if (value === null || value === undefined) {
+        return { type: 'empty', value: null };
+      }
+
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return { type: 'number', value };
+      }
+
+      if (typeof value === 'boolean') {
+        return { type: 'number', value: value ? 1 : 0 };
+      }
+
+      if (value instanceof Date) {
+        return { type: 'number', value: value.getTime() };
+      }
+
+      const raw = String(value).trim();
+      if (!raw) {
+        return { type: 'empty', value: null };
+      }
+
+      const normalizedDate = raw.replace(' ', 'T');
+      if (/[-/:]/.test(raw)) {
+        const timestamp = Date.parse(normalizedDate);
+        if (!Number.isNaN(timestamp)) {
+          return { type: 'number', value: timestamp };
+        }
+      }
+
+      const normalizedNumber = raw
+        .replace(/\s/g, '')
+        .replace(/\.(?=\d{3}(?:\D|$))/g, '')
+        .replace(',', '.');
+
+      if (/^-?\d+(\.\d+)?$/.test(normalizedNumber)) {
+        const numberValue = Number(normalizedNumber);
+        if (!Number.isNaN(numberValue)) {
+          return { type: 'number', value: numberValue };
+        }
+      }
+
+      return { type: 'string', value: raw.toLowerCase() };
+    },
+    compareValues(a, b) {
+      const parsedA = this.parseComparableValue(a);
+      const parsedB = this.parseComparableValue(b);
+
+      if (parsedA.type === 'empty' && parsedB.type === 'empty') return 0;
+      if (parsedA.type === 'empty') return 1;
+      if (parsedB.type === 'empty') return -1;
+
+      if (parsedA.type === parsedB.type) {
+        if (parsedA.value < parsedB.value) return -1;
+        if (parsedA.value > parsedB.value) return 1;
+        return 0;
+      }
+
+      return String(a ?? '').localeCompare(String(b ?? ''), undefined, {
+        numeric: true,
+        sensitivity: 'base'
+      });
+    },
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
@@ -229,7 +375,7 @@ export default {
 
       worksheet.addRow(this.columns.map(col => col.label));
 
-      const dataToExport = this.searchQuery ? this.filteredData : this.data;
+      const dataToExport = (this.searchQuery || this.sortKey) ? this.sortedData : this.data;
       
       dataToExport.forEach(row => {
         worksheet.addRow(this.columns.map(col => row[col.key]));
@@ -276,6 +422,17 @@ export default {
     },
     getVisibleActions(row) {
       return this.actions.filter(action => !action.show || action.show(row));
+    },
+    isInteractiveElement(target) {
+      if (!target || typeof target.closest !== 'function') return false;
+      return Boolean(
+        target.closest('button, a, input, select, textarea, label, .no-row-click')
+      );
+    },
+    handleRowClick(row, event) {
+      if (!this.clickableRows) return;
+      if (this.isInteractiveElement(event?.target)) return;
+      this.$emit('row-click', row);
     }
   },
   watch: {
@@ -284,6 +441,22 @@ export default {
     },
     searchQuery() {
       this.currentPage = 1;
+    },
+    totalPages(newTotalPages) {
+      if (this.currentPage > newTotalPages) {
+        this.currentPage = newTotalPages;
+      }
+    },
+    columns: {
+      handler(newColumns) {
+        if (!this.sortKey) return;
+        const exists = newColumns.some((column) => column.key === this.sortKey);
+        if (!exists) {
+          this.sortKey = null;
+          this.sortDirection = 'asc';
+        }
+      },
+      deep: true
     }
   }
 };
@@ -380,9 +553,56 @@ export default {
   white-space: nowrap;
 }
 
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.th-content-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-table thead th.sortable-header {
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.custom-table thead th.sortable-header:hover {
+  background: #eef2ff;
+  color: #3939ff;
+}
+
+.custom-table thead th.sortable-header:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(57, 57, 255, 0.35);
+}
+
+.custom-table thead th.is-sorted {
+  color: #3939ff;
+}
+
+.sort-icon {
+  font-size: 0.72rem;
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.sort-icon.active {
+  opacity: 1;
+}
+
 .custom-table tbody tr.data-row {
   transition: all 0.2s ease;
   border-bottom: 1px solid #f3f4f6;
+}
+
+.custom-table tbody tr.data-row.row-clickable {
+  cursor: pointer;
+}
+
+.custom-table tbody tr.data-row.row-clickable:hover {
+  background: #f8faff;
 }
 
 /* .custom-table tbody tr.data-row:hover {

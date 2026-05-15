@@ -33,6 +33,9 @@ import SidebarComponent from '@/components/SidebarComponent.vue';
 import MenuPanelComponent from '@/components/MenuPanelComponent.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
 import ToastComponent from '@/components/ToastComponent.vue';
+import { useAuthStore } from '@/stores/auth';
+
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutos
 
 export default {
     components: {
@@ -45,7 +48,9 @@ export default {
         return {
             toastMessage: '',
             isSuccess: true,
-            isSidebarVisible: false
+            isSidebarVisible: false,
+            inactivityTimer: null,
+            inactivityEvents: ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click']
         };
     },
     provide() {
@@ -64,7 +69,50 @@ export default {
         },
         toggleSidebar() {
            this.isSidebarVisible = !this.isSidebarVisible;
+        },
+        resetInactivityTimer() {
+            const authStore = useAuthStore();
+            if (!authStore.isAuthenticated) return;
+
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+            }
+
+            this.inactivityTimer = setTimeout(() => {
+                this.handleInactivityLogout();
+            }, INACTIVITY_TIMEOUT_MS);
+        },
+        handleUserActivity() {
+            this.resetInactivityTimer();
+        },
+        setupInactivityTracking() {
+            this.inactivityEvents.forEach((eventName) => {
+                window.addEventListener(eventName, this.handleUserActivity, { passive: true });
+            });
+            this.resetInactivityTimer();
+        },
+        cleanupInactivityTracking() {
+            this.inactivityEvents.forEach((eventName) => {
+                window.removeEventListener(eventName, this.handleUserActivity);
+            });
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+                this.inactivityTimer = null;
+            }
+        },
+        handleInactivityLogout() {
+            const authStore = useAuthStore();
+            if (!authStore.isAuthenticated) return;
+
+            authStore.logout();
+            this.$router.push({ name: 'login', query: { reason: 'inactive' } });
         }
+    },
+    mounted() {
+        this.setupInactivityTracking();
+    },
+    beforeUnmount() {
+        this.cleanupInactivityTracking();
     }
 };
 </script>

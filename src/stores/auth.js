@@ -16,7 +16,10 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.isAuthenticated = false;
       this.user = null; // Limpiar los datos del usuario al cerrar sesión
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('menu');
     },
   },
   persist: true // Puedes usar pinia-plugin-persistedstate si necesitas persistir el estado
 });
+

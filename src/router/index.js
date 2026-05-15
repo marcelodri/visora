@@ -270,6 +270,40 @@ const router = createRouter({
         //   ]
         // },
 
+        // Emails
+        {
+          path: 'emails',
+          name: 'emails',
+          redirect: '/panel/emails/start',
+          meta: { category: 'emails', icon: '<i class="bi bi-envelope-paper"></i>' },
+          children: [
+            {
+              path: 'start',
+              name: 'emails-start',
+              component: () => import('@/views/panel/emails/StartView.vue'),
+              meta: { requiresAuth: true, category: 'emails' }
+            },
+            {
+              path: 'templates',
+              name: 'emails-templates',
+              component: () => import('@/views/panel/emails/TemplatesView.vue'),
+              meta: { requiresAuth: true, category: 'emails' }
+            },
+            {
+              path: 'campaigns',
+              name: 'emails-campaigns',
+              component: () => import('@/views/panel/emails/CampaignsView.vue'),
+              meta: { requiresAuth: true, category: 'emails' }
+            },
+            {
+              path: 'builder',
+              name: 'emails-builder',
+              component: () => import('@/views/panel/emails/CampaignBuilderView.vue'),
+              meta: { requiresAuth: true, category: 'emails', hideInMenu: true }
+            }
+          ]
+        },
+
         // Ventas (Incolmotos)
         {
           path: 'rewards',
@@ -301,16 +335,6 @@ const router = createRouter({
               }
             },
             {
-              path: 'customers',
-              name: 'rewards-customers',
-              component: () => import('@/views/panel/rewards/CustomersView.vue'),
-              meta: {
-                requiresAuth: true,
-                category: 'rewards',
-                label: 'Pilot Post'
-              }
-            },
-            {
               path: 'rewards',
               name: 'rewards-import',
               component: () => import('@/views/panel/rewards/SalesView.vue'),
@@ -331,9 +355,30 @@ const router = createRouter({
               }
             },
             {
+              path: 'customers',
+              name: 'rewards-customers',
+              component: () => import('@/views/panel/rewards/CustomersView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'rewards',
+                label: 'Pilot Post'
+              }
+            },
+            
+            {
               path: 'MigrateCustomers',
               name: 'migrate-customers',
               component: () => import('@/views/panel/rewards/MigrateCustomersView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'rewards',
+                label: 'Pilot Post'
+              }
+            },
+            {
+              path: 'logs',
+              name: 'rewards-logs',
+              component: () => import('@/views/panel/rewards/LogsView.vue'),
               meta: {
                 requiresAuth: true,
                 category: 'rewards',

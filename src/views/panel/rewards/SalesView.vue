@@ -135,6 +135,65 @@
         </div>
         
         <div class="row g-4">
+
+          <!-- Fecha factura -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-calendar-event me-2"></i>
+                Fecha de Venta
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.fecha_venta"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('fecha_venta') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Asesor -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-person-workspace me-2"></i>
+                Asesor
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.asesor"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('asesor') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Nro factura -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-receipt me-2"></i>
+                Nro de Factura
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.nro_factura"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('nro_factura') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- DNI Cliente final -->
           <div class="col-md-4">
             <div class="mapping-field">
               <label for="dniColumn" class="mapping-label">
@@ -146,7 +205,10 @@
                 id="dniColumn"
                 v-model="columnMapping.dni" 
                 class="form-select custom-select"
-                :class="{'is-invalid': showValidation && !columnMapping.dni}"
+                :class="{
+                  'is-invalid': showValidation && !columnMapping.dni,
+                  'custom-select--missing': isMissingMapping('dni')
+                }"
               >
                 <option value="">-- Seleccionar columna --</option>
                 <option 
@@ -163,6 +225,134 @@
             </div>
           </div>
 
+          <!-- Nombre del cliente final -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-person-fill me-2"></i>
+                Nombre Cliente
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.nombre_cliente"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('nombre_cliente') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Referencia -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-upc-scan me-2"></i>
+                Referencia
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.referencia"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('referencia') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Descripcion -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-card-text me-2"></i>
+                Descripción
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.descripcion"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('descripcion') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tipo producto -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-tag me-2"></i>
+                Tipo Producto
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.tipo_producto"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('tipo_producto') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Cantidad -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-123 me-2"></i>
+                Cantidad
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.cantidad"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('cantidad') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Importe factura -->
+          <div class="col-md-4">
+            <div class="mapping-field">
+              <label for="importeColumn" class="mapping-label">
+                <i class="bi bi-currency-dollar me-2"></i>
+                Importe
+                <span class="required-badge">Requerido</span>
+              </label>
+              <select 
+                id="importeColumn"
+                v-model="columnMapping.importe" 
+                class="form-select custom-select"
+                :class="{
+                  'is-invalid': showValidation && !columnMapping.importe,
+                  'custom-select--missing': isMissingMapping('importe')
+                }"
+              >
+                <option value="">-- Seleccionar columna --</option>
+                <option 
+                  v-for="col in getAvailableColumnsForField('importe')" 
+                  :key="col" 
+                  :value="col"
+                >
+                  {{ col }}
+                </option>
+              </select>
+              <div v-if="showValidation && !columnMapping.importe" class="invalid-feedback">
+                Debes seleccionar una columna para Importe
+              </div>
+            </div>
+          </div>
+
+          <!-- DNI Cliente VIP -->
           <div class="col-md-4">
             <div class="mapping-field">
               <label for="dniReferidoColumn" class="mapping-label">
@@ -174,7 +364,10 @@
                 id="dniReferidoColumn"
                 v-model="columnMapping.dni_referido" 
                 class="form-select custom-select"
-                :class="{'is-invalid': showValidation && !columnMapping.dni_referido}"
+                :class="{
+                  'is-invalid': showValidation && !columnMapping.dni_referido,
+                  'custom-select--missing': isMissingMapping('dni_referido')
+                }"
               >
                 <option value="">-- Seleccionar columna --</option>
                 <option 
@@ -191,40 +384,7 @@
             </div>
           </div>
 
-          <div class="col-md-4">
-            <div class="mapping-field">
-              <label for="importeColumn" class="mapping-label">
-                <i class="bi bi-currency-dollar me-2"></i>
-                Importe
-                <span class="required-badge">Requerido</span>
-              </label>
-              <select 
-                id="importeColumn"
-                v-model="columnMapping.importe" 
-                class="form-select custom-select"
-                :class="{'is-invalid': showValidation && !columnMapping.importe}"
-              >
-                <option value="">-- Seleccionar columna --</option>
-                <option 
-                  v-for="col in getAvailableColumnsForField('importe')" 
-                  :key="col" 
-                  :value="col"
-                >
-                  {{ col }}
-                </option>
-              </select>
-              <div v-if="showValidation && !columnMapping.importe" class="invalid-feedback">
-                Debes seleccionar una columna para Importe
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Campos opcionales -->
-        <p class="mapping-description mt-4 mb-2">
-          <i class="bi bi-sliders me-2"></i>Campos opcionales (mejoran el registro)
-        </p>
-        <div class="row g-4">
+          <!-- Nombre Cliente VIP -->
           <div class="col-md-4">
             <div class="mapping-field optional">
               <label class="mapping-label">
@@ -232,129 +392,55 @@
                 Cliente VIP (nombre)
                 <span class="optional-badge">Opcional</span>
               </label>
-              <select v-model="columnMapping.nombre_referido" class="form-select custom-select">
+              <select
+                v-model="columnMapping.nombre_referido"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('nombre_referido') }"
+              >
                 <option value="">-- Sin asignar --</option>
                 <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
               </select>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-calendar-event me-2"></i>
-                Fecha de Venta
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.fecha_venta" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-receipt me-2"></i>
-                Nro de Factura
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.nro_factura" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-person-workspace me-2"></i>
-                Asesor
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.asesor" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-person-fill me-2"></i>
-                Nombre Cliente
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.nombre_cliente" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-upc-scan me-2"></i>
-                Referencia
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.referencia" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-card-text me-2"></i>
-                Descripción
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.descripcion" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-tag me-2"></i>
-                Tipo Producto
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.tipo_producto" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="mapping-field optional">
-              <label class="mapping-label">
-                <i class="bi bi-123 me-2"></i>
-                Cantidad
-                <span class="optional-badge">Opcional</span>
-              </label>
-              <select v-model="columnMapping.cantidad" class="form-select custom-select">
-                <option value="">-- Sin asignar --</option>
-                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
-              </select>
-            </div>
-          </div>
+          
+          <!-- Compra propia -->
           <div class="col-md-4">
             <div class="mapping-field optional">
               <label class="mapping-label">
                 <i class="bi bi-check2-circle me-2"></i>
-                Compra (SI/NO)
+                Compra propia (SI/NO)
                 <span class="optional-badge">Opcional</span>
               </label>
-              <select v-model="columnMapping.compra" class="form-select custom-select">
+              <select
+                v-model="columnMapping.compra"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('compra') }"
+              >
                 <option value="">-- Sin asignar --</option>
                 <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
               </select>
             </div>
           </div>
+
+          <!-- Location / Sede -->
+          <div class="col-md-4">
+            <div class="mapping-field optional">
+              <label class="mapping-label">
+                <i class="bi bi-geo-alt me-2"></i>
+                Sede / Location
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <select
+                v-model="columnMapping.location"
+                class="form-select custom-select"
+                :class="{ 'custom-select--missing': isMissingMapping('location') }"
+              >
+                <option value="">-- Sin asignar --</option>
+                <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
+              </select>
+            </div>
+          </div>
+
         </div>
 
         <div v-if="allFieldsMapped" class="mapping-success mt-4">
@@ -389,7 +475,7 @@
         <div class="preview-info mb-3">
           <div class="info-badge">
             <i class="bi bi-info-circle me-2"></i>
-            Mostrando las primeras 5 filas de <strong>{{ totalRows }}</strong> registros totales
+            Mostrando las primeras 5 filas de &nbsp;<strong>{{ totalRows }}</strong>&nbsp;registros totales
           </div>
         </div>
 
@@ -397,38 +483,38 @@
           <table class="table custom-table">
             <thead>
               <tr>
+                <th v-if="columnMapping.fecha_venta"><i class="bi bi-calendar me-1"></i> Fecha</th>
+                <th v-if="columnMapping.nro_factura"><i class="bi bi-receipt me-1"></i> Factura</th>
                 <th><i class="bi bi-person-badge me-1"></i> CC Cliente</th>
                 <th v-if="columnMapping.nombre_cliente"><i class="bi bi-person-fill me-1"></i> Cliente</th>
                 <th><i class="bi bi-people me-1"></i> CC VIP</th>
                 <th v-if="columnMapping.nombre_referido"><i class="bi bi-person me-1"></i> VIP</th>
-                <th v-if="columnMapping.fecha_venta"><i class="bi bi-calendar me-1"></i> Fecha</th>
-                <th v-if="columnMapping.nro_factura"><i class="bi bi-receipt me-1"></i> Factura</th>
-                <th v-if="columnMapping.asesor"><i class="bi bi-person-workspace me-1"></i> Asesor</th>
-                <th v-if="columnMapping.referencia"><i class="bi bi-upc-scan me-1"></i> Ref.</th>
+                <th><i class="bi bi-currency-dollar me-1"></i> Importe</th>
                 <th v-if="activeRule"><i class="bi bi-star me-1"></i> Puntos</th>
+                <!-- <th v-if="columnMapping.asesor"><i class="bi bi-person-workspace me-1"></i> Asesor</th>
+                <th v-if="columnMapping.referencia"><i class="bi bi-upc-scan me-1"></i> Ref.</th>
                 <th v-if="columnMapping.descripcion"><i class="bi bi-card-text me-1"></i> Descripción</th>
                 <th v-if="columnMapping.tipo_producto"><i class="bi bi-tag me-1"></i> Tipo</th>
                 <th v-if="columnMapping.cantidad"><i class="bi bi-123 me-1"></i> Cant.</th>
-                <th><i class="bi bi-currency-dollar me-1"></i> Importe</th>
-                <th v-if="columnMapping.compra"><i class="bi bi-check2-circle me-1"></i> Compra</th>
+                <th v-if="columnMapping.compra"><i class="bi bi-check2-circle me-1"></i> Compra</th> -->
               </tr>
             </thead>
             <tbody>
               <tr v-for="(row, index) in previewData" :key="index">
+                <td v-if="columnMapping.fecha_venta"><span class="data-cell">{{ row.fecha_venta }}</span></td>
+                <td v-if="columnMapping.nro_factura"><span class="data-cell">{{ row.nro_factura }}</span></td>
                 <td><span class="data-cell">{{ row.dni }}</span></td>
                 <td v-if="columnMapping.nombre_cliente"><span class="data-cell">{{ row.nombre_cliente }}</span></td>
                 <td><span class="data-cell">{{ row.dni_referido }}</span></td>
                 <td v-if="columnMapping.nombre_referido"><span class="data-cell">{{ row.nombre_referido }}</span></td>
-                <td v-if="columnMapping.fecha_venta"><span class="data-cell">{{ row.fecha_venta }}</span></td>
-                <td v-if="columnMapping.nro_factura"><span class="data-cell">{{ row.nro_factura }}</span></td>
-                <td v-if="columnMapping.asesor"><span class="data-cell">{{ row.asesor }}</span></td>
-                <td v-if="columnMapping.referencia"><span class="data-cell">{{ row.referencia }}</span></td>
+                <td><span class="data-cell money">{{ formatCurrency(row.importe) }}</span></td>
                 <td v-if="activeRule"><span class="data-cell points">{{ row.points }}</span></td>
+                <!-- <td v-if="columnMapping.asesor"><span class="data-cell">{{ row.asesor }}</span></td>
+                <td v-if="columnMapping.referencia"><span class="data-cell">{{ row.referencia }}</span></td>
                 <td v-if="columnMapping.descripcion"><span class="data-cell">{{ row.descripcion }}</span></td>
                 <td v-if="columnMapping.tipo_producto"><span class="data-cell">{{ row.tipo_producto }}</span></td>
                 <td v-if="columnMapping.cantidad"><span class="data-cell">{{ row.cantidad }}</span></td>
-                <td><span class="data-cell money">{{ formatCurrency(row.importe) }}</span></td>
-                <td v-if="columnMapping.compra"><span class="data-cell">{{ row.compra }}</span></td>
+                <td v-if="columnMapping.compra"><span class="data-cell">{{ row.compra }}</span></td> -->
               </tr>
             </tbody>
           </table>
@@ -437,7 +523,7 @@
         <div class="preview-footer">
           <div class="total-summary">
             <i class="bi bi-file-earmark-spreadsheet me-2"></i>
-            Total de registros a enviar: <strong>{{ totalRows }}</strong>
+            Total de registros a enviar:&nbsp;<strong>{{ totalRows }}</strong>
           </div>
           <button 
             class="btn btn-primary btn-submit"
@@ -459,7 +545,78 @@
       :show.sync="showToastFlag" 
       ref="toastComponent" 
     />
-    
+
+    <!-- Modal de resultados de integración -->
+    <ModalComponent
+      ref="resultModal"
+      modalId="integrationResultModal"
+      modalTitle="Resultados de la Ingesta"
+      class="modal-xl"
+    >
+      <div v-if="integrationResult" class="integration-result">
+
+        <!-- Summary stats -->
+        <div class="ir-stats">
+          <div class="ir-stat ir-stat--ok">
+            <i class="bi bi-check-circle-fill"></i>
+            <div class="ir-stat-num">{{ integrationResult.integration_ok }}</div>
+            <div class="ir-stat-label">Registros OK</div>
+          </div>
+          <div class="ir-stat ir-stat--err">
+            <i class="bi bi-x-circle-fill"></i>
+            <div class="ir-stat-num">{{ integrationResult.integration_error }}</div>
+            <div class="ir-stat-label">Con error</div>
+          </div>
+          <div class="ir-stat ir-stat--total">
+            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+            <div class="ir-stat-num">{{ integrationResult.total_registros }}</div>
+            <div class="ir-stat-label">Total</div>
+          </div>
+        </div>
+
+        <!-- Error list -->
+        <div v-if="integrationResult.files_error && integrationResult.files_error.length > 0" class="ir-errors">
+          <div class="ir-errors-header">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Registros con errores ({{ integrationResult.files_error.length }})
+          </div>
+          <div class="ir-error-list">
+            <div
+              v-for="(err, idx) in integrationResult.files_error"
+              :key="idx"
+              class="ir-error-item"
+            >
+              <div class="ir-error-badge">{{ idx + 1 }}</div>
+              <div class="ir-error-body">
+                <div class="ir-error-who">
+                  <span class="ir-error-name">{{ err.firstname || '—' }}</span>
+                  <span class="ir-error-doc">Doc: {{ err.document || '—' }}</span>
+                  <span v-if="err.invoice_number" class="ir-error-invoice">Factura: {{ err.invoice_number }}</span>
+                </div>
+                <div class="ir-error-msg">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  {{ err.error_message || 'Error desconocido' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="ir-no-errors">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          No hubo registros con errores
+        </div>
+
+        <!-- Footer -->
+        <div class="ir-footer">
+          <button class="btn btn-secondary" @click="closeResultModal">
+            <i class="bi bi-x-circle me-1"></i> Cerrar
+          </button>
+        </div>
+
+      </div>
+    </ModalComponent>
+
     <LoadingDots :isLoading="isLoading" />
   </div>
 </template>
@@ -468,12 +625,14 @@
 import { ref, computed, onMounted } from 'vue';
 import * as XLSX from 'xlsx';
 import ToastComponent from '@/components/ToastComponent.vue';
+import ModalComponent from '@/components/ModalComponent.vue';
 import axios from 'axios';
 
 export default {
   name: 'SalesView',
   components: {
-    ToastComponent
+    ToastComponent,
+    ModalComponent
   },
   setup() {
     const fileInput = ref(null);
@@ -496,7 +655,8 @@ export default {
       descripcion: '',
       tipo_producto: '',
       cantidad: '',
-      compra: ''
+      compra: '',
+      location: ''
     });
     const activeRule = ref(null);
     const autoMatchedCount = ref(0);
@@ -512,6 +672,10 @@ export default {
     const isSuccess = ref(false);
     const showToastFlag = ref(false);
     const toastComponent = ref(null);
+
+    // Modal de resultados de integración
+    const resultModal = ref(null);
+    const integrationResult = ref(null);
 
     const currentStep = computed(() => {
       if (!fileName.value) return 1;
@@ -540,7 +704,8 @@ export default {
       descripcion:      ['descripción', 'descripcion', 'detalle'],
       tipo_producto:    ['tipo producto', 'tipo', 'categoría', 'categoria'],
       cantidad:         ['cantidad', 'cant', 'qty', 'unidades'],
-      compra:           ['compra', 'venta', 'estado']
+      compra:           ['compra', 'venta', 'estado'],
+      location:         ['location', 'sede', 'sucursal', 'tienda', 'punto de venta']
     };
 
     // Prioridad: más específico primero
@@ -548,7 +713,7 @@ export default {
       'dni_referido', 'nombre_referido',
       'nro_factura', 'nombre_cliente', 'tipo_producto',
       'fecha_venta', 'asesor', 'referencia', 'descripcion',
-      'cantidad', 'compra', 'importe', 'dni'
+      'cantidad', 'compra', 'location', 'importe', 'dni'
     ];
 
     const STORAGE_KEY = 'salesview_column_mapping';
@@ -699,7 +864,8 @@ export default {
         descripcion: '',
         tipo_producto: '',
         cantidad: '',
-        compra: ''
+        compra: '',
+        location: ''
       };
       autoMatchedCount.value = 0;
       showValidation.value = false;
@@ -807,6 +973,7 @@ export default {
           tipo_producto: columnMapping.value.tipo_producto ? (row[columnMapping.value.tipo_producto] || '') : '',
           cantidad: columnMapping.value.cantidad ? (row[columnMapping.value.cantidad] || '') : '',
           compra: columnMapping.value.compra ? (row[columnMapping.value.compra] || '') : '',
+          location: columnMapping.value.location ? (row[columnMapping.value.location] || '') : '',
           points: calculatePoints(row)
         };
       });
@@ -816,6 +983,11 @@ export default {
 
     const validateMapping = () => {
       return allFieldsMapped.value;
+    };
+
+    const isMissingMapping = (fieldName) => {
+      if (!availableColumns.value.length) return false;
+      return !columnMapping.value[fieldName];
     };
 
     const submitData = async () => {
@@ -844,7 +1016,7 @@ export default {
       const sales = rawData.value.map(row => {
         const pointsAwarded = Number(calculatePoints(row)) || 0;
 
-        // Parsear nombre: intentar separar "Apellido Nombre" o usar completo como firstname
+        // nombre del Cliente VIP (va con document, es quien acumula puntos)
         const fullName = columnMapping.value.nombre_referido
           ? String(row[columnMapping.value.nombre_referido] || '').trim()
           : '';
@@ -857,7 +1029,7 @@ export default {
           document: normalizeDocument(row[columnMapping.value.dni_referido]),
           firstname: fullName,
           lastname: '',
-          referred_by: normalizeDocument(row[columnMapping.value.dni]),
+          referred_document: normalizeDocument(row[columnMapping.value.dni]),
           sale_date: columnMapping.value.fecha_venta
             ? (row[columnMapping.value.fecha_venta] || null)
             : null,
@@ -877,6 +1049,7 @@ export default {
           is_purchase: columnMapping.value.compra
             ? (['SI', 'SÍ', 'YES', '1', 'TRUE'].includes(String(row[columnMapping.value.compra]).toUpperCase().trim()) ? 1 : 0)
             : 1,
+          location: optStr('location'),
           batch_id: batchId
         };
       });
@@ -897,10 +1070,10 @@ export default {
         console.log('response importSales', response);
         showToast('Éxito', `${sales.length} registros enviados correctamente`, true);
 
-        if(response.data.success){
-          setTimeout(() => {
-            clearFile();
-          }, 2000);
+        const raw = Array.isArray(response.data) ? response.data[0] : response.data;
+        if (raw?.success) {
+          integrationResult.value = raw;
+          resultModal.value.openModal();
         }
 
       } catch (error) {
@@ -909,6 +1082,12 @@ export default {
       } finally {
         isLoading.value = false;
       }
+    };
+
+    const closeResultModal = () => {
+      resultModal.value.closeModal();
+      integrationResult.value = null;
+      clearFile();
     };
 
     const showToast = (title, message, success) => {
@@ -986,7 +1165,11 @@ export default {
       selectSheet,
       submitData,
       getAvailableColumnsForField,
-      formatCurrency
+      isMissingMapping,
+      formatCurrency,
+      resultModal,
+      integrationResult,
+      closeResultModal
     };
   }
 };
@@ -1294,9 +1477,19 @@ export default {
   font-weight: 500;
 }
 
+.custom-select--missing {
+  border-color: #f87171;
+  background: #fff7f7;
+}
+
 .custom-select:focus {
   border-color: #3939ff;
   box-shadow: 0 0 0 3px rgba(57, 57, 255, 0.1);
+}
+
+.custom-select--missing:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
 }
 
 .mapping-success {
@@ -1465,5 +1658,114 @@ export default {
 .data-cell.points {
   color: #7c3aed;
   font-weight: 700;
+}
+
+/* ===== INTEGRATION RESULT MODAL ===== */
+.integration-result {
+  padding: 1rem;
+}
+
+.ir-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ir-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.1rem;
+  border-radius: 12px;
+}
+
+.ir-stat--ok    { background: #d1fae5; color: #065f46; }
+.ir-stat--err   { background: #fee2e2; color: #991b1b; }
+.ir-stat--total { background: #eff6ff; color: #1e40af; }
+
+.ir-stat-num   { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.ir-stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+.ir-errors-header {
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.ir-error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ir-error-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+}
+
+.ir-error-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ir-error-body { flex: 1; min-width: 0; }
+
+.ir-error-who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  align-items: center;
+}
+
+.ir-error-name    { font-weight: 700; color: #1f2937; font-size: 0.87rem; }
+.ir-error-doc     { font-size: 0.78rem; color: #6b7280; background: #f3f4f6; padding: 1px 7px; border-radius: 4px; }
+.ir-error-invoice { font-size: 0.78rem; color: #6b7280; background: #f3f4f6; padding: 1px 7px; border-radius: 4px; }
+
+.ir-error-msg {
+  font-size: 0.83rem;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.ir-no-errors {
+  text-align: center;
+  padding: 1.5rem;
+  color: #065f46;
+  background: #d1fae5;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.ir-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 }
 </style>
