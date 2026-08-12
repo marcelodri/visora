@@ -113,249 +113,292 @@
       ref="formModal" 
       modalId="formModal" 
       :modalTitle="editingIndex === null ? 'Nuevo Formulario' : 'Editar Formulario'" 
-      class="modal-xl" 
-      @closeModal="handleCloseModal"
+      class="modal-fullscreen-fixed" 
+      @modalClosed="handleCloseModal"
     >
-      <div class="modal-body">
-        <!-- Nombre del formulario -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-card-heading me-2"></i>
-                Nombre:
-              </label>
-              <input 
-                v-model="formData.name" 
-                type="text" 
-                class="form-control" 
-                placeholder="Ingrese el nombre del formulario" 
-              />
+      <div class="forms-step-modal">
+        <div class="forms-step-shell">
+          <!--<div class="forms-step-topbar">
+            <div>
+              <h3 class="forms-step-title">{{ editingIndex === null ? 'Nuevo formulario' : 'Editar formulario' }}</h3>
+              <p class="forms-step-subtitle">Separamos la configuración en pasos para que crear y editar formularios sea más claro y ordenado.</p>
             </div>
-          </div>
-        </div>
+            <button type="button" class="btn btn-outline-secondary forms-step-close" @click="closeModalForm">
+              <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
+            </button>
+          </div>-->
 
-        <!-- Título del formulario -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-type-h1 me-2"></i>
-                Título:
-              </label>
-              <input 
-                v-model="formData.form_header_text" 
-                type="text" 
-                class="form-control" 
-                placeholder="Ingrese título del formulario (opcional)" 
-              />
-            </div>
+          <div class="forms-stepper">
+            <button
+              v-for="(step, index) in formSteps"
+              :key="step.key"
+              type="button"
+              class="forms-step-item"
+              :class="{ active: currentStep === index, done: currentStep > index }"
+              @click="goToStep(index)"
+            >
+              <div class="forms-step-num">
+                <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <div class="forms-step-copy">
+                <span>{{ step.label }}</span>
+                <small>{{ step.description }}</small>
+              </div>
+            </button>
           </div>
-        </div>
-        
-        <!-- Título del formulario -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-type-h1 me-2"></i>
-                SubTítulo:
-              </label>
-              <input 
-                v-model="formData.form_header_subtext" 
-                type="text" 
-                class="form-control" 
-                placeholder="Ingrese subtítulo del formulario (opcional)" 
-              />
-            </div>
-          </div>
-        </div>
 
-        <!-- Descripción -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-text-paragraph me-2"></i>
-                Descripción (opcional):
-              </label>
-              <textarea 
-                v-model="formData.form_header_descript" 
-                class="form-control" 
-                rows="4" 
-                placeholder="Ingrese descripción del formulario (opcional)"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Campos del formulario -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-ui-checks me-2"></i>
-                Campos del formulario:
-              </label>
-              
-              <div v-for="(field, fieldIndex) in formData.fields" :key="fieldIndex" class="field-item mb-4">
-                <div class="field-header">
-                  <span class="field-number">
-                    <i class="bi bi-input-cursor-text me-1"></i>
-                    Campo {{ fieldIndex + 1 }}
-                  </span>
-                  <button class="btn btn-sm btn-danger" @click="removeField(fieldIndex)">
-                    <i class="bi bi-trash"></i>
-                  </button>
+          <div class="forms-step-content">
+            <div v-show="currentStep === 0" class="forms-step-panel">
+              <div class="card form-card forms-card mb-3">
+                <div class="forms-card-head">
+                  <i class="bi bi-card-heading"></i>
+                  <span>Información del formulario</span>
                 </div>
-                
-                <div class="field-body">
-                  <div v-if="field.type !== 'title'" class="row g-3 mb-3">
-                    <div class="col-6">
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input" v-model="field.hidden" :id="'hidden' + fieldIndex" />
-                        <label class="form-check-label" :for="'hidden' + fieldIndex">
-                          <i class="bi bi-eye-slash me-1"></i>
-                          Campo oculto
-                        </label>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input" v-model="field.required" :id="'required' + fieldIndex" />
-                        <label class="form-check-label" :for="'required' + fieldIndex">
-                          <i class="bi bi-asterisk me-1"></i>
-                          Requerido
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div v-if="field.type === 'title'" class="mb-3">
-                    <label class="form-label">Texto del título:</label>
-                    <input v-model="field.label" class="form-control" placeholder="Ej: Información de contacto" />
-                  </div>
-
-                  <div v-else class="row g-3 mb-3">
-                    <div class="col-3">
-                      <label class="form-label">Etiqueta:</label>
-                      <input v-model="field.label" class="form-control" placeholder="Ej: Nombre completo" />
-                    </div>
-                    <div class="col-3">
-                      <label class="form-label">Nombre del campo:</label>
-                      <input v-model="field.name" class="form-control" placeholder="Ej: full_name" />
-                    </div>
-                    <div class="col-3">
-                      <label class="form-label">Valor por defecto:</label>
-                      <input v-model="field.value" class="form-control" placeholder="Opcional" />
-                    </div>
-                    <div class="col-3">
-                      <label class="form-label">Ancho (%):</label>
-                      <input v-model.number="field.width" type="number" min="1" max="100" class="form-control" placeholder="100" />
-                    </div>
+                <div class="card-body forms-card-body">
+                  <div class="mb-3">
+                    <label class="form-label">
+                      <i class="bi bi-card-heading me-2"></i>
+                      Nombre:
+                    </label>
+                    <input
+                      v-model="formData.name"
+                      type="text"
+                      class="form-control"
+                      placeholder="Ingrese el nombre del formulario"
+                    />
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label">Tipo de campo:</label>
-                    <select v-model="field.type" class="form-select">
-                      <option value="title">Título</option>
-                      <option value="text">Texto</option>
-                      <option value="number">Número</option>
-                      <option value="email">Email</option>
-                      <option value="textarea">Área de texto</option>
-                      <option value="date">Fecha</option>
-                      <option value="select">Lista desplegable</option>
-                    </select>
+                    <label class="form-label">
+                      <i class="bi bi-type-h1 me-2"></i>
+                      Título:
+                    </label>
+                    <input
+                      v-model="formData.form_header_text"
+                      type="text"
+                      class="form-control"
+                      placeholder="Ingrese título del formulario (opcional)"
+                    />
                   </div>
 
-                  <div v-if="field.type === 'select'" class="options-section">
-                    <h6>
-                      <i class="bi bi-list-ul me-1"></i>
-                      Opciones del select
-                    </h6>
-                    <div v-for="(option, optIndex) in field.options" :key="optIndex" class="option-item mb-2">
-                      <input v-model="option.text" class="form-control" placeholder="Texto visible" />
-                      <input v-model="option.value" class="form-control" placeholder="Valor" />
-                      <button class="btn btn-sm btn-danger" @click="removeOption(fieldIndex, optIndex)">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
+                  <div class="mb-3">
+                    <label class="form-label">
+                      <i class="bi bi-type-h1 me-2"></i>
+                      SubTítulo:
+                    </label>
+                    <input
+                      v-model="formData.form_header_subtext"
+                      type="text"
+                      class="form-control"
+                      placeholder="Ingrese subtítulo del formulario (opcional)"
+                    />
+                  </div>
+
+                  <div class="mb-0">
+                    <label class="form-label">
+                      <i class="bi bi-text-paragraph me-2"></i>
+                      Descripción (opcional):
+                    </label>
+                    <textarea
+                      v-model="formData.form_header_descript"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Ingrese descripción del formulario (opcional)"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-show="currentStep === 1" class="forms-step-panel">
+              <div class="card form-card forms-card mb-3">
+                <div class="forms-card-head">
+                  <i class="bi bi-ui-checks"></i>
+                  <span>Campos del formulario</span>
+                </div>
+                <div class="card-body forms-card-body">
+                  <div class="mb-3">
+                    <label class="form-label">
+                      <i class="bi bi-ui-checks me-2"></i>
+                      Campos del formulario:
+                    </label>
+
+                    <div v-for="(field, fieldIndex) in formData.fields" :key="fieldIndex" class="field-item mb-4">
+                      <div class="field-header">
+                        <span class="field-number">
+                          <i class="bi bi-input-cursor-text me-1"></i>
+                          Campo {{ fieldIndex + 1 }}
+                        </span>
+                        <button type="button" class="btn btn-sm btn-danger" @click="removeField(fieldIndex)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+
+                      <div class="field-body">
+                        <div v-if="field.type !== 'title'" class="row g-3 mb-3">
+                          <div class="col-6">
+                            <div class="form-check">
+                              <input type="checkbox" class="form-check-input" v-model="field.hidden" :id="'hidden' + fieldIndex" />
+                              <label class="form-check-label" :for="'hidden' + fieldIndex">
+                                <i class="bi bi-eye-slash me-1"></i>
+                                Campo oculto
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="form-check">
+                              <input type="checkbox" class="form-check-input" v-model="field.required" :id="'required' + fieldIndex" />
+                              <label class="form-check-label" :for="'required' + fieldIndex">
+                                <i class="bi bi-asterisk me-1"></i>
+                                Requerido
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div v-if="field.type === 'title'" class="mb-3">
+                          <label class="form-label">Texto del título:</label>
+                          <input v-model="field.label" class="form-control" placeholder="Ej: Información de contacto" />
+                        </div>
+
+                        <div v-else class="row g-3 mb-3">
+                          <div class="col-12 col-lg-3">
+                            <label class="form-label">Etiqueta:</label>
+                            <input v-model="field.label" class="form-control" placeholder="Ej: Nombre completo" />
+                          </div>
+                          <div class="col-12 col-lg-3">
+                            <label class="form-label">Nombre del campo:</label>
+                            <input v-model="field.name" class="form-control" placeholder="Ej: full_name" />
+                          </div>
+                          <div class="col-12 col-lg-3">
+                            <label class="form-label">Valor por defecto:</label>
+                            <input v-model="field.value" class="form-control" placeholder="Opcional" />
+                          </div>
+                          <div class="col-12 col-lg-3">
+                            <label class="form-label">Ancho (%):</label>
+                            <input v-model.number="field.width" type="number" min="1" max="100" class="form-control" placeholder="100" />
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label">Tipo de campo:</label>
+                          <select v-model="field.type" class="form-select">
+                            <option value="title">Título</option>
+                            <option value="text">Texto</option>
+                            <option value="number">Número</option>
+                            <option value="email">Email</option>
+                            <option value="textarea">Área de texto</option>
+                            <option value="date">Fecha</option>
+                            <option value="select">Lista desplegable</option>
+                          </select>
+                        </div>
+
+                        <div v-if="field.type === 'select'" class="options-section">
+                          <h6>
+                            <i class="bi bi-list-ul me-1"></i>
+                            Opciones del select
+                          </h6>
+                          <div v-for="(option, optIndex) in field.options" :key="optIndex" class="option-item mb-2">
+                            <input v-model="option.text" class="form-control" placeholder="Texto visible" />
+                            <input v-model="option.value" class="form-control" placeholder="Valor" />
+                            <button type="button" class="btn btn-sm btn-danger" @click="removeOption(fieldIndex, optIndex)">
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          </div>
+                          <button type="button" class="btn btn-sm btn-secondary" @click="addOption(fieldIndex)">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar opción
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <button class="btn btn-sm btn-secondary" @click="addOption(fieldIndex)">
-                      <i class="bi bi-plus-circle me-1"></i>Agregar opción
+
+                    <button type="button" class="btn btn-primary" @click="addField">
+                      <i class="bi bi-plus-circle me-2"></i>Agregar Campo
                     </button>
                   </div>
                 </div>
               </div>
-              
-              <button class="btn btn-primary" @click="addField">
-                <i class="bi bi-plus-circle me-2"></i>Agregar Campo
+            </div>
+
+            <div v-show="currentStep === 2" class="forms-step-panel">
+              <div class="card form-card forms-card mb-3">
+                <div class="forms-card-head">
+                  <i class="bi bi-gear-fill"></i>
+                  <span>Servicio</span>
+                </div>
+                <div class="card-body forms-card-body">
+                  <div class="mb-3">
+                    <label class="form-label">
+                      <i class="bi bi-gear-fill me-2"></i>
+                      Servicio:
+                    </label>
+                    <select v-model="formData.service" class="form-select">
+                      <option disabled value="">Selecciona un servicio</option>
+                      <option v-for="(item, index) in services" :key="index" :value="item.name">
+                        {{ item.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-show="currentStep === 3" class="forms-step-panel">
+              <div class="card form-card forms-card mb-3">
+                <div class="forms-card-head">
+                  <i class="bi bi-chat-left-text"></i>
+                  <span>Mensajes</span>
+                </div>
+                <div class="card-body forms-card-body">
+                  <div class="mb-3">
+                    <label class="form-label">
+                      <i class="bi bi-check-circle me-2"></i>
+                      Mensaje de éxito:
+                    </label>
+                    <textarea
+                      v-model="formData.success"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Mensaje que verá el usuario al enviar correctamente el formulario"
+                    ></textarea>
+                  </div>
+
+                  <div class="mb-0">
+                    <label class="form-label">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      Mensaje de error:
+                    </label>
+                    <textarea
+                      v-model="formData.error"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Mensaje que verá el usuario si ocurre un error"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="forms-step-actions">
+            <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+              <i class="bi bi-arrow-left me-2"></i>Anterior
+            </button>
+            <div v-else></div>
+            <div class="forms-step-actions-right">
+              <!--<button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
+                Cancelar
+              </button>-->
+              <button v-if="currentStep < formSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+                Siguiente <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+              <button v-else type="button" class="btn btn-primary" @click="saveForm">
+                <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
               </button>
             </div>
           </div>
         </div>
-
-        <!-- Servicios -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-gear-fill me-2"></i>
-                Servicio:
-              </label>
-              <select v-model="formData.service" class="form-select">
-                <option disabled value="">Selecciona un servicio</option>
-                <option v-for="(item, index) in services" :key="index" :value="item.name">
-                  {{ item.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mensaje de éxito -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-check-circle me-2"></i>
-                Mensaje de éxito:
-              </label>
-              <textarea 
-                v-model="formData.success" 
-                class="form-control" 
-                rows="4" 
-                placeholder="Mensaje que verá el usuario al enviar correctamente el formulario"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mensaje de error -->
-        <div class="card form-card mb-3">
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                Mensaje de error:
-              </label>
-              <textarea 
-                v-model="formData.error" 
-                class="form-control" 
-                rows="4" 
-                placeholder="Mensaje que verá el usuario si ocurre un error"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" @click="saveForm">
-          <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
-        </button>
-        <button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
-          <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
-        </button>
       </div>
     </ModalComponent>
 
@@ -364,28 +407,89 @@
       ref="styleModal" 
       modalId="styleModal" 
       :modalTitle="'Estilos del formulario'" 
-      class="modal-xl"
+      class="modal-fullscreen-fixed"
     >
-      <div class="modal-body">
-        <h5 class="mb-3">
-          <i class="bi bi-palette me-2"></i>
-          Personalización de colores
-        </h5>
-        <div v-for="(color, key) in formData.colorOptions" :key="key" class="mb-3">
-          <label class="form-label">{{ color.label }}</label>
-          <div class="color-picker-wrapper">
-            <input type="color" v-model="formData.colorOptions[key].value" class="color-input">
-            <input type="text" v-model="formData.colorOptions[key].value" class="color-value-input">
+      <div class="forms-style-modal">
+        <div class="forms-style-shell">
+          <div class="forms-style-content">
+            <div class="row g-4">
+              <div class="col-12 col-xl-7">
+                <div class="card forms-card mb-0">
+                  <div class="forms-card-head">
+                    <i class="bi bi-palette-fill"></i>
+                    <span>Personalización de colores</span>
+                  </div>
+                  <div class="forms-card-body">
+                    <div class="forms-style-grid">
+                      <div v-for="(color, key) in formData.colorOptions" :key="key" class="forms-style-color-item">
+                        <div class="forms-style-color-copy">
+                          <label class="form-label mb-1">{{ color.label }}</label>
+                          <small>{{ color.code }}</small>
+                        </div>
+                        <div class="color-picker-wrapper">
+                          <input type="color" v-model="formData.colorOptions[key].value" class="color-input">
+                          <input type="text" v-model="formData.colorOptions[key].value" class="color-value-input">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-xl-5">
+                <div class="card forms-card mb-0">
+                  <div class="forms-card-head">
+                    <i class="bi bi-eye-fill"></i>
+                    <span>Vista previa</span>
+                  </div>
+                  <div class="forms-card-body">
+                    <div
+                      class="forms-style-preview"
+                      :style="{
+                        background: formData.colorOptions.background.value,
+                        color: formData.colorOptions.text.value
+                      }"
+                    >
+                      <h4>Formulario de ejemplo</h4>
+                      <p>Así se verá la base visual del formulario con los colores elegidos.</p>
+                      <input
+                        type="text"
+                        class="forms-style-preview-input"
+                        placeholder="Placeholder de ejemplo"
+                        :style="{
+                          background: formData.colorOptions.inputs.value,
+                          color: formData.colorOptions.text.value
+                        }"
+                      />
+                      <button
+                        type="button"
+                        class="forms-style-preview-button"
+                        :style="{
+                          background: formData.colorOptions.buttonBg.value,
+                          borderColor: formData.colorOptions.buttonBorder.value,
+                          color: formData.colorOptions.buttonText.value
+                        }"
+                      >
+                        Botón principal
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="forms-style-actions">
+            <!--<button type="button" class="btn btn-outline-secondary forms-style-close" @click="closeStyleModalForm">
+              <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
+            </button>-->
+            <div class="forms-style-actions-right">
+              <button type="button" class="btn btn-primary" @click="saveStyleForm">
+                <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" @click="saveStyleForm">
-          <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
-        </button>
-        <button type="button" class="btn btn-outline-secondary" @click="closeStyleModalForm">
-          <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
-        </button>
       </div>
     </ModalComponent>
 
@@ -503,6 +607,13 @@ export default {
     const instance = getCurrentInstance();
     const forms = ref([]);
     const editingIndex = ref(null);
+    const currentStep = ref(0);
+    const formSteps = ref([
+      { key: 'info', label: 'Información', description: 'Nombre, título, subtítulo y descripción' },
+      { key: 'fields', label: 'Campos', description: 'Estructura y configuración del formulario' },
+      { key: 'service', label: 'Servicio', description: 'Integración destino del formulario' },
+      { key: 'messages', label: 'Mensajes', description: 'Textos de éxito y error' }
+    ]);
     const formData = ref({ 
       name: '', 
       images: [],
@@ -572,6 +683,7 @@ export default {
 
     const openModalForm = (index = null) => {
       editingIndex.value = index;
+      currentStep.value = 0;
       if (index !== null) {
         formData.value = JSON.parse(JSON.stringify(index));
         if (!Array.isArray(formData.value.images)) {
@@ -604,6 +716,8 @@ export default {
     },
         appkey_pilot: ""
       };
+      editingIndex.value = null;
+      currentStep.value = 0;
       formModal.value.closeModal();
     };
 
@@ -612,8 +726,47 @@ export default {
     };
 
     const handleCloseModal = () => {
-      closeModalForm();
+      formData.value = { 
+        name: '', 
+        images: [],
+        fields: [], 
+        form_header_text: "",
+        form_header_subtext: "",
+        form_header_descript: "",
+        success: "",
+        error: "",
+        service: "",
+        status: "draft",
+        colorOptions: {
+          background: { label: 'Color de fondo', value: '#ffffff', code: "bg_form" },
+          inputs: { label: 'Color de inputs', value: '#f8f9fa', code: "bg_input" },
+          text: { label: 'Color de texto', value: '#000000', code: "tx_form" },
+          placeholder: { label: 'Color de placeholder', value: '#6c757d', code: "pl_form" },
+          buttonBg: { label: 'Color de fondo del botón', value: '#007bff', code: "btn_bg_form" },
+          buttonBorder: { label: 'Color de borde del botón', value: '#007bff', code: "btn_border_form" },
+          buttonText: { label: 'Color de texto del botón', value: '#ffffff', code: "btn_txt_form" },
+        },
+        appkey_pilot: ""
+      };
+      editingIndex.value = null;
+      currentStep.value = 0;
       closeStyleModalForm();
+    };
+
+    const goToStep = (index) => {
+      currentStep.value = index;
+    };
+
+    const nextStep = () => {
+      if (currentStep.value < formSteps.value.length - 1) {
+        currentStep.value += 1;
+      }
+    };
+
+    const prevStep = () => {
+      if (currentStep.value > 0) {
+        currentStep.value -= 1;
+      }
     };
 
     const addField = () => {
@@ -909,8 +1062,13 @@ export default {
       forms,
       formData,
       editingIndex,
+      currentStep,
+      formSteps,
       openModalForm,
       closeModalForm,
+      goToStep,
+      nextStep,
+      prevStep,
       addField,
       removeField,
       addOption,
@@ -957,6 +1115,283 @@ export default {
 </script>
 
 <style scoped>
+.forms-step-modal {
+  height: 100%;
+}
+
+.forms-step-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.forms-step-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.forms-step-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.forms-step-subtitle {
+  margin: 0;
+  color: #6c757d;
+  max-width: 760px;
+}
+
+.forms-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.forms-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.forms-step-item:last-child {
+  border-right: 0;
+}
+
+.forms-step-item:hover:not(.active) {
+  background: #f8f9fa;
+}
+
+.forms-step-item.active {
+  background: #eff6ff;
+}
+
+.forms-step-item.done .forms-step-num,
+.forms-step-item.active .forms-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.forms-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.forms-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.forms-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.forms-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.forms-step-item.active .forms-step-copy span,
+.forms-step-item.done .forms-step-copy span {
+  color: #185fa5;
+}
+
+.forms-step-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.forms-step-panel {
+  min-height: 100%;
+}
+
+.forms-card {
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.forms-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 700;
+  color: #212529;
+}
+
+.forms-card-head i {
+  color: #185fa5;
+}
+
+.forms-card-body {
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.forms-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.forms-step-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.forms-step-close {
+  white-space: nowrap;
+}
+
+.forms-style-modal {
+  height: 100%;
+}
+
+.forms-style-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.forms-style-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+  overflow-x: hidden;
+  padding-bottom: 1rem;
+}
+
+.forms-style-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.forms-style-color-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e8edf3;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.forms-style-color-copy {
+  min-width: 0;
+}
+
+.forms-style-color-copy small {
+  color: #6c757d;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.forms-style-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.5rem;
+  min-height: 320px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.forms-style-preview h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.forms-style-preview p {
+  margin: 0;
+  color: inherit;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.forms-style-preview-input {
+  width: 100%;
+  border: 1px solid #d9dee5;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  outline: 0;
+}
+
+.forms-style-preview-input::placeholder {
+  color: v-bind('formData.colorOptions.placeholder.value');
+  opacity: 1;
+}
+
+.forms-style-preview-button {
+  align-self: flex-start;
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 0.8rem 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(24, 95, 165, 0.14);
+}
+
+.forms-style-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.forms-style-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.forms-style-close {
+  white-space: nowrap;
+}
+
 .tip-link-card {
   border: 1px solid #e8f4f8;
   background: linear-gradient(135deg, #f0f9fc 0%, #ffffff 100%);
@@ -1066,5 +1501,55 @@ export default {
 .field-order-actions .btn {
   padding: 6px 12px;
   font-size: 0.85em;
+}
+
+@media (max-width: 991px) {
+  .forms-step-shell {
+    padding: 1rem;
+  }
+
+  .forms-style-shell {
+    padding: 1rem;
+  }
+
+  .forms-stepper {
+    flex-direction: column;
+  }
+
+  .forms-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .forms-step-item:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .forms-step-topbar,
+  .forms-step-actions,
+  .forms-step-actions-right,
+  .forms-style-actions,
+  .forms-style-actions-right,
+  .tip-link-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .forms-step-close,
+  .forms-step-actions .btn,
+  .forms-step-actions-right .btn,
+  .forms-style-close,
+  .forms-style-actions .btn,
+  .forms-style-actions-right .btn,
+  .tip-link-content .btn {
+    width: 100%;
+  }
+
+  .forms-style-color-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>

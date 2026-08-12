@@ -80,7 +80,10 @@
         "emails-start": "Comenzar",
         "emails-templates": "Templates",
         "emails-campaigns": "Campañas",
-        "emails-builder": "Nueva Campaña"
+        "emails-builder": "Nueva Campaña",
+        "stock-pilot": "Stock Pilot",
+        "vehicles-config": "Configuración",
+        "vehicles-share": "Nuevo PDF"
     },
     "business_type":{
         "name": "Nombre",

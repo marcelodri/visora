@@ -1323,9 +1323,20 @@ export default {
       this.columnMapping = {};
     },
 
-    toMysqlDatetime(isoString) {
-      if (!isoString) return null;
-      return new Date(isoString).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');
+    toMysqlDatetime(dateTimeLocal) {
+      if (!dateTimeLocal) return null;
+      // dateTimeLocal es un string de datetime-local: "2025-05-15T21:30"
+      // Parsearlo como fecha local (no UTC)
+      const [datePart, timePart] = dateTimeLocal.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      
+      // Crear fecha en timezone local
+      const localDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      
+      // Convertir a MySQL format (YYYY-MM-DD HH:mm:ss)
+      const pad = n => String(n).padStart(2, '0');
+      return `${localDate.getFullYear()}-${pad(localDate.getMonth() + 1)}-${pad(localDate.getDate())} ${pad(localDate.getHours())}:${pad(localDate.getMinutes())}:00`;
     },
 
     toDateTimeLocal(value) {

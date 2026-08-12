@@ -42,7 +42,16 @@
 
     },
     methods: {
+      checkMobile() {
+        return window.innerWidth < 768;
+      },
       async showConfirmPopup() {
+        // Ocultar el scroll de la página solo en desktop
+        const isMobile = this.checkMobile();
+        if (!isMobile) {
+          document.documentElement.style.overflow = 'hidden';
+        }
+        
         const result = await Swal.fire({
           title: this.title,
           text: this.question,
@@ -52,6 +61,11 @@
           confirmButtonText: 'Sí',
           cancelButtonText: this.cancelButtonText
         })
+        
+        // Mostrar el scroll de la página nuevamente
+        if (!isMobile) {
+          document.documentElement.style.overflow = 'auto';
+        }
   
         if (result.isConfirmed) {
           // El usuario presionó "Sí"

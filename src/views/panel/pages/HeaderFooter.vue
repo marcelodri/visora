@@ -62,200 +62,239 @@
             </div>
         </div>
 
-        <!-- Preview del Footer -->
-        <div class="footer-preview-section">
-            <div class="preview-section-header">
-              <i class="bi bi-eye-fill me-2"></i>
-              Vista previa del footer
+        <div class="hf-stepper">
+          <button
+            v-for="(step, index) in footerSteps"
+            :key="step.key"
+            type="button"
+            class="hf-step-item"
+            :class="{ active: currentStep === index, done: currentStep > index }"
+            @click="goToStep(index)"
+          >
+            <div class="hf-step-num">
+              <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+              <span v-else>{{ index + 1 }}</span>
             </div>
-            <div class="footer-preview" :style="{ background: formData.background, color: formData.color }">
-                <div class="footer-preview-col">
-                  <img 
-                    v-if="formData.image || formData.path"
-                    :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`"
-                    alt="Logo"
-                    class="footer-preview-logo"
-                  />
-                  <div v-else class="footer-placeholder">Logo</div>
-                </div>
-                <div class="footer-preview-col">
-                  <div v-if="formData.footer_left" v-html="sanitizeHtml(formData.footer_left)"></div>
-                  <p v-else class="text-muted">Contenido central vacío</p>
-                </div>
-                <div class="footer-preview-col footer-right">
-                  <div v-if="formData.footer_right" v-html="sanitizeHtml(formData.footer_right)"></div>
-                  <p v-else class="text-muted">Contenido derecho vacío</p>
-                </div>
+            <div class="hf-step-copy">
+              <span>{{ step.label }}</span>
+              <small>{{ step.description }}</small>
             </div>
+          </button>
         </div>
 
-        <!-- Columna Izquierda - Imagen -->
-        <div class="card settings-card mb-4">
-            <div class="card-header-custom">
-              <i class="bi bi-image-fill me-2"></i>
-              Columna Izquierda - Logo del Footer
-            </div>
-            <div class="card-body p-4">
-                <div class="settings-group">
-                    <label class="settings-label">
-                      <i class="bi bi-card-image me-2"></i>
-                      Logo del footer
-                    </label>
-                    <p class="settings-description">
-                      Cargá una imagen como logo secundario, sello institucional o marca de soporte
-                    </p>
-
-                    <input 
-                      type="file" 
-                      class="d-none" 
-                      id="fileInput" 
-                      accept="image/png, image/jpeg, image/webp, image/gif"
-                      @change="handleImageUpload" 
-                    />
-
-                    <label for="fileInput" class="file-input-label">
-                      <i class="bi bi-cloud-upload me-2"></i>
-                      <span>{{ formData.fileName || 'Archivo permitidos: jpg, jpeg, png, gif, webp' }}</span>
-                    </label>
-
-                    <div v-if="formData.image || formData.path" class="image-preview-container">
-                      <div class="image-preview">
-                          <img 
-                              :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`" 
-                              alt="Logo Footer" 
-                              class="preview-image"
-                          />
-                          <button
-                              class="btn-remove-image"
-                              @click="removeImage"
-                              title="Eliminar imagen"
-                          >
-                            <i class="bi bi-trash3"></i>
-                          </button>
-                      </div>
-                      <p class="image-info">
-                        <i class="bi bi-check-circle-fill text-success me-1"></i>
-                        Imagen cargada correctamente
-                      </p>
-                    </div>
+        <div class="hf-step-content">
+          <div v-show="currentStep === 0">
+            <div class="footer-preview-section">
+                <div class="preview-section-header">
+                  <i class="bi bi-eye-fill me-2"></i>
+                  Vista previa del footer
                 </div>
-            </div>
-        </div>
-
-        <!-- Columna Central -->
-        <div class="card settings-card mb-4">
-            <div class="card-header-custom">
-              <i class="bi bi-text-left me-2"></i>
-              Columna Central - Contenido HTML
-            </div>
-            <div class="card-body p-4">
-                <div class="settings-group">
-                    <label class="settings-label">
-                      <i class="bi bi-code-square me-2"></i>
-                      Contenido central
-                    </label>
-                    <p class="settings-description">
-                      Agregá texto, enlaces o información con formato HTML
-                    </p>
-                    <div class="editor-wrapper">
-                      <QuillEditor
-                        v-model:content="formData.footer_left"
-                        contentType="html"
-                        theme="snow"
-                        :options="editorOptions"
-                      /> 
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Columna Derecha -->
-        <div class="card settings-card mb-4">
-            <div class="card-header-custom">
-              <i class="bi bi-envelope-fill me-2"></i>
-              Columna Derecha - Datos de Contacto
-            </div>
-            <div class="card-body p-4">
-                <div class="settings-group">
-                    <label class="settings-label">
-                      <i class="bi bi-info-circle-fill me-2"></i>
-                      Información de contacto
-                    </label>
-                    <p class="settings-description">
-                      Ideal para emails, teléfonos, direcciones o enlaces útiles
-                    </p>
-                    <div class="editor-wrapper">
-                      <QuillEditor
-                        v-model:content="formData.footer_right"
-                        contentType="html"
-                        theme="snow"
-                        :options="editorOptions"
+                <div class="footer-preview" :style="{ background: formData.background, color: formData.color }">
+                    <div class="footer-preview-col">
+                      <img 
+                        v-if="formData.image || formData.path"
+                        :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`"
+                        alt="Logo"
+                        class="footer-preview-logo"
                       />
+                      <div v-else class="footer-placeholder">Logo</div>
+                    </div>
+                    <div class="footer-preview-col">
+                      <div v-if="formData.footer_left" v-html="sanitizeHtml(formData.footer_left)"></div>
+                      <p v-else class="text-muted">Contenido central vacío</p>
+                    </div>
+                    <div class="footer-preview-col footer-right">
+                      <div v-if="formData.footer_right" v-html="sanitizeHtml(formData.footer_right)"></div>
+                      <p v-else class="text-muted">Contenido derecho vacío</p>
                     </div>
                 </div>
             </div>
+          </div>
+
+          <div v-show="currentStep === 1">
+            <div class="card settings-card mb-4">
+                <div class="card-header-custom">
+                  <i class="bi bi-image-fill me-2"></i>
+                  Columna Izquierda - Logo del Footer
+                </div>
+                <div class="card-body p-4">
+                    <div class="settings-group">
+                        <label class="settings-label">
+                          <i class="bi bi-card-image me-2"></i>
+                          Logo del footer
+                        </label>
+                        <p class="settings-description">
+                          Cargá una imagen como logo secundario, sello institucional o marca de soporte
+                        </p>
+
+                        <input 
+                          type="file" 
+                          class="d-none" 
+                          id="fileInput" 
+                          accept="image/png, image/jpeg, image/webp, image/gif"
+                          @change="handleImageUpload" 
+                        />
+
+                        <label for="fileInput" class="file-input-label">
+                          <i class="bi bi-cloud-upload me-2"></i>
+                          <span>{{ formData.fileName || 'Archivo permitidos: jpg, jpeg, png, gif, webp' }}</span>
+                        </label>
+
+                        <div v-if="formData.image || formData.path" class="image-preview-container">
+                          <div class="image-preview">
+                              <img 
+                                  :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`" 
+                                  alt="Logo Footer" 
+                                  class="preview-image"
+                              />
+                              <button
+                                  class="btn-remove-image"
+                                  @click="removeImage"
+                                  title="Eliminar imagen"
+                                  type="button"
+                              >
+                                <i class="bi bi-trash3"></i>
+                              </button>
+                          </div>
+                          <p class="image-info">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            Imagen cargada correctamente
+                          </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <div v-show="currentStep === 2">
+            <div class="card settings-card mb-4">
+                <div class="card-header-custom">
+                  <i class="bi bi-text-left me-2"></i>
+                  Columna Central - Contenido HTML
+                </div>
+                <div class="card-body p-4">
+                    <div class="settings-group">
+                        <label class="settings-label">
+                          <i class="bi bi-code-square me-2"></i>
+                          Contenido central
+                        </label>
+                        <p class="settings-description">
+                          Agregá texto, enlaces o información con formato HTML
+                        </p>
+                        <div class="editor-wrapper">
+                          <QuillEditor
+                            v-model:content="formData.footer_left"
+                            contentType="html"
+                            theme="snow"
+                            :options="editorOptions"
+                          /> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <div v-show="currentStep === 3">
+            <div class="card settings-card mb-4">
+                <div class="card-header-custom">
+                  <i class="bi bi-envelope-fill me-2"></i>
+                  Columna Derecha - Datos de Contacto
+                </div>
+                <div class="card-body p-4">
+                    <div class="settings-group">
+                        <label class="settings-label">
+                          <i class="bi bi-info-circle-fill me-2"></i>
+                          Información de contacto
+                        </label>
+                        <p class="settings-description">
+                          Ideal para emails, teléfonos, direcciones o enlaces útiles
+                        </p>
+                        <div class="editor-wrapper">
+                          <QuillEditor
+                            v-model:content="formData.footer_right"
+                            contentType="html"
+                            theme="snow"
+                            :options="editorOptions"
+                          />
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <div v-show="currentStep === 4">
+            <div class="card settings-card mb-5">
+                <div class="card-header-custom">
+                  <i class="bi bi-palette-fill me-2"></i>
+                  Estilos del Footer
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6">
+                            <div class="settings-group">
+                                <label class="settings-label">
+                                  <i class="bi bi-paint-bucket me-2"></i>
+                                  Color de fondo
+                                </label>
+                                <p class="settings-description">
+                                  Definí el color de fondo del footer
+                                </p>
+                                <div class="color-picker-wrapper">
+                                  <input
+                                    type="color"
+                                    v-model="formData.background"
+                                    class="color-input"
+                                  />
+                                  <input 
+                                    type="text" 
+                                    v-model="formData.background" 
+                                    class="color-value-input"
+                                    placeholder="#ffffff"
+                                  />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="settings-group">
+                                <label class="settings-label">
+                                  <i class="bi bi-fonts me-2"></i>
+                                  Color de fuente
+                                </label>
+                                <p class="settings-description">
+                                  Elegí el color del texto del footer
+                                </p>
+                                <div class="color-picker-wrapper">
+                                  <input
+                                    type="color"
+                                    v-model="formData.color"
+                                    class="color-input"
+                                  />
+                                  <input 
+                                    type="text" 
+                                    v-model="formData.color" 
+                                    class="color-value-input"
+                                    placeholder="#000000"
+                                  />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Estilos CSS -->
-        <div class="card settings-card mb-5">
-            <div class="card-header-custom">
-              <i class="bi bi-palette-fill me-2"></i>
-              Estilos del Footer
-            </div>
-            <div class="card-body p-4">
-                <div class="row g-4">
-                    <div class="col-12 col-md-6">
-                        <div class="settings-group">
-                            <label class="settings-label">
-                              <i class="bi bi-paint-bucket me-2"></i>
-                              Color de fondo
-                            </label>
-                            <p class="settings-description">
-                              Definí el color de fondo del footer
-                            </p>
-                            <div class="color-picker-wrapper">
-                              <input
-                                type="color"
-                                v-model="formData.background"
-                                class="color-input"
-                              />
-                              <!-- <div class="color-preview" :style="{ background: formData.background }"></div> -->
-                              <input 
-                                type="text" 
-                                v-model="formData.background" 
-                                class="color-value-input"
-                                placeholder="#ffffff"
-                              />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="settings-group">
-                            <label class="settings-label">
-                              <i class="bi bi-fonts me-2"></i>
-                              Color de fuente
-                            </label>
-                            <p class="settings-description">
-                              Elegí el color del texto del footer
-                            </p>
-                            <div class="color-picker-wrapper">
-                              <input
-                                type="color"
-                                v-model="formData.color"
-                                class="color-input"
-                              />
-                              <!-- <div class="color-preview" :style="{ background: formData.color }"></div> -->
-                              <input 
-                                type="text" 
-                                v-model="formData.color" 
-                                class="color-value-input"
-                                placeholder="#000000"
-                              />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="hf-step-actions">
+          <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+            <i class="bi bi-arrow-left me-2"></i>Anterior
+          </button>
+          <div v-else></div>
+          <button v-if="currentStep < footerSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+            Siguiente <i class="bi bi-arrow-right ms-2"></i>
+          </button>
+          <button v-else type="button" class="btn btn-primary" @click="saveFormFooter">
+            <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
+          </button>
         </div>
 
         <ToastComponent 
@@ -298,6 +337,14 @@
         const forms = ref([]);
         const formData = ref(getEmptyForm());
         const editingIndex = ref(null);
+        const currentStep = ref(0);
+        const footerSteps = ref([
+            { key: 'preview', label: 'Vista previa', description: 'Cómo se verá el footer final' },
+            { key: 'logo', label: 'Logo', description: 'Imagen de la columna izquierda' },
+            { key: 'center', label: 'Contenido central', description: 'Texto o HTML de la columna media' },
+            { key: 'right', label: 'Contacto', description: 'Contenido HTML de la columna derecha' },
+            { key: 'style', label: 'Estilos', description: 'Colores de fondo y fuente' }
+        ]);
         const isLoading = ref(false);
         const showToastFlag = ref(false);
         const toastTitle = ref('');
@@ -417,6 +464,22 @@
             isSuccess.value = success;
             toastComponent.value.showToas();
         };
+
+        const goToStep = (index) => {
+            currentStep.value = index;
+        };
+
+        const nextStep = () => {
+            if (currentStep.value < footerSteps.value.length - 1) {
+                currentStep.value += 1;
+            }
+        };
+
+        const prevStep = () => {
+            if (currentStep.value > 0) {
+                currentStep.value -= 1;
+            }
+        };
         
         const saveFormFooter = async () => {
             isLoading.value = true;
@@ -463,6 +526,8 @@
             columns,
             formData,
             editingIndex,
+            currentStep,
+            footerSteps,
             isLoading,
             toastTitle,
             toastMessage,
@@ -478,6 +543,9 @@
             toastComponent,
             removeImage,
             saveFormFooter,
+            goToStep,
+            nextStep,
+            prevStep,
             editorOptions,
             sanitizeHtml
         };
@@ -486,6 +554,89 @@
 </script>
    
 <style scoped>
+.hf-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.hf-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.hf-step-item:last-child { border-right: 0; }
+.hf-step-item:hover:not(.active) { background: #f8f9fa; }
+.hf-step-item.active { background: #eff6ff; }
+.hf-step-item.done .hf-step-num,
+.hf-step-item.active .hf-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.hf-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.hf-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hf-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.hf-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.hf-step-item.active .hf-step-copy span,
+.hf-step-item.done .hf-step-copy span {
+  color: #185fa5;
+}
+
+.hf-step-content {
+  min-height: 420px;
+}
+
+.hf-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
 /* Header Section */
 .header-section {
   display: flex;
@@ -763,6 +914,30 @@
   .footer-preview {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .hf-stepper {
+    flex-direction: column;
+  }
+
+  .hf-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .hf-step-item:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .hf-step-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hf-step-actions .btn {
+    width: 100%;
   }
 }
 </style>

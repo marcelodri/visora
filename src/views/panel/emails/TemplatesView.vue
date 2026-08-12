@@ -146,83 +146,77 @@
     </template>
 
     <!-- ═══ MODAL CREATE / EDIT ═══ -->
-    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
-      <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content" style="border-radius:14px">
-          <div class="modal-header" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px 14px 0 0">
-            <h5 class="modal-title mb-0">
-              <i class="bi bi-file-earmark-code me-2"></i>
-              {{ editing ? 'Editar Template' : 'Nuevo Template' }}
-            </h5>
-            <button type="button" class="btn-close btn-close-white" @click="closeModal"></button>
+    <ModalComponent
+      ref="templateModal"
+      modalId="templateModal"
+      :modalTitle="editing ? 'Editar Template' : 'Nuevo Template'"
+      dialogClass="modal-fullscreen-fixed"
+      @modalClosed="handleTemplateModalClosed"
+    >
+      <div class="p-4">
+        <div class="row g-3 mb-3">
+          <!-- Name -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold"><i class="bi bi-tag me-1"></i>Nombre del template *</label>
+            <input v-model="form.name" type="text" class="form-control" placeholder="Ej: Bienvenida a nuevos clientes" />
           </div>
-          <div class="modal-body p-4">
-            <div class="row g-3 mb-3">
-              <!-- Name -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold"><i class="bi bi-tag me-1"></i>Nombre del template *</label>
-                <input v-model="form.name" type="text" class="form-control" placeholder="Ej: Bienvenida a nuevos clientes" />
-              </div>
-              <!-- Subject -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold"><i class="bi bi-envelope me-1"></i>Asunto del email *</label>
-                <input v-model="form.subject" type="text" class="form-control" placeholder="Ej: Bienvenido/a, {{nombre}}!" />
-              </div>
-            </div>
-
-            <!-- Import HTML -->
-            <div class="mb-3 d-flex align-items-center gap-3 flex-wrap">
-              <label class="form-label fw-semibold mb-0"><i class="bi bi-code-slash me-1"></i>HTML</label>
-              <label class="btn btn-outline">
-                <i class="bi bi-upload me-1"></i>Importar .html
-                <input type="file" accept=".html,.htm" class="d-none" @change="importHtml" />
-              </label>
-              <button type="button" class="btn btn-outline" @click="insertBaseTemplate">
-                <i class="bi bi-layout-text-window me-1"></i>Plantilla base
-              </button>
-              <span class="text-muted" style="font-size:0.8rem">Usá <code>&#123;&#123;variable&#125;&#125;</code> para datos dinámicos</span>
-            </div>
-
-            <!-- Variables detected -->
-            <div v-if="detectedVars.length" class="mb-3">
-              <span class="text-muted" style="font-size:0.82rem">Variables detectadas:</span>
-              <span v-for="v in detectedVars" :key="v" class="variable-tag ms-1" v-text="varLabel(v)"></span>
-            </div>
-
-            <!-- Editor + Preview split -->
-            <div class="html-editor-container">
-              <div class="html-editor-pane">
-                <div class="pane-header"><i class="bi bi-code me-1"></i>Editor HTML</div>
-                <textarea
-                  v-model="form.html_content"
-                  class="html-textarea"
-                  spellcheck="false"
-                  @input="onHtmlInput"
-                  placeholder="Pegá o escribí tu HTML aquí..."
-                ></textarea>
-              </div>
-              <div class="html-preview-pane">
-                <div class="pane-header"><i class="bi bi-eye me-1"></i>Vista previa</div>
-                <iframe
-                  :srcdoc="form.html_content || previewPlaceholder"
-                  sandbox=""
-                  class="html-preview-frame"
-                  title="preview"
-                ></iframe>
-              </div>
-            </div>
+          <!-- Subject -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold"><i class="bi bi-envelope me-1"></i>Asunto del email *</label>
+            <input v-model="form.subject" type="text" class="form-control" placeholder="Ej: Bienvenido/a, {{nombre}}!" />
           </div>
-          <div class="modal-footer">
-            <!-- <button class="btn btn-outline" @click="closeModal">Cancelar</button> -->
-            <button class="btn btn-outline" :disabled="saving || !canSave" @click="saveTemplate">
-              <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-              <i v-else class="bi bi-check-circle me-2"></i>
-              {{ editing ? 'Guardar cambios' : 'Crear template' }}
-            </button>
+        </div>
+
+        <!-- Import HTML -->
+        <div class="mb-3 d-flex align-items-center gap-3 flex-wrap">
+          <label class="form-label fw-semibold mb-0"><i class="bi bi-code-slash me-1"></i>HTML</label>
+          <label class="btn btn-outline">
+            <i class="bi bi-upload me-1"></i>Importar .html
+            <input type="file" accept=".html,.htm" class="d-none" @change="importHtml" />
+          </label>
+          <button type="button" class="btn btn-outline" @click="insertBaseTemplate">
+            <i class="bi bi-layout-text-window me-1"></i>Plantilla base
+          </button>
+          <span class="text-muted" style="font-size:0.8rem">Usá <code>&#123;&#123;variable&#125;&#125;</code> para datos dinámicos</span>
+        </div>
+
+        <!-- Variables detected -->
+        <div v-if="detectedVars.length" class="mb-3">
+          <span class="text-muted" style="font-size:0.82rem">Variables detectadas:</span>
+          <span v-for="v in detectedVars" :key="v" class="variable-tag ms-1" v-text="varLabel(v)"></span>
+        </div>
+
+        <!-- Editor + Preview split -->
+        <div class="html-editor-container">
+          <div class="html-editor-pane">
+            <div class="pane-header"><i class="bi bi-code me-1"></i>Editor HTML</div>
+            <textarea
+              v-model="form.html_content"
+              class="html-textarea"
+              spellcheck="false"
+              @input="onHtmlInput"
+              placeholder="Pegá o escribí tu HTML aquí..."
+            ></textarea>
+          </div>
+          <div class="html-preview-pane">
+            <div class="pane-header"><i class="bi bi-eye me-1"></i>Vista previa</div>
+            <iframe
+              :srcdoc="form.html_content || previewPlaceholder"
+              sandbox=""
+              class="html-preview-frame"
+              title="preview"
+            ></iframe>
           </div>
         </div>
       </div>
-    </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" :disabled="saving || !canSave" @click="saveTemplate">
+          <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+          <i v-else class="bi bi-check-circle me-2"></i>
+          {{ editing ? 'Guardar cambios' : 'Crear template' }}
+        </button>
+      </div>
+    </ModalComponent>
 
     <!-- ═══ CONFIRM DELETE ═══ -->
     <div v-if="showDeleteConfirm" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
@@ -263,18 +257,18 @@ import {
 } from '@/services/emailService';
 import { useAuthStore } from '@/stores/auth';
 import ToastComponent from '@/components/ToastComponent.vue';
+import ModalComponent from '@/components/ModalComponent.vue';
 import '@/assets/styles/emails.css';
 
 export default {
   name: 'EmailTemplatesView',
-  components: { ToastComponent },
+  components: { ToastComponent, ModalComponent },
   data() {
     return {
       loading: true,
       saving: false,
       templates: [],
       maxTemplates: null,
-      showModal: false,
       showDeleteConfirm: false,
       editing: null,
       templateToDelete: null,
@@ -314,23 +308,26 @@ export default {
       this.editing = null;
       this.form = { name: '', subject: '', html_content: '' };
       this.detectedVars = [];
-      this.showModal = true;
+      this.$nextTick(() => {
+        this.$refs.templateModal.openModal();
+      });
     },
     openEdit(tmpl) {
       this.editing = tmpl;
       this.form = { name: tmpl.name, subject: tmpl.subject, html_content: tmpl.html_content };
       this.detectedVars = extractVariables(tmpl.html_content);
-      this.showModal = true;
+      this.$nextTick(() => {
+        this.$refs.templateModal.openModal();
+      });
     },
-    closeModal() {
-      this.showModal = false;
+    handleTemplateModalClosed() {
+      this.editing = null;
+      this.form = { name: '', subject: '', html_content: '' };
+      this.detectedVars = [];
     },
     onHtmlInput() {
-
-      this.detectedVars = extractVariables(this.form.      html_content);
-
-      console.log('onHtmlInput', this.detectedVars)
-
+      this.detectedVars = extractVariables(this.form.html_content);
+      console.log('onHtmlInput', this.detectedVars);
     },
     importHtml(e) {
       const file = e.target.files[0];
@@ -361,7 +358,7 @@ export default {
           await createTemplate(this.form);
           this.showToast('Template creado correctamente');
         }
-        this.closeModal();
+        this.$refs.templateModal.closeModal();
         await this.loadTemplates();
       } catch (err) {
         this.showToast(err.message || 'Error al guardar', 'error');

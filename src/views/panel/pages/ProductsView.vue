@@ -73,222 +73,266 @@
     </div>
 
     <!-- Modal -->
-    <ModalComponent ref="formModal" modalId="formModal" :modalTitle="editingIndex === null ? 'Nuevo Producto' : 'Editar Producto'" class="modal-xl" @modalClosed="handleCloseModal">
-      <div class="modal-body">
-
-        <!-- Segmentación -->
-        <div class="card form-card mb-3">
-          <div class="card-header-modal">
-            <i class="bi bi-funnel-fill me-2"></i>
-            Segmentación
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-tag-fill me-2"></i>
-                  {{ $t('menu.brands') }}:
-                </label>
-                <select v-model="formData.marca_id" class="form-select custom-select">
-                  <option value="">Seleccione una marca</option>
-                  <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
-                    {{ marca.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-briefcase-fill me-2"></i>
-                  {{ $t('menu.business-types') }}:
-                </label>
-                <select v-model="formData.tipo_de_negocio_id" class="form-select custom-select">
-                  <option value="">Seleccione un tipo de negocio</option>
-                  <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">
-                    {{ negocio.name }}
-                  </option>
-                </select>
-              </div>
+    <ModalComponent ref="formModal" modalId="formModal" :modalTitle="editingIndex === null ? 'Nuevo Producto' : 'Editar Producto'" class="modal-fullscreen-fixed" @modalClosed="handleCloseModal">
+      <div class="products-step-modal">
+        <div class="products-step-shell">
+          <!--<div class="products-step-topbar">
+            <div>
+              <h3 class="products-step-title">{{ editingIndex === null ? 'Nuevo producto' : 'Editar producto' }}</h3>
+              <p class="products-step-subtitle">Separamos el modal en pasos para que el alta y la edición tengan el mismo flujo cómodo que quedó en PagesView.</p>
             </div>
+            <button type="button" class="btn btn-outline-secondary products-step-close" @click="closeModalForm">
+              <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
+            </button>
+          </div>-->
+
+          <div class="products-stepper">
+            <button
+              v-for="(step, index) in formSteps"
+              :key="step.key"
+              type="button"
+              class="products-step-item"
+              :class="{ active: currentStep === index, done: currentStep > index }"
+              @click="goToStep(index)"
+            >
+              <div class="products-step-num">
+                <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <div class="products-step-copy">
+                <span>{{ step.label }}</span>
+                <small>{{ step.description }}</small>
+              </div>
+            </button>
           </div>
-        </div>
 
-        <!-- Imagen -->
-        <div class="card form-card mb-3">
-          <div class="card-header-modal">
-            <i class="bi bi-image-fill me-2"></i>
-            Imagen del producto
-          </div>
-          <div class="card-body">
-            <label class="form-label">
-              <i class="bi bi-card-image me-2"></i>
-              {{ $t('forms.form_img') }}:
-            </label>
-
-            <input 
-              type="file" 
-              class="d-none" 
-              id="fileInput"
-              accept="image/png, image/jpeg, image/webp, image/gif"
-              @change="handleImageUpload" 
-            />
-
-            <label for="fileInput" class="file-input-label">
-              <i class="bi bi-cloud-upload me-2"></i>
-              <span>{{ formData.fileName || 'Archivos permitidos: jpg, jpeg, png, gif, webp' }}</span>
-            </label>
-
-            <div v-if="formData.image || formData.path" class="image-preview-container">
-              <div class="image-preview">
-                <img 
-                  :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`" 
-                  alt="Imagen" 
-                  class="preview-image"
-                />
-                <button 
-                  class="btn-remove-image"
-                  @click="removeImage"
-                  title="Eliminar imagen"
-                >
-                  <i class="bi bi-trash3"></i>
-                </button>
-              </div>
-              <p class="image-info">
-                <i class="bi bi-check-circle-fill text-success me-1"></i>
-                Imagen cargada correctamente
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Información del Producto -->
-        <div class="card form-card mb-3">
-          <div class="card-header-modal">
-            <i class="bi bi-info-circle-fill me-2"></i>
-            Información del producto
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-car-front me-2"></i>
-                  Modelo:
-                </label>
-                <input v-model="formData.model" type="text" class="form-control" placeholder="Ej: Yaris" />
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-gear-fill me-2"></i>
-                  Versión:
-                </label>
-                <input v-model="formData.version" type="text" class="form-control" placeholder="Ej: XS 1.5 CVT" />
-              </div>
-
-              <div class="col-12">
-                <label class="form-label">
-                  <i class="bi bi-link-45deg me-2"></i>
-                  Call Code:
-                  <span class="badge bg-warning text-dark ms-2">
-                    <i class="bi bi-lightbulb-fill me-1"></i>
-                    Genera un link en la card para llamar a otro formulario
-                  </span>
-                </label>
-                <input
-                  v-model="formData.code"
-                  type="text"
-                  class="form-control"
-                  placeholder="Ej: 123456"
-                />
-              </div>
-
-              <div class="col-12 col-md-4">
-                <label class="form-label">
-                  <i class="bi bi-file-text me-2"></i>
-                  Plan:
-                </label>
-                <input v-model="formData.plan" type="text" class="form-control" placeholder="Ej: Plan 70/30" />
-              </div>
-
-              <div class="col-12 col-md-4">
-                <label class="form-label">
-                  <i class="bi bi-calendar-range me-2"></i>
-                  Plazo:
-                </label>
-                <input v-model="formData.plazo" type="text" class="form-control" placeholder="Ej: Plazo 96 meses" />
-              </div>
-
-              <div class="col-12 col-md-4">
-                <label class="form-label">
-                  <i class="bi bi-currency-dollar me-2"></i>
-                  Importe:
-                </label>
-                <input v-model="formData.precio" type="text" class="form-control" placeholder="Ej: Cuotas desde $239.246" />
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">
-                  <i class="bi bi-fonts me-2"></i>
-                  Título Link externo:
-                </label>
-                <input v-model="formData.title_link_external" type="text" class="form-control" placeholder="Ej: Miralo aquí" />
-              </div>
-
-              <div class="col-12 col-md-9">
-                <label class="form-label">
-                  <i class="bi bi-box-arrow-up-right me-2"></i>
-                  Link externo:
-                </label>
-                <input v-model="formData.link_external" type="text" class="form-control" placeholder="Ej: https://www.mercadolibre.com.ar/" />
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- Estilos CSS -->
-        <div class="card form-card mb-3">
-          <div class="card-header-modal">
-            <i class="bi bi-palette-fill me-2"></i>
-            Estilos de la card
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-paint-bucket me-2"></i>
-                  Background
-                </label>
-                <div class="color-picker-wrapper">
-                  <input v-model="formData.background" type="color" class="color-input" />
-                  <!-- <div class="color-preview" :style="{ background: formData.background }"></div> -->
-                  <input type="text" v-model="formData.background" class="color-value-input" placeholder="#ffffff" />
+          <div class="products-step-content">
+            <div v-show="currentStep === 0" class="products-step-panel">
+              <div class="card form-card products-card mb-3">
+                <div class="card-header-modal products-card-head">
+                  <i class="bi bi-funnel-fill me-2"></i>
+                  Segmentación
                 </div>
-              </div>
+                <div class="card-body products-card-body">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">
+                        <i class="bi bi-tag-fill me-2"></i>
+                        {{ $t('menu.brands') }}:
+                      </label>
+                      <select v-model="formData.marca_id" class="form-select custom-select">
+                        <option value="">Seleccione una marca</option>
+                        <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
+                          {{ marca.name }}
+                        </option>
+                      </select>
+                    </div>
 
-              <div class="col-12 col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-fonts me-2"></i>
-                  Color
-                </label>
-                <div class="color-picker-wrapper">
-                  <input v-model="formData.color" type="color" class="color-input" />
-                  <!-- <div class="color-preview" :style="{ background: formData.color }"></div> -->
-                  <input type="text" v-model="formData.color" class="color-value-input" placeholder="#000000" />
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">
+                        <i class="bi bi-briefcase-fill me-2"></i>
+                        {{ $t('menu.business-types') }}:
+                      </label>
+                      <select v-model="formData.tipo_de_negocio_id" class="form-select custom-select">
+                        <option value="">Seleccione un tipo de negocio</option>
+                        <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">
+                          {{ negocio.name }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <div v-show="currentStep === 1" class="products-step-panel">
+              <div class="card form-card products-card mb-3">
+                <div class="card-header-modal products-card-head">
+                  <i class="bi bi-image-fill me-2"></i>
+                  Imagen del producto
+                </div>
+                <div class="card-body products-card-body">
+                  <label class="form-label">
+                    <i class="bi bi-card-image me-2"></i>
+                    {{ $t('forms.form_img') }}:
+                  </label>
+
+                  <input
+                    type="file"
+                    class="d-none"
+                    id="fileInput"
+                    accept="image/png, image/jpeg, image/webp, image/gif"
+                    @change="handleImageUpload"
+                  />
+
+                  <label for="fileInput" class="file-input-label">
+                    <i class="bi bi-cloud-upload me-2"></i>
+                    <span>{{ formData.fileName || 'Archivos permitidos: jpg, jpeg, png, gif, webp' }}</span>
+                  </label>
+
+                  <div v-if="formData.image || formData.path" class="image-preview-container">
+                    <div class="image-preview">
+                      <img
+                        :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`"
+                        alt="Imagen"
+                        class="preview-image"
+                      />
+                      <button
+                        class="btn-remove-image"
+                        @click="removeImage"
+                        title="Eliminar imagen"
+                        type="button"
+                      >
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    </div>
+                    <p class="image-info">
+                      <i class="bi bi-check-circle-fill text-success me-1"></i>
+                      Imagen cargada correctamente
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-show="currentStep === 2" class="products-step-panel">
+              <div class="card form-card products-card mb-3">
+                <div class="card-header-modal products-card-head">
+                  <i class="bi bi-info-circle-fill me-2"></i>
+                  Información del producto
+                </div>
+                <div class="card-body products-card-body">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">
+                        <i class="bi bi-car-front me-2"></i>
+                        Modelo:
+                      </label>
+                      <input v-model="formData.model" type="text" class="form-control" placeholder="Ej: Yaris" />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">
+                        <i class="bi bi-gear-fill me-2"></i>
+                        Versión:
+                      </label>
+                      <input v-model="formData.version" type="text" class="form-control" placeholder="Ej: XS 1.5 CVT" />
+                    </div>
+
+                    <div class="col-12">
+                      <label class="form-label">
+                        <i class="bi bi-link-45deg me-2"></i>
+                        Call Code:
+                        <span class="badge bg-warning text-dark ms-2">
+                          <i class="bi bi-lightbulb-fill me-1"></i>
+                          Genera un link en la card para llamar a otro formulario
+                        </span>
+                      </label>
+                      <input
+                        v-model="formData.code"
+                        type="text"
+                        class="form-control"
+                        placeholder="Ej: 123456"
+                      />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">
+                        <i class="bi bi-file-text me-2"></i>
+                        Plan:
+                      </label>
+                      <input v-model="formData.plan" type="text" class="form-control" placeholder="Ej: Plan 70/30" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">
+                        <i class="bi bi-calendar-range me-2"></i>
+                        Plazo:
+                      </label>
+                      <input v-model="formData.plazo" type="text" class="form-control" placeholder="Ej: Plazo 96 meses" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">
+                        <i class="bi bi-currency-dollar me-2"></i>
+                        Importe:
+                      </label>
+                      <input v-model="formData.precio" type="text" class="form-control" placeholder="Ej: Cuotas desde $239.246" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                      <label class="form-label">
+                        <i class="bi bi-fonts me-2"></i>
+                        Título Link externo:
+                      </label>
+                      <input v-model="formData.title_link_external" type="text" class="form-control" placeholder="Ej: Miralo aquí" />
+                    </div>
+
+                    <div class="col-12 col-md-9">
+                      <label class="form-label">
+                        <i class="bi bi-box-arrow-up-right me-2"></i>
+                        Link externo:
+                      </label>
+                      <input v-model="formData.link_external" type="text" class="form-control" placeholder="Ej: https://www.mercadolibre.com.ar/" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-show="currentStep === 3" class="products-step-panel">
+              <div class="card form-card products-card mb-3">
+                <div class="card-header-modal products-card-head">
+                  <i class="bi bi-palette-fill me-2"></i>
+                  Estilos de la card
+                </div>
+                <div class="card-body products-card-body">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">
+                        <i class="bi bi-paint-bucket me-2"></i>
+                        Background
+                      </label>
+                      <div class="color-picker-wrapper">
+                        <input v-model="formData.background" type="color" class="color-input" />
+                        <input type="text" v-model="formData.background" class="color-value-input" placeholder="#ffffff" />
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">
+                        <i class="bi bi-fonts me-2"></i>
+                        Color
+                      </label>
+                      <div class="color-picker-wrapper">
+                        <input v-model="formData.color" type="color" class="color-input" />
+                        <input type="text" v-model="formData.color" class="color-value-input" placeholder="#000000" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="products-step-actions">
+            <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+              <i class="bi bi-arrow-left me-2"></i>Anterior
+            </button>
+            <div v-else></div>
+            <div class="products-step-actions-right">
+              <!--<button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
+                Cancelar
+              </button>-->
+              <button v-if="currentStep < formSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+                Siguiente <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+              <button v-else type="button" class="btn btn-primary" @click="saveForm">
+                <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
+              </button>
+            </div>
           </div>
         </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" @click="saveForm">
-          <i class="bi bi-floppy me-2"></i> {{$t('search_view.save')}}
-        </button>
-        <button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
-          <i class="bi bi-x-circle me-2"></i> {{$t('search_view.cancel')}}
-        </button>
       </div>
     </ModalComponent>
 
@@ -335,6 +379,13 @@
       const formData = ref(getEmptyForm());
       const formDataProduct = ref(getEmptyFormProduct());
       const editingIndex = ref(null);
+      const currentStep = ref(0);
+      const formSteps = ref([
+        { key: 'segmentacion', label: 'Segmentación', description: 'Marca y tipo de negocio' },
+        { key: 'imagen', label: 'Imagen', description: 'Carga y reemplazo de imagen' },
+        { key: 'info', label: 'Información', description: 'Modelo, versión, plan y links' },
+        { key: 'estilos', label: 'Estilos', description: 'Colores de la card' }
+      ]);
       const isLoading = ref(false);
       const showToastFlag = ref(false);
       const toastTitle = ref('');
@@ -425,6 +476,7 @@
       function editForm(item) {
         editingIndex.value = item;
         formData.value = item;
+        currentStep.value = 0;
         openModalForm();
       }
 
@@ -438,11 +490,14 @@
           formData.value = getEmptyForm();
           editingIndex.value = null; 
         }
+        currentStep.value = 0;
         formModal.value.openModal();
       };
 
       const cleanData = () => {
-        editingIndex.value = null; 
+        editingIndex.value = null;
+        currentStep.value = 0;
+        formData.value = getEmptyForm();
       }
 
       const closeModalForm = () => {
@@ -452,6 +507,22 @@
 
       const handleCloseModal = () => {
         cleanData();
+      };
+
+      const goToStep = (index) => {
+        currentStep.value = index;
+      };
+
+      const nextStep = () => {
+        if (currentStep.value < formSteps.value.length - 1) {
+          currentStep.value += 1;
+        }
+      };
+
+      const prevStep = () => {
+        if (currentStep.value > 0) {
+          currentStep.value -= 1;
+        }
       };
 
       function getEmptyForm() {
@@ -568,8 +639,13 @@
         formData,
         formDataProduct,
         editingIndex,
+        currentStep,
+        formSteps,
         openModalForm,
         closeModalForm,
+        goToStep,
+        nextStep,
+        prevStep,
         saveForm,
         isLoading,
         toastTitle,
@@ -597,6 +673,162 @@
 </script>
  
 <style scoped>
+.products-step-modal {
+  height: 100%;
+}
+
+.products-step-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.products-step-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.products-step-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.products-step-subtitle {
+  margin: 0;
+  color: #6c757d;
+  max-width: 760px;
+}
+
+.products-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.products-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.products-step-item:last-child {
+  border-right: 0;
+}
+
+.products-step-item:hover:not(.active) {
+  background: #f8f9fa;
+}
+
+.products-step-item.active {
+  background: #eff6ff;
+}
+
+.products-step-item.done .products-step-num,
+.products-step-item.active .products-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.products-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.products-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.products-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.products-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.products-step-item.active .products-step-copy span,
+.products-step-item.done .products-step-copy span {
+  color: #185fa5;
+}
+
+.products-step-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.products-step-panel {
+  min-height: 100%;
+}
+
+.products-card {
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.products-card-head {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.products-card-body {
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.products-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.products-step-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.products-step-close {
+  white-space: nowrap;
+}
+
 /* Header Section */
 .header-section {
   display: flex;
@@ -836,6 +1068,38 @@
   .btn-add {
     width: 100%;
     justify-content: center;
+  }
+
+  .products-step-topbar,
+  .products-step-actions,
+  .products-step-actions-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .products-step-close,
+  .products-step-actions .btn,
+  .products-step-actions-right .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 991px) {
+  .products-step-shell {
+    padding: 1rem;
+  }
+
+  .products-stepper {
+    flex-direction: column;
+  }
+
+  .products-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .products-step-item:last-child {
+    border-bottom: 0;
   }
 }
 </style>

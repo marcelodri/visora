@@ -23,6 +23,10 @@
   position: fixed;
   right: 30px;
   z-index: 10;
+  width: fit-content!important;
+}
+.btn-save {
+  width: fit-content!important;
 }
 .btn-save {
 position: fixed;

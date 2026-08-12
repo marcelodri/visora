@@ -330,7 +330,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  height: 420px;
+  height: 380px;
 }
 
 .html-editor-pane,

@@ -98,632 +98,674 @@
         ref="formModal" 
         modalId="formModal" 
         :modalTitle="editingIndex === null ? 'Nueva página' : 'Editar página'" 
-        class="modal-xl" 
-        @closeModal="handleCloseModal"
+        class="modal-fullscreen-fixed" 
+        @modalClosed="handleCloseModal"
         >
-        <div class="modal-body">
-            <div class="accordion accordion-modern" id="formAccordion">
+        <div class="pages-step-modal">
+            <div class="pages-step-shell">
+                <!--<div class="pages-step-topbar">
+                    <div>
+                        <h3 class="pages-step-title">{{ editingIndex === null ? 'Nueva página' : 'Editar página' }}</h3>
+                        <p class="pages-step-subtitle">Reemplazamos los acordeones por un flujo guiado en pasos, tomando como referencia el diseño de StockView.</p>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary pages-step-close" @click="closeModalForm">
+                        <i class="bi bi-x-circle me-2"></i>{{ $t('search_view.cancel') }}
+                    </button>
+                </div>-->
 
-            <!-- 1. DATOS BÁSICOS -->
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingDatosBasicos">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDatosBasicos" aria-expanded="true">
-                    <i class="bi bi-info-circle-fill me-2"></i>
-                    1. Datos Básicos
-                </button>
-                </h2>
-                <div id="collapseDatosBasicos" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                    <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label"><i class="bi bi-globe me-2"></i>Dominio:</label>
-                        <input v-model="formData.dominio" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label"><i class="bi bi-file-text me-2"></i>{{ $t('forms.form_name') }}:</label>
-                        <input v-model="formData.name" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label"><i class="bi bi-hash me-2"></i>{{ $t('forms.form_code') }}:</label>
-                        <input v-model="formData.code" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label"><i class="bi bi-tag-fill me-2"></i>{{ $t('menu.brands') }}:</label>
-                        <select v-model="formData.marca_id" class="form-select">
-                        <option value="">Seleccione una marca</option>
-                        <option v-for="marca in marcas" :key="marca.id" :value="marca.id">{{ marca.name }}</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label"><i class="bi bi-briefcase-fill me-2"></i>{{ $t('menu.business-types') }}:</label>
-                        <select v-model="formData.tipo_de_negocio_id" class="form-select">
-                        <option value="">Seleccione un tipo de negocio</option>
-                        <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">{{ negocio.name }}</option>
-                        </select>
-                    </div>
-                    </div>
-                    <!-- Switches para Menú y Footer -->
-                    <div class="mt-4 p-3 rounded border border-secondary">
-                        <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <div class="form-check form-switch">
-                                    <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="menuVisibleSwitch"
-                                    :checked="formData.menu_is_visible === 'true' || formData.menu_is_visible === true"
-                                    @change="formData.menu_is_visible = $event.target.checked ? 'true' : 'false'"
-                                    >
-                                    <label class="form-check-label fw-bold" for="menuVisibleSwitch">
-                                    Menú Visible: {{ formData.menu_is_visible === 'true' || formData.menu_is_visible === true ? 'Sí' : 'No' }}
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span v-if="formData.menu_is_visible === 'true' || formData.menu_is_visible === true">
-                                            <strong>Visible:</strong> El menú será mostrado en la página.
-                                        </span>
-                                        <span v-else>
-                                            <strong>Oculto:</strong> El menú no será visible en la página.
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <div class="form-check form-switch">
-                                    <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="footerVisibleSwitch"
-                                    :checked="formData.footer_is_visible === 'true' || formData.footer_is_visible === true"
-                                    @change="formData.footer_is_visible = $event.target.checked ? 'true' : 'false'"
-                                    >
-                                    <label class="form-check-label fw-bold" for="footerVisibleSwitch">
-                                    Footer Visible: {{ formData.footer_is_visible === 'true' || formData.footer_is_visible === true ? 'Sí' : 'No' }}
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span v-if="formData.footer_is_visible === 'true' || formData.footer_is_visible === true">
-                                            <strong>Visible:</strong> El footer será mostrado en la página.
-                                        </span>
-                                        <span v-else>
-                                            <strong>Oculto:</strong> El footer no será visible en la página.
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-
-            <!-- 2. IMÁGENES (MÚLTIPLES) -->
-            <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImagen">
-                <i class="bi bi-images me-2"></i>
-                2. Imágenes de la página
-                </button>
-            </h2>
-            <div id="collapseImagen" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                <label class="form-label">
-                    <i class="bi bi-card-image me-2"></i>{{ $t('forms.form_img') }}:
-                </label>
-                
-                <!-- Input para múltiples archivos -->
-                <input 
-                    type="file" 
-                    class="d-none" 
-                    id="fileInput" 
-                    accept="image/*" 
-                    multiple
-                    @change="handleMultipleImageUpload" 
-                />
-                <label for="fileInput" class="file-input-label">
-                    <i class="bi bi-cloud-upload me-2"></i>
-                    Seleccionar imágenes...
-                </label>
-
-                <!-- Contador de imágenes -->
-                <div v-if="formData.images && formData.images.length > 0" class="mt-2 mb-3">
-                    <small class="text-muted">
-                    {{ formData.images.length }} imagen(es) cargada(s)
-                    </small>
-                </div>
-
-                <!-- Grid de imágenes -->
-                <div v-if="formData.images && formData.images.length > 0" class="images-grid">
-                    <div 
-                    v-for="(img, index) in formData.images" 
-                    :key="index" 
-                    class="image-preview-container"
+                <div class="pages-stepper">
+                    <button
+                    v-for="(step, index) in formSteps"
+                    :key="step.key"
+                    type="button"
+                    class="pages-step-item"
+                    :class="{ active: currentStep === index, done: currentStep > index }"
+                    @click="goToStep(index)"
                     >
-                    <div class="image-preview">
-                        <img 
-                        :src="img.data || `https://madcoder.io/apis/images_upload/${img.path}`" 
-                        class="preview-image" 
-                        :alt="`Imagen ${index + 1}`"
-                        />
-                        <button 
-                        class="btn-remove-image" 
-                        @click="removeImageByIndex(index, img)"
-                        type="button"
-                        >
-                        <i class="bi bi-trash3"></i>
+                    <div class="pages-step-num">
+                        <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+                        <span v-else>{{ index + 1 }}</span>
+                    </div>
+                    <div class="pages-step-copy">
+                        <span>{{ step.label }}</span>
+                        <small>{{ step.description }}</small>
+                    </div>
+                    </button>
+                </div>
+
+                <div class="pages-step-content">
+                    <div v-show="currentStep === 0" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <span>Datos básicos</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label"><i class="bi bi-file-text me-2"></i>{{ $t('forms.form_name') }}:</label>
+                                        <input v-model="formData.name" type="text" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label"><i class="bi bi-hash me-2"></i>{{ $t('forms.form_code') }}:</label>
+                                        <input v-model="formData.code" type="text" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label"><i class="bi bi-tag-fill me-2"></i>{{ $t('menu.brands') }}:</label>
+                                        <select v-model="formData.marca_id" class="form-select">
+                                            <option value="">Seleccione una marca</option>
+                                            <option v-for="marca in marcas" :key="marca.id" :value="marca.id">{{ marca.name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label"><i class="bi bi-briefcase-fill me-2"></i>{{ $t('menu.business-types') }}:</label>
+                                        <select v-model="formData.tipo_de_negocio_id" class="form-select">
+                                            <option value="">Seleccione un tipo de negocio</option>
+                                            <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">{{ negocio.name }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="pages-toggle-box mt-4">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="menuVisibleSwitch"
+                                                :checked="formData.menu_is_visible === 'true' || formData.menu_is_visible === true"
+                                                @change="formData.menu_is_visible = $event.target.checked ? 'true' : 'false'"
+                                                >
+                                                <label class="form-check-label fw-bold" for="menuVisibleSwitch">
+                                                Menú Visible: {{ formData.menu_is_visible === 'true' || formData.menu_is_visible === true ? 'Sí' : 'No' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.menu_is_visible === 'true' || formData.menu_is_visible === true">
+                                                        <strong>Visible:</strong> El menú será mostrado en la página.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Oculto:</strong> El menú no será visible en la página.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="footerVisibleSwitch"
+                                                :checked="formData.footer_is_visible === 'true' || formData.footer_is_visible === true"
+                                                @change="formData.footer_is_visible = $event.target.checked ? 'true' : 'false'"
+                                                >
+                                                <label class="form-check-label fw-bold" for="footerVisibleSwitch">
+                                                Footer Visible: {{ formData.footer_is_visible === 'true' || formData.footer_is_visible === true ? 'Sí' : 'No' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.footer_is_visible === 'true' || formData.footer_is_visible === true">
+                                                        <strong>Visible:</strong> El footer será mostrado en la página.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Oculto:</strong> El footer no será visible en la página.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="stockVisibleSwitch"
+                                                :checked="formData.stock_id === 1 || formData.stock_id === '1'"
+                                                @change="formData.stock_id = $event.target.checked ? 1 : null"
+                                                >
+                                                <label class="form-check-label fw-bold" for="stockVisibleSwitch">
+                                                Mostrar Stock: {{ formData.stock_id === 1 || formData.stock_id === '1' ? 'Sí' : 'No' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.stock_id === 1 || formData.stock_id === '1'">
+                                                        <strong>Activo:</strong> Esta página mostrará la sección de stock.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Inactivo:</strong> Esta página no mostrará la sección de stock.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 1" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-images"></i>
+                                <span>Imágenes de la página</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <label class="form-label">
+                                    <i class="bi bi-card-image me-2"></i>{{ $t('forms.form_img') }}:
+                                </label>
+
+                                <input
+                                type="file"
+                                class="d-none"
+                                id="fileInput"
+                                accept="image/*"
+                                multiple
+                                @change="handleMultipleImageUpload"
+                                />
+                                <label for="fileInput" class="file-input-label">
+                                    <i class="bi bi-cloud-upload me-2"></i>
+                                    Seleccionar imágenes...
+                                </label>
+
+                                <div v-if="formData.images && formData.images.length > 0" class="mt-2 mb-3">
+                                    <small class="text-muted">{{ formData.images.length }} imagen(es) cargada(s)</small>
+                                </div>
+
+                                <div v-if="formData.images && formData.images.length > 0" class="images-grid">
+                                    <div
+                                    v-for="(img, index) in formData.images"
+                                    :key="index"
+                                    class="image-preview-container"
+                                    >
+                                        <div class="image-preview">
+                                            <img
+                                            :src="img.data || `https://madcoder.io/apis/images_upload/${img.path}`"
+                                            class="preview-image"
+                                            :alt="`Imagen ${index + 1}`"
+                                            />
+                                            <button
+                                            class="btn-remove-image"
+                                            @click="removeImageByIndex(index, img)"
+                                            type="button"
+                                            >
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                            <div class="image-number">{{ index + 1 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-else class="text-center text-muted py-4">
+                                    <i class="bi bi-image pages-empty-icon"></i>
+                                    <p class="mt-2 mb-0">No hay imágenes cargadas</p>
+                                </div>
+
+                                <div class="pages-toggle-box mt-4">
+                                    <div class="form-check form-switch">
+                                        <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        role="switch"
+                                        id="headerVisibleSwitch"
+                                        :checked="formData.header_is_visible === 'true' || formData.header_is_visible === true"
+                                        @change="formData.header_is_visible = $event.target.checked ? 'true' : 'false'"
+                                        >
+                                        <label class="form-check-label fw-bold" for="headerVisibleSwitch">
+                                        Encabezado Visible: {{ formData.header_is_visible === 'true' || formData.header_is_visible === true ? 'Sí' : 'No' }}
+                                        </label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            <span v-if="formData.header_is_visible === 'true' || formData.header_is_visible === true">
+                                                <strong>Visible:</strong> El encabezado (imágenes) será mostrado en la página.
+                                            </span>
+                                            <span v-else>
+                                                <strong>Oculto:</strong> El encabezado (imágenes) no será visible en la página.
+                                            </span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 2" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-text-left"></i>
+                                <span>Encabezado de la página</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ $t('forms.form_title') }}:</label>
+                                    <input v-model="formData.header_text" type="text" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">{{ $t('forms.form_subtitle') }}:</label>
+                                    <input v-model="formData.header_subtext" type="text" class="form-control" />
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label">{{ $t('forms.form_descript') }}:</label>
+                                    <textarea v-model="formData.header_descript" class="form-control" style="height:160px"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 3" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>Formulario</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-lg-6">
+                                        <label class="form-label">Selecciona un formulario:</label>
+                                        <select v-model="formData.form_id" class="form-select">
+                                            <option :value="0">Ninguno</option>
+                                            <option v-for="form in forms" :key="form.id" :value="form.id">{{ form.name }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 4" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-grid-3x3-gap-fill"></i>
+                                <span>Sección 1 (Productos)</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Enlace Name</label>
+                                        <input v-model="formData.product_label" type="text" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Product Title</label>
+                                        <input v-model="formData.product_title" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Product Descripción</label>
+                                    <textarea class="form-control" v-model="formData.product_description" style="height:200px"></textarea>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Background</label>
+                                        <div class="color-picker-wrapper">
+                                            <input v-model="formData.product_background" type="color" class="color-input" />
+                                            <input type="text" v-model="formData.product_background" class="color-value-input" />
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input v-model="formData.product_color" type="color" class="color-input" />
+                                            <input type="text" v-model="formData.product_color" class="color-value-input" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pages-toggle-box mt-4">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="productVisibleSwitch"
+                                                :checked="formData.product_is_visible === 'true' || formData.product_is_visible === true"
+                                                @change="formData.product_is_visible = $event.target.checked ? 'true' : 'false'"
+                                                >
+                                                <label class="form-check-label fw-bold" for="productVisibleSwitch">
+                                                Visible: {{ formData.product_is_visible === 'true' || formData.product_is_visible === true ? 'Sí' : 'No' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.product_is_visible === 'true' || formData.product_is_visible === true">
+                                                        <strong>Visible:</strong> Esta sección será mostrada en la página.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Oculto:</strong> Esta sección no será visible en la página.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="productCarouselSwitch"
+                                                :checked="formData.product_carrouselcard === 1"
+                                                @change="formData.product_carrouselcard = $event.target.checked ? 1 : 0"
+                                                >
+                                                <label class="form-check-label fw-bold" for="productCarouselSwitch">
+                                                {{ formData.product_carrouselcard === 1 ? 'Carrousel Activo' : 'Carrousel Inactivo' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.product_carrouselcard === 1">
+                                                        <strong>Carrusel:</strong> En desktop se mostrarán 3 cards en la primera pantalla, las demás estarán disponibles mediante navegación del carrusel. En móvil se mostrará 1 card a la vez.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Grid:</strong> Las cards se mostrarán una al lado de la otra en filas de 3. Todas las cards serán visibles sin necesidad de navegación.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 5" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-card-text"></i>
+                                <span>Sección 2 (About)</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Enlace Name</label>
+                                        <input v-model="formData.about_label" type="text" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">About Title</label>
+                                        <input v-model="formData.about_title" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">About Descripción</label>
+                                    <textarea class="form-control" v-model="formData.about_description" style="height:200px"></textarea>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Background</label>
+                                        <div class="color-picker-wrapper">
+                                            <input v-model="formData.about_background" type="color" class="color-input" />
+                                            <input type="text" v-model="formData.about_background" class="color-value-input" />
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input v-model="formData.about_color" type="color" class="color-input" />
+                                            <input type="text" v-model="formData.about_color" class="color-value-input" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pages-toggle-box mt-4">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="aboutVisibleSwitch"
+                                                :checked="formData.about_is_visible === 'true' || formData.about_is_visible === true"
+                                                @change="formData.about_is_visible = $event.target.checked ? 'true' : 'false'"
+                                                >
+                                                <label class="form-check-label fw-bold" for="aboutVisibleSwitch">
+                                                Visible: {{ formData.about_is_visible === 'true' || formData.about_is_visible === true ? 'Sí' : 'No' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.about_is_visible === 'true' || formData.about_is_visible === true">
+                                                        <strong>Visible:</strong> Esta sección será mostrada en la página.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Oculto:</strong> Esta sección no será visible en la página.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="aboutCarouselSwitch"
+                                                :checked="formData.about_carrouselcard === 1"
+                                                @change="formData.about_carrouselcard = $event.target.checked ? 1 : 0"
+                                                >
+                                                <label class="form-check-label fw-bold" for="aboutCarouselSwitch">
+                                                {{ formData.about_carrouselcard === 1 ? 'Carrousel Activo' : 'Carrousel Inactivo' }}
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span v-if="formData.about_carrouselcard === 1">
+                                                        <strong>Carrusel:</strong> En desktop se mostrarán 3 cards en la primera pantalla, las demás estarán disponibles mediante navegación del carrusel. En móvil se mostrará 1 card a la vez.
+                                                    </span>
+                                                    <span v-else>
+                                                        <strong>Grid:</strong> Las cards se mostrarán una al lado de la otra en filas de 3. Todas las cards serán visibles sin necesidad de navegación.
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 6" class="pages-step-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-code-square"></i>
+                                <span>Contenido HTML</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="col-12">
+                                    <h5 class="form-label">HTML Personalizado</h5>
+                                    <textarea
+                                    v-model="formData.html_content"
+                                    class="form-control css-editor"
+                                    rows="15"
+                                    placeholder="/* Escribe tu HTML aquí */
+
+<h1>Hello</h1>"
+                                    spellcheck="false"
+                                    @keydown.tab.prevent="handleTab"
+                                    ></textarea>
+                                    <small class="form-text text-muted">
+                                        Escribe HTML. El código se aplicará automáticamente en la página.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pages-step-actions">
+                    <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+                        <i class="bi bi-arrow-left me-2"></i>Anterior
+                    </button>
+                    <div v-else></div>
+                    <div class="pages-step-actions-right">
+                        <!--<button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
+                            Cancelar
+                        </button>-->
+                        <button v-if="currentStep < formSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+                            Siguiente <i class="bi bi-arrow-right ms-2"></i>
                         </button>
-                        <div class="image-number">{{ index + 1 }}</div>
-                    </div>
-                    </div>
-                </div>
-
-                <!-- Mensaje cuando no hay imágenes -->
-                <div v-else class="text-center text-muted py-4">
-                    <i class="bi bi-image" style="font-size: 3rem;"></i>
-                    <p class="mt-2">No hay imágenes cargadas</p>
-                </div>
-
-                <!-- Switch para Encabezado Visible -->
-                <div class="mt-4 p-3 rounded border border-secondary">
-                    <div class="form-check form-switch">
-                        <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        role="switch" 
-                        id="headerVisibleSwitch"
-                        :checked="formData.header_is_visible === 'true' || formData.header_is_visible === true"
-                        @change="formData.header_is_visible = $event.target.checked ? 'true' : 'false'"
-                        >
-                        <label class="form-check-label fw-bold" for="headerVisibleSwitch">
-                        Encabezado Visible: {{ formData.header_is_visible === 'true' || formData.header_is_visible === true ? 'Sí' : 'No' }}
-                        </label>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <span v-if="formData.header_is_visible === 'true' || formData.header_is_visible === true">
-                                <strong>Visible:</strong> El encabezado (imágenes) será mostrado en la página.
-                            </span>
-                            <span v-else>
-                                <strong>Oculto:</strong> El encabezado (imágenes) no será visible en la página.
-                            </span>
-                        </small>
-                    </div>
-                </div>
-                </div>
-            </div>
-            </div>
-
-            <!-- 3. ENCABEZADO -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEncabezado">
-                    <i class="bi bi-text-left me-2"></i>
-                    3. Encabezado de la página
-                </button>
-                </h2>
-                <div id="collapseEncabezado" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.form_title') }}:</label>
-                    <input v-model="formData.header_text" type="text" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.form_subtitle') }}:</label>
-                    <input v-model="formData.header_subtext" type="text" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">{{ $t('forms.form_descript') }}:</label>
-                    <textarea v-model="formData.header_descript" class="form-control" style="height:160px"></textarea>
-                    </div>
-                </div>
-                </div>
-            </div>
-
-            <!-- 4. CAMPOS (mantener funcionalidad completa) -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCampos">
-                    <i class="bi bi-ui-checks-grid me-2"></i>
-                    4. Formulario
-                </button>
-                </h2>
-                <div id="collapseCampos" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <div class="col-12 col-md-6">
-                    <label class="form-label">Selecciona un formulario:</label>
-                    <select v-model="formData.form_id" class="form-select">
-                        <option value=0>Ninguno</option>
-                        <option v-for="form in forms" :key="form.id" :value="form.id">{{ form.name }}</option>
-                    </select>
-                    </div>
-                    <!-- <div v-for="(field, fieldIndex) in formData.fields" :key="fieldIndex" class="field-item mb-4">
-                    <div class="field-header">
-                        <span class="field-number">Campo {{ fieldIndex + 1 }}</span>
-                        <button class="btn btn-sm btn-danger" @click="removeField(fieldIndex)">
-                        <i class="bi bi-trash"></i>
+                        <button v-else type="button" class="btn btn-primary" @click="saveForm">
+                            <i class="bi bi-floppy me-2"></i>{{ $t('search_view.save') }}
                         </button>
                     </div>
-                    
-                    <div class="field-body">
-                        <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <div class="form-check">
-                            <input type="checkbox" class="form-check-input" v-model="field.hidden" :id="'hidden' + fieldIndex" />
-                            <label class="form-check-label" :for="'hidden' + fieldIndex">Hidden</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                            <input type="checkbox" class="form-check-input" v-model="field.required" :id="'required' + fieldIndex" />
-                            <label class="form-check-label" :for="'required' + fieldIndex">Requerido</label>
-                            </div>
-                        </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                        <div class="col-4">
-                            <label class="form-label">{{ $t('forms.form_field_label') }}:</label>
-                            <input v-model="field.label" class="form-control" placeholder="Etiqueta" />
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label">{{ $t('forms.form_field_name') }}:</label>
-                            <input v-model="field.name" class="form-control" placeholder="Nombre" />
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label">{{ $t('forms.form_field_value') }}:</label>
-                            <input v-model="field.value" class="form-control" placeholder="Valor" />
-                        </div>
-                        </div>
-
-                        <div class="mb-3">
-                        <label class="form-label">{{ $t('forms.form_field_type') }}:</label>
-                        <select v-model="field.type" class="form-select">
-                            <option value="text">Texto</option>
-                            <option value="number">Número</option>
-                            <option value="email">Email</option>
-                            <option value="textarea">Textarea</option>
-                            <option value="select">Select</option>
-                        </select>
-                        </div>
-
-                        <div v-if="field.type === 'select'" class="options-section">
-                        <h6>{{ $t('forms.form_field_options') }}</h6>
-                        <div v-for="(option, optIndex) in field.options" :key="optIndex" class="option-item mb-2">
-                            <input v-model="option.text" class="form-control" placeholder="Texto" />
-                            <input v-model="option.value" class="form-control" placeholder="Valor" />
-                            <button class="btn btn-sm btn-danger" @click="removeOption(fieldIndex, optIndex)">×</button>
-                        </div>
-                        <button class="btn btn-sm btn-secondary" @click="addOption(fieldIndex)">
-                            <i class="bi bi-plus-circle me-1"></i>Agregar opción
-                        </button>
-                        </div>
-                    </div>
-                    </div>
-                    <button class="btn btn-primary" @click="addField">
-                    <i class="bi bi-plus-circle me-2"></i>Agregar Campo
-                    </button> -->
-                </div>
                 </div>
             </div>
-
-            <!-- 5. SECCIÓN 1 -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>
-                    5. Sección 1 (Productos)
-                </button>
-                </h2>
-                <div id="collapseProducto" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">Enlace Name</label>
-                        <input v-model="formData.product_label" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">Product Title</label>
-                        <input v-model="formData.product_title" type="text" class="form-control" />
-                    </div>
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">Product Descripción</label>
-                    <textarea class="form-control" v-model="formData.product_description" style="height:200px"></textarea>
-                    </div>
-                    <div class="row g-3">
-                    <div class="col-6">
-                        <label class="form-label">Background</label>
-                        <div class="color-picker-wrapper">
-                        <input v-model="formData.product_background" type="color" class="color-input" />
-                        <input type="text" v-model="formData.product_background" class="color-value-input" />
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Color</label>
-                        <div class="color-picker-wrapper">
-                        <input v-model="formData.product_color" type="color" class="color-input" />
-                        <input type="text" v-model="formData.product_color" class="color-value-input" />
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Switches para activar/desactivar la sección -->
-                    <div class="mt-5 p-3 rounded">
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="form-check form-switch">
-                                    <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="productVisibleSwitch"
-                                    :checked="formData.product_is_visible === 'true' || formData.product_is_visible === true"
-                                    @change="formData.product_is_visible = $event.target.checked ? 'true' : 'false'"
-                                    >
-                                    <label class="form-check-label fw-bold" for="productVisibleSwitch">
-                                    Visible: {{ formData.product_is_visible === 'true' || formData.product_is_visible === true ? 'Sí' : 'No' }}
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span v-if="formData.product_is_visible === 'true' || formData.product_is_visible === true">
-                                            <strong>Visible:</strong> Esta sección será mostrada en la página.
-                                        </span>
-                                        <span v-else>
-                                            <strong>Oculto:</strong> Esta sección no será visible en la página.
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-check form-switch">
-                                    <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="productCarouselSwitch"
-                                    :checked="formData.product_carrouselcard === 1"
-                                    @change="formData.product_carrouselcard = $event.target.checked ? 1 : 0"
-                                    >
-                                    <label class="form-check-label fw-bold" for="productCarouselSwitch">
-                                    {{ formData.product_carrouselcard === 1 ? 'Carrousel Activo' : 'Carrousel Inactivo' }}
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span v-if="formData.product_carrouselcard === 1">
-                                            <strong>Carrusel:</strong> En desktop se mostrarán 3 cards en la primera pantalla, las demás estarán disponibles mediante navegación del carrusel. En móvil se mostrará 1 card a la vez.
-                                        </span>
-                                        <span v-else>
-                                            <strong>Grid:</strong> Las cards se mostrarán una al lado de la otra en filas de 3. Todas las cards serán visibles sin necesidad de navegación.
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                </div>
-            </div>
-
-            <!-- 6. SECCIÓN 2 -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAbout">
-                    <i class="bi bi-card-text me-2"></i>
-                    6. Sección 2 (About)
-                </button>
-                </h2>
-                <div id="collapseAbout" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">Enlace Name</label>
-                        <input v-model="formData.about_label" type="text" class="form-control" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">About Title</label>
-                        <input v-model="formData.about_title" type="text" class="form-control" />
-                    </div>
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">About Descripción</label>
-                    <textarea class="form-control" v-model="formData.about_description" style="height:200px"></textarea>
-                    </div>
-                    <div class="row g-3">
-                    <div class="col-6">
-                        <label class="form-label">Background</label>
-                        <div class="color-picker-wrapper">
-                        <input v-model="formData.about_background" type="color" class="color-input" />
-                        <input type="text" v-model="formData.about_background" class="color-value-input" />
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Color</label>
-                        <div class="color-picker-wrapper">
-                        <input v-model="formData.about_color" type="color" class="color-input" />
-                        <input type="text" v-model="formData.about_color" class="color-value-input" />
-                        </div>
-                    </div>
-                    <!-- Switches para activar/desactivar la sección -->
-                    <div class="mt-5 p-3 rounded">
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="form-check form-switch">
-                                    <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="aboutVisibleSwitch"
-                                    :checked="formData.about_is_visible === 'true' || formData.about_is_visible === true"
-                                    @change="formData.about_is_visible = $event.target.checked ? 'true' : 'false'"
-                                    >
-                                    <label class="form-check-label fw-bold" for="aboutVisibleSwitch">
-                                    Visible: {{ formData.about_is_visible === 'true' || formData.about_is_visible === true ? 'Sí' : 'No' }}
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span v-if="formData.about_is_visible === 'true' || formData.about_is_visible === true">
-                                            <strong>Visible:</strong> Esta sección será mostrada en la página.
-                                        </span>
-                                        <span v-else>
-                                            <strong>Oculto:</strong> Esta sección no será visible en la página.
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-check form-switch">
-                                    <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="aboutCarouselSwitch"
-                                    :checked="formData.about_carrouselcard === 1"
-                                    @change="formData.about_carrouselcard = $event.target.checked ? 1 : 0"
-                                    >
-                                    <label class="form-check-label fw-bold" for="aboutCarouselSwitch">
-                                    {{ formData.about_carrouselcard === 1 ? 'Carrousel Activo' : 'Carrousel Inactivo' }}
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span v-if="formData.about_carrouselcard === 1">
-                                            <strong>Carrusel:</strong> En desktop se mostrarán 3 cards en la primera pantalla, las demás estarán disponibles mediante navegación del carrusel. En móvil se mostrará 1 card a la vez.
-                                        </span>
-                                        <span v-else>
-                                            <strong>Grid:</strong> Las cards se mostrarán una al lado de la otra en filas de 3. Todas las cards serán visibles sin necesidad de navegación.
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                
-                </div>
-                
-            </div>
-
-            <!-- 7. HTML -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHTML">
-                    <i class="bi bi-card-text me-2"></i>
-                    7. Contenido HTML 
-                </button>
-                </h2>
-                <div id="collapseHTML" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <div class="row g-3 mb-3">
-                    
-                        <div class="mb-5">
-                <div class="col-12">
-                    <h5 class="form-label">HTML Personalizado</h5>
-                    <textarea 
-                        v-model="formData.html_content" 
-                        class="form-control css-editor" 
-                        rows="15"
-                        placeholder="/* Escribe tu HTML aquí */
-                        
-<h1>Hello</h1>
-                        "
-                        spellcheck="false"
-                        @keydown.tab.prevent="handleTab"
-                    ></textarea>
-                    <small class="form-text text-muted">
-                        Escribe HTML. El código se aplicará automáticamente en la página.
-                    </small>
-                </div>
-            </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-
-        </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" @click="saveForm">
-            <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
-            <i class="bi bi-x-circle me-2"></i>{{$t('search_view.cancel')}}
-            </button>
         </div>
         </ModalComponent>
 
         <!-- MODAL ESTILOS (simplificado) -->
-        <ModalComponent ref="styleModal" modalId="styleModal" :modalTitle="'Estilo de formulario'" class="modal-xl">
-        <div class="modal-body">
-            <div class="mb-5">
-            <h5 class="mb-3">{{$t('menu.templates')}}</h5>
-            <select v-model="formData.selectedStyleOption" class="form-select mb-4">
-            <option disabled value="">Selecciona un template</option>
-            <option v-for="(item, index) in styleOptions" :key="index" :value="item.code">{{ item.name }}</option>
-            </select>
-            </div>
+        <ModalComponent ref="styleModal" modalId="styleModal" :modalTitle="'Estilo de formulario'" class="modal-fullscreen-fixed">
+        <div class="pages-style-modal">
+            <div class="pages-style-shell">
+                <!--<div class="pages-style-topbar">
+                    <div>
+                        <h3 class="pages-style-title">Estilo de formulario</h3>
+                        <p class="pages-style-subtitle">Configurá template, paleta visual y clases personalizadas con el mismo formato guiado del resto de la vista.</p>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary pages-style-close" @click="closeStyleModalForm">
+                        <i class="bi bi-x-circle me-2"></i>{{$t('search_view.cancel')}}
+                    </button>
+                </div>-->
 
-            <div class="mb-5">
-            <h5 class="mb-3">Colores</h5>
-            <div v-for="(color, key) in formData.colorOptions" :key="key" class="mb-3">
-            <label class="form-label">{{ color.label }}</label>
-            <div class="color-picker-wrapper">
-                <input type="color" v-model="formData.colorOptions[key].value" class="color-input">
-                <input type="text" v-model="formData.colorOptions[key].value" class="color-value-input">
-            </div>
-            </div>
-            </div>
+                <div class="pages-style-stepper">
+                    <button
+                    v-for="(step, index) in styleSteps"
+                    :key="step.key"
+                    type="button"
+                    class="pages-style-step-item"
+                    :class="{ active: currentStyleStep === index, done: currentStyleStep > index }"
+                    @click="goToStyleStep(index)"
+                    >
+                        <div class="pages-style-step-num">
+                            <i v-if="currentStyleStep > index" class="bi bi-check-lg"></i>
+                            <span v-else>{{ index + 1 }}</span>
+                        </div>
+                        <div class="pages-style-step-copy">
+                            <span>{{ step.label }}</span>
+                            <small>{{ step.description }}</small>
+                        </div>
+                    </button>
+                </div>
 
-            <div class="mb-5">
-            <div class="col-12">
-                <h5 class="form-label">ClassName</h5>
-                <input v-model="formData.className" type="text" class="form-control" />
-            </div>
-            </div>
+                <div class="pages-style-content">
+                    <div v-show="currentStyleStep === 0" class="pages-style-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span>{{$t('menu.templates')}}</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <label class="form-label">Template visual</label>
+                                <select v-model="formData.selectedStyleOption" class="form-select mb-0">
+                                    <option disabled value="">Selecciona un template</option>
+                                    <option v-for="(item, index) in styleOptions" :key="index" :value="item.code">{{ item.name }}</option>
+                                </select>
 
-            <div class="mb-5">
-                <div class="col-12">
-                    <h5 class="form-label">CSS Personalizado</h5>
-                    <textarea 
-                        v-model="formData.css" 
-                        class="form-control css-editor" 
-                        rows="15"
-                        placeholder="/* Escribe tu CSS aquí */
+                                <div class="pages-style-toggle-list mt-4">
+                                    <div class="pages-style-toggle-row">
+                                        <div class="pages-style-toggle-info">
+                                            <span>Efecto parallax en el header</span>
+                                            <p>Activa o desactiva el efecto visual del encabezado para contemplarlo después en base y render.</p>
+                                        </div>
+                                        <label class="pages-style-switch">
+                                            <input
+                                                type="checkbox"
+                                                :checked="formData.header_is_paralax === 1 || formData.header_is_paralax === '1' || formData.header_is_paralax === true"
+                                                @change="formData.header_is_paralax = $event.target.checked ? 1 : 0"
+                                            />
+                                            <span class="pages-style-switch-track"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStyleStep === 1" class="pages-style-panel">
+                        <div class="card data-card pages-card">
+                            <div class="pages-card-head">
+                                <i class="bi bi-palette-fill"></i>
+                                <span>Colores</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div v-for="(color, key) in formData.colorOptions" :key="key" class="mb-3">
+                                    <label class="form-label">{{ color.label }}</label>
+                                    <div class="color-picker-wrapper">
+                                        <input type="color" v-model="formData.colorOptions[key].value" class="color-input">
+                                        <input type="text" v-model="formData.colorOptions[key].value" class="color-value-input">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStyleStep === 2" class="pages-style-panel">
+                        <div class="card data-card pages-card mb-3">
+                            <div class="pages-card-head">
+                                <i class="bi bi-braces"></i>
+                                <span>Clase y CSS personalizado</span>
+                            </div>
+                            <div class="pages-card-body">
+                                <div class="mb-4">
+                                    <label class="form-label">ClassName</label>
+                                    <input v-model="formData.className" type="text" class="form-control" />
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">CSS Personalizado</label>
+                                    <textarea 
+                                        v-model="formData.css" 
+                                        class="form-control css-editor" 
+                                        rows="15"
+                                        placeholder="/* Escribe tu CSS aquí */
             .mi-clase {
                 color: #333;
                 font-size: 16px;
             }"
-                        spellcheck="false"
-                        @keydown.tab.prevent="handleTab"
-                    ></textarea>
-                    <small class="form-text text-muted">
-                        Escribe CSS sin la etiqueta &lt;style&gt;. El código se aplicará automáticamente al formulario.
-                    </small>
+                                        spellcheck="false"
+                                        @keydown.tab.prevent="handleTab"
+                                    ></textarea>
+                                    <small class="form-text text-muted">
+                                        Escribe CSS sin la etiqueta &lt;style&gt;. El código se aplicará automáticamente al formulario.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pages-style-actions">
+                    <button v-if="currentStyleStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStyleStep">
+                        <i class="bi bi-arrow-left me-2"></i>Anterior
+                    </button>
+                    <div v-else></div>
+                    <div class="pages-style-actions-right">
+                        <!--<button type="button" class="btn btn-outline-secondary" @click="closeStyleModalForm">
+                            Cancelar
+                        </button>-->
+                        <button v-if="currentStyleStep < styleSteps.length - 1" type="button" class="btn btn-primary" @click="nextStyleStep">
+                            Siguiente <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                        <button v-else type="button" class="btn btn-primary" @click="saveStyleForm">
+                            <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
+                        </button>
+                    </div>
                 </div>
             </div>
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" @click="saveStyleForm">
-            <i class="bi bi-floppy me-2"></i>{{$t('search_view.save')}}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" @click="closeStyleModalForm">
-            <i class="bi bi-x-circle me-2"></i>{{$t('search_view.cancel')}}
-            </button>
         </div>
         </ModalComponent>
 
@@ -755,6 +797,7 @@
   import ToastComponent from '@/components/ToastComponent.vue'; // Asegúrate de ajustar la ruta
   import ConfirmPopup from '@/components/ConfirmPopup.vue'
   import { useI18n } from "vue-i18n";
+  import { useAuthStore } from '@/stores/auth';
 
   export default {
     components: {
@@ -766,6 +809,7 @@
     setup() {
 
         const { t } = useI18n();
+        const authStore = useAuthStore();
         const instance = getCurrentInstance();
         const forms = ref([]);
         const pages = ref([]);
@@ -773,7 +817,23 @@
         const negocios = ref([]);
         const isModalOpen = ref(false);
         const editingIndex = ref(null);
-        const formData = ref({ name: '', image: '', images: [], images_deleted: [], header_text: "", header_subtext: "", header_descript: "", colorOptions:{}, selectedStyleOption:"classic", status: "inactive", about_title:"",about_description:"", product_title: "", product_description: "", about_background: "#ffffff", about_color: "#0000", product_background: "#ffffff", product_color: "#0000", form_id: null, html_content: "", about_carrouselcard: 0, product_carrouselcard: 0, product_is_visible: "false", about_is_visible: "false", menu_is_visible: "false", footer_is_visible: "false", header_is_visible: "false", marca_id: "", marca_name: "", tipo_de_negocio_id: "", tipo_de_negocio_name: "" });
+        const currentStep = ref(0);
+        const currentStyleStep = ref(0);
+        const formSteps = ref([
+            { key: 'basic', label: 'Datos básicos', description: 'Dominio, marca, negocio y visibilidad general' },
+            { key: 'images', label: 'Imágenes', description: 'Galería y visibilidad del encabezado' },
+            { key: 'header', label: 'Encabezado', description: 'Título, subtítulo y descripción' },
+            { key: 'form', label: 'Formulario', description: 'Formulario asociado a la page' },
+            { key: 'products', label: 'Sección 1', description: 'Contenido y estilo de productos' },
+            { key: 'about', label: 'Sección 2', description: 'Contenido y estilo de about' },
+            { key: 'html', label: 'HTML', description: 'Bloque HTML personalizado' }
+        ]);
+        const styleSteps = ref([
+            { key: 'template', label: 'Template', description: 'Selección del estilo base' },
+            { key: 'colors', label: 'Colores', description: 'Paleta del formulario' },
+            { key: 'css', label: 'Clase y CSS', description: 'Ajustes avanzados de estilo' }
+        ]);
+        const formData = ref({ name: '', image: '', images: [], images_deleted: [], header_text: "", header_subtext: "", header_descript: "", colorOptions:{}, selectedStyleOption:"classic", status: "inactive", about_title:"",about_description:"", product_title: "", product_description: "", about_background: "#ffffff", about_color: "#0000", product_background: "#ffffff", product_color: "#0000", form_id: null, stock_id: null, html_content: "", about_carrouselcard: 0, product_carrouselcard: 0, product_is_visible: "false", about_is_visible: "false", menu_is_visible: "false", footer_is_visible: "false", header_is_visible: "false", header_is_paralax: 0, marca_id: "", marca_name: "", tipo_de_negocio_id: "", tipo_de_negocio_name: "" });
         const token = ref(null);
         const isLoading = ref(false);
         const formModal = ref(null);
@@ -792,6 +852,11 @@
         // const quillEditorRef2 = ref(null);
         const url_forms = "https://apis.madautomate.cloud/webhook/81d62e39-5785-4ca3-8efc-735a72e05302";
         const url = "https://apis.madautomate.cloud/webhook/c535ea5e-4f73-4237-b6c6-51eef225cdd2";
+
+        const getDomainPage = () => {
+            const details = Array.isArray(authStore.user?.details) ? authStore.user.details : [];
+            return details.find(detail => detail.key == "domain_page")?.value || null;
+        };
 
         onMounted(() => {
             confirmPopup.value = instance?.proxy?.$refs.confirmPopup; // Acceder a $refs en onMounted
@@ -812,9 +877,11 @@
   
         const openModalForm = (index = null) => {
             editingIndex.value = index;
+            currentStep.value = 0;
             if (index !== null) {
                 // Clonar datos existentes
                 formData.value = JSON.parse(JSON.stringify(index));
+                delete formData.value.dominio;
                 
                 // Asegurarse de que images sea un array
                 if (!Array.isArray(formData.value.images)) {
@@ -849,23 +916,103 @@
                 about_is_visible: "false",
                 menu_is_visible: "false",
                 footer_is_visible: "false",
+                stock_id: null,
                 header_is_visible: "false",
+                header_is_paralax: 0,
                 marca_id: "",
                 marca_name: "",
                 tipo_de_negocio_id: "",
                 tipo_de_negocio_name: ""
             };
+            currentStep.value = 0;
             formModal.value.closeModal();
         };
   
         const closeStyleModalForm = () => {
+            currentStyleStep.value = 0;
             styleModal.value.closeModal();
         }
 
         const handleCloseModal = () => {
-            closeModalForm();
+            formData.value = {
+                name: '',
+                image: '',
+                images: [],
+                about_title: "",
+                about_description: "",
+                about_background: "#ffffff",
+                about_color: "#0000",
+                about_label: "",
+                product_title: "",
+                product_description: "",
+                product_background: "#ffffff",
+                product_color: "#0000",
+                product_label: "",
+                form_id: null,
+                images_deleted: [],
+                html_content: "",
+                about_carrouselcard: 0,
+                product_carrouselcard: 0,
+                product_is_visible: "false",
+                about_is_visible: "false",
+                menu_is_visible: "false",
+                footer_is_visible: "false",
+                stock_id: null,
+                header_is_visible: "false",
+                header_is_paralax: 0,
+                marca_id: "",
+                marca_name: "",
+                tipo_de_negocio_id: "",
+                tipo_de_negocio_name: ""
+            };
+            editingIndex.value = null;
+            currentStep.value = 0;
+            currentStyleStep.value = 0;
             closeStyleModalForm();
             // acá hacés lo que necesites cuando el modal se cierre
+        };
+
+        const goToStep = (index) => {
+            currentStep.value = index;
+        };
+
+        const nextStep = () => {
+            if (currentStep.value < formSteps.value.length - 1) {
+                currentStep.value += 1;
+            }
+        };
+
+        const prevStep = () => {
+            if (currentStep.value > 0) {
+                currentStep.value -= 1;
+            }
+        };
+
+        const goToStyleStep = (index) => {
+            currentStyleStep.value = index;
+        };
+
+        const nextStyleStep = () => {
+            if (currentStyleStep.value < styleSteps.value.length - 1) {
+                currentStyleStep.value += 1;
+            }
+        };
+
+        const prevStyleStep = () => {
+            if (currentStyleStep.value > 0) {
+                currentStyleStep.value -= 1;
+            }
+        };
+
+        const handleTab = (event) => {
+            const start = event.target.selectionStart;
+            const end = event.target.selectionEnd;
+            const value = event.target.value;
+            event.target.value = `${value.substring(0, start)}\t${value.substring(end)}`;
+            event.target.selectionStart = event.target.selectionEnd = start + 1;
+            if (event.target === document.activeElement) {
+                event.target.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         };
 
         const handleImageUpload = (event) => {
@@ -899,11 +1046,13 @@
 
       
         const saveForm = () => {
+            const payload = JSON.parse(JSON.stringify(formData.value));
+            delete payload.dominio;
             if (editingIndex.value === null) {
-                instance.proxy.createForm(JSON.parse(JSON.stringify(formData.value)));
+                instance.proxy.createForm(payload);
             } else {
-                pages.value[editingIndex.value] = JSON.parse(JSON.stringify(formData.value));
-                instance.proxy.updateForm(JSON.parse(JSON.stringify(formData.value)));
+                pages.value[editingIndex.value] = payload;
+                instance.proxy.updateForm(payload);
             }
             closeModalForm();
         };
@@ -1217,6 +1366,7 @@
         const styleForm = async (index = null) => {
             editingIndex.value = index;
             formData.value = index;
+            currentStyleStep.value = 0;
             styleModal.value.openModal();
         }
 
@@ -1253,19 +1403,21 @@
 
         const enlaceClick = (row) => {
         const data = row?.__v_raw || row;
+        const domainPage = getDomainPage();
         //console.log('data', data)
         try {
-            // Dominio base (podés reemplazar por el tuyo o tomarlo de la instancia)
-            const dominio = data.dominio; 
-
             // Validar que tenga código
             if (!data.code) {
             alert("El formulario no tiene un código asignado.");
             return;
             }
 
-            // Construir la URL final
-            const url = `${dominio}?code=${data.code}`;
+            if (!domainPage) {
+            alert("La página no tiene configurado el campo domain_page.");
+            return;
+            }
+
+            const url = `${domainPage}/${data.code}`;
 
             // Abrir en una nueva pestaña
             window.open(url, "_blank");
@@ -1348,9 +1500,20 @@
         isModalOpen,
         formData,
         editingIndex,
+        currentStep,
+        currentStyleStep,
+        formSteps,
+        styleSteps,
         openModalForm,
         closeModalForm,
+        goToStep,
+        nextStep,
+        prevStep,
+        goToStyleStep,
+        nextStyleStep,
+        prevStyleStep,
         handleImageUpload,
+        handleTab,
         saveForm,
         duplicateForm,
         deleteForm,
@@ -1396,3 +1559,445 @@
   };
   </script>
 
+<style scoped>
+.pages-step-modal {
+  height: 100%;
+}
+
+.pages-step-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.pages-step-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pages-step-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.pages-step-subtitle {
+  margin: 0;
+  color: #6c757d;
+  max-width: 780px;
+}
+
+.pages-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.pages-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.pages-step-item:last-child {
+  border-right: 0;
+}
+
+.pages-step-item:hover:not(.active) {
+  background: #f8f9fa;
+}
+
+.pages-step-item.active {
+  background: #eff6ff;
+}
+
+.pages-step-item.done .pages-step-num,
+.pages-step-item.active .pages-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.pages-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.pages-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pages-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.pages-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.pages-step-item.active .pages-step-copy span,
+.pages-step-item.done .pages-step-copy span {
+  color: #185fa5;
+}
+
+.pages-step-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.pages-step-panel {
+  min-height: 100%;
+}
+
+.pages-card {
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.pages-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 700;
+  color: #212529;
+}
+
+.pages-card-head i {
+  color: #185fa5;
+}
+
+.pages-card-body {
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.pages-toggle-box {
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.pages-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.pages-step-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pages-step-close {
+  white-space: nowrap;
+}
+
+.pages-empty-icon {
+  font-size: 3rem;
+}
+
+.pages-style-modal {
+  height: 100%;
+}
+
+.pages-style-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.pages-style-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pages-style-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.pages-style-subtitle {
+  margin: 0;
+  color: #6c757d;
+  max-width: 780px;
+}
+
+.pages-style-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.pages-style-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.pages-style-step-item:last-child { border-right: 0; }
+.pages-style-step-item:hover:not(.active) { background: #f8f9fa; }
+.pages-style-step-item.active { background: #eff6ff; }
+.pages-style-step-item.done .pages-style-step-num,
+.pages-style-step-item.active .pages-style-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.pages-style-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.pages-style-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pages-style-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.pages-style-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.pages-style-step-item.active .pages-style-step-copy span,
+.pages-style-step-item.done .pages-style-step-copy span {
+  color: #185fa5;
+}
+
+.pages-style-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.pages-style-panel {
+  min-height: 100%;
+}
+
+.pages-style-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.pages-style-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pages-style-close {
+  white-space: nowrap;
+}
+
+.pages-style-toggle-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.pages-style-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 0;
+  border-top: 1px solid #eef1f4;
+}
+
+.pages-style-toggle-info span {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.pages-style-toggle-info p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #6c757d;
+}
+
+.pages-style-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.pages-style-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pages-style-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: #dee2e6;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pages-style-switch input:checked + .pages-style-switch-track {
+  background: #185fa5;
+}
+
+.pages-style-switch-track::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.pages-style-switch input:checked + .pages-style-switch-track::after {
+  left: 21px;
+}
+
+.images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.images-grid .image-preview-container {
+  margin-top: 0;
+  max-width: 300px;
+}
+
+@media (max-width: 991px) {
+  .pages-step-shell {
+    padding: 1rem;
+  }
+
+  .pages-stepper {
+    flex-direction: column;
+  }
+
+  .pages-style-stepper {
+    flex-direction: column;
+  }
+
+  .pages-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .pages-step-item:last-child {
+    border-bottom: 0;
+  }
+
+  .pages-style-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .pages-style-step-item:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .pages-step-topbar,
+  .pages-step-actions,
+  .pages-step-actions-right,
+  .pages-style-topbar,
+  .pages-style-actions,
+  .pages-style-actions-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pages-step-close,
+  .pages-style-close,
+  .pages-step-actions .btn,
+  .pages-step-actions-right .btn,
+  .pages-style-actions .btn,
+  .pages-style-actions-right .btn {
+    width: 100%;
+  }
+}
+</style>

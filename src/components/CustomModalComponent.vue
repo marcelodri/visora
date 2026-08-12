@@ -22,15 +22,34 @@
     },
     data() {
       return {
-        isVisible: false
+        isVisible: false,
+        isMobile: false
       };
     },
+    mounted() {
+      this.checkMobile();
+      window.addEventListener('resize', this.checkMobile);
+    },
+    beforeUnmount() {
+      window.removeEventListener('resize', this.checkMobile);
+    },
     methods: {
+      checkMobile() {
+        this.isMobile = window.innerWidth < 768;
+      },
       openModal() {
         this.isVisible = true;
+        // Ocultar el scroll de la página solo en desktop
+        if (!this.isMobile) {
+          document.documentElement.style.overflow = 'hidden';
+        }
       },
       closeModal() {
         this.isVisible = false;
+        // Mostrar el scroll de la página nuevamente
+        if (!this.isMobile) {
+          document.documentElement.style.overflow = 'auto';
+        }
       }
     }
   };

@@ -43,7 +43,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/images/innovalabs-software-developer-6521720.jpg');
+  background-image: url('../../assets/images/transforma.jpg');
   background-size: cover;
   background-position: center;
   z-index: 1;

@@ -438,7 +438,7 @@ const isLoading = ref(false);
 const selectedFieldsByAuto = ref({})
 
 const username = "m.dri@madcoder.io"
-const password = "Pilot1234"
+const password = "Marcedri1452/"
 const API_URL = "https://api.pilotsolution.net/v1"
 
 // --- Toast refs ---

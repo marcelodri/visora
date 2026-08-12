@@ -6,7 +6,7 @@
       @click="$emit('closeSidebar')"
     ></div>
     <div id="sidebar" aria-labelledby="sidebar-title" no-header shadow :class="['sidebar', { 'show': isVisible }]">
-      <div class="p-3 pl-1 d-flex flex-column justify-content-between h-100">
+      <div class="p-3 pl-1 d-flex flex-column justify-content-between">
         <button 
           class="btn-close d-md-none mb-3 ms-auto" 
           @click="$emit('closeSidebar')"
@@ -53,7 +53,7 @@
                     v-for="route in category.routes"
                     :key="route.name"
                     class="mb-2"
-                    :class="['/panel/pages/settings', '/panel/pages/templates', '/panel/events/start', '/panel/forms/started', '/panel/events/qr-access', '/panel/rewards/start', '/panel/rewards/rules', '/panel/rewards/sales', '/panel/rewards/MigrateCustomers', '/panel/emails/start'].includes(route.path) ? 'border-b pb-2' : ''"
+                    :class="['/panel/pages/settings', '/panel/pages/templates', '/panel/events/start', '/panel/forms/started', '/panel/events/qr-access', '/panel/rewards/start', '/panel/rewards/MigrateCustomers', '/panel/emails/start'].includes(route.path) ? 'border-b pb-2' : ''"
                   >
                     <router-link
                       :to="route.path"

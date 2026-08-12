@@ -62,231 +62,263 @@
       </div>
     </div>
 
-    <!-- PREVIEW SECTION FIXED -->
-    <div class="preview-section-fixed">
-      <div class="preview-section">
-        <h5 class="preview-title">
-          <i class="bi bi-eye-fill me-2"></i>
-          Vista previa
-        </h5>
-        <div class="menu-preview" :style="{ background: formData.background, color: formData.menuColor }">
-          <div class="preview-logo">
-            <img 
-              v-if="formData.image || formData.path"
-              :src="formData.image || `${baseUrl}${formData.path}`"
-              alt="Logo preview"
-              class="preview-logo-img"
-            />
-            <span v-else class="preview-logo-placeholder">Logo</span>
+    <div class="menu-stepper">
+      <button
+        v-for="(step, index) in menuSteps"
+        :key="step.key"
+        type="button"
+        class="menu-step-item"
+        :class="{ active: currentStep === index, done: currentStep > index }"
+        @click="goToStep(index)"
+      >
+        <div class="menu-step-num">
+          <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+          <span v-else>{{ index + 1 }}</span>
+        </div>
+        <div class="menu-step-copy">
+          <span>{{ step.label }}</span>
+          <small>{{ step.description }}</small>
+        </div>
+      </button>
+    </div>
+
+    <div class="menu-step-content">
+      <div v-show="currentStep === 0">
+        <div class="preview-section-fixed">
+          <div class="preview-section">
+            <h5 class="preview-title">
+              <i class="bi bi-eye-fill me-2"></i>
+              Vista previa
+            </h5>
+            <div class="menu-preview" :style="{ background: formData.background, color: formData.menuColor }">
+              <div class="preview-logo">
+                <img 
+                  v-if="formData.image || formData.path"
+                  :src="formData.image || `${baseUrl}${formData.path}`"
+                  alt="Logo preview"
+                  class="preview-logo-img"
+                />
+                <span v-else class="preview-logo-placeholder">Logo</span>
+              </div>
+              <div class="preview-menu-items">
+                <span v-for="(item, index) in formData.extra_items" :key="index">
+                  {{ item.label }}
+                </span>
+                <span>Acerca de</span>
+                <span>Contacto</span>
+              </div>
+            </div>
           </div>
-          <div class="preview-menu-items">
-            <span v-for="(item, index) in formData.extra_items" :key="index">
-              {{ item.label }}
-            </span>
-            <span>Acerca de</span>
-            <span>Contacto</span>
+        </div>
+      </div>
+
+      <div v-show="currentStep === 1">
+        <div class="card settings-card mb-4">
+          <div class="card-body p-4">
+            <div class="settings-group">
+              <label class="settings-label">
+                <i class="bi bi-image-fill me-2"></i>
+                Logo del menú
+              </label>
+              <p class="settings-description">
+                Cargá el logo que aparecerá en la parte superior izquierda de todos tus formularios
+              </p>
+
+              <input
+                type="file"
+                class="d-none"
+                id="fileLogo"
+                accept="image/png, image/jpeg, image/webp, image/gif"
+                @change="handleImageUpload"
+              />
+
+              <label for="fileLogo" class="file-input-label">
+                <i class="bi bi-cloud-upload me-2"></i>
+                <span>{{ formData.fileName || 'Seleccionar imagen (jpg, png, webp, gif)' }}</span>
+              </label>
+
+              <div v-if="formData.image || formData.path" class="image-preview-container">
+                <div class="image-preview">
+                  <img
+                    :src="formData.image || `${baseUrl}${formData.path}`"
+                    alt="Logo"
+                    class="preview-image"
+                  />
+                  <button
+                    class="btn-remove-image"
+                    @click="removeImage"
+                    title="Eliminar imagen"
+                    type="button"
+                  >
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+                <p class="image-info">
+                  <i class="bi bi-check-circle-fill text-success me-1"></i>
+                  Imagen cargada correctamente
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-show="currentStep === 2">
+        <div class="card settings-card mb-4">
+          <div class="card-body p-4">
+            <div class="row g-4">
+              <div class="col-12 col-lg-6">
+                <div class="settings-group">
+                  <label class="settings-label">
+                    <i class="bi bi-palette-fill me-2"></i>
+                    Color de fondo
+                  </label>
+                  <p class="settings-description">
+                    Definí el color de fondo de la barra del menú
+                  </p>
+                  <div class="color-picker-wrapper">
+                    <input
+                      type="color"
+                      v-model="formData.background"
+                      class="color-input"
+                    />
+                    <input 
+                      type="text" 
+                      v-model="formData.background" 
+                      class="color-value-input"
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="settings-group">
+                  <label class="settings-label">
+                    <i class="bi bi-fonts me-2"></i>
+                    Color de fuente del menú
+                  </label>
+                  <p class="settings-description">
+                    Elegí el color del texto para asegurar buena visibilidad
+                  </p>
+                  <div class="color-picker-wrapper">
+                    <input
+                      type="color"
+                      v-model="formData.menuColor"
+                      class="color-input"
+                    />
+                    <input 
+                      type="text" 
+                      v-model="formData.menuColor" 
+                      class="color-value-input"
+                      placeholder="#000000"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-show="currentStep === 3">
+        <div class="card settings-card">
+          <div class="card-body p-4">
+            <div class="settings-group">
+              <label class="settings-label">
+                <i class="bi bi-link-45deg me-2"></i>
+                Items del Menú Personalizados
+              </label>
+              <p class="settings-description">
+                Agregá hasta 2 items personalizados al menú (máximo 5)
+              </p>
+
+              <div class="custom-items-container">
+                <div 
+                  v-for="(item, index) in formData.extra_items" 
+                  :key="index"
+                  class="custom-item-card mb-3"
+                >
+                  <div class="custom-item-header">
+                    <h6 class="mb-0">Item {{ index + 1 }}</h6>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger"
+                      @click="removeCustomItem(index)"
+                    >
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Label</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="item.label"
+                        placeholder="Ej: Mi Sitio Web"
+                        maxlength="50"
+                      />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">URL</label>
+                      <input
+                        type="url"
+                        class="form-control"
+                        v-model="item.link"
+                        placeholder="Ej: https://miwebsite.com"
+                      />
+                    </div>
+
+                    <div class="col-12">
+                      <div class="form-check">
+                        <input
+                          type="checkbox"
+                          class="form-check-input ml-1"
+                          :id="`blank-${index}`"
+                          v-model="item.blank"
+                        />
+                        <label class="form-check-label" :for="`blank-${index}`">
+                          Abrir en nueva pestaña
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  v-if="formData.extra_items.length < 5"
+                  type="button"
+                  class="btn btn-outline"
+                  @click="addCustomItem"
+                >
+                  <i class="bi bi-plus-circle me-2"></i>
+                  Agregar Item
+                </button>
+                <p v-else class="text-muted mt-2">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Límite máximo de 2 items alcanzado
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card settings-card">
-      <div class="card-body p-4">
-        <div class="container">
-          <div class="row g-4">
-            <!-- LOGO -->
-            <div class="col-12 col-lg-6">
-              <div class="settings-group">
-                <label class="settings-label">
-                  <i class="bi bi-image-fill me-2"></i>
-                  Logo del menú
-                </label>
-                <p class="settings-description">
-                  Cargá el logo que aparecerá en la parte superior izquierda de todos tus formularios
-                </p>
-
-                <input
-                  type="file"
-                  class="d-none"
-                  id="fileLogo"
-                  accept="image/png, image/jpeg, image/webp, image/gif"
-                  @change="handleImageUpload"
-                />
-
-                <label for="fileLogo" class="file-input-label">
-                  <i class="bi bi-cloud-upload me-2"></i>
-                  <span>{{ formData.fileName || 'Seleccionar imagen (jpg, png, webp, gif)' }}</span>
-                </label>
-
-                <div v-if="formData.image || formData.path" class="image-preview-container">
-                  <div class="image-preview">
-                    <img
-                      :src="formData.image || `${baseUrl}${formData.path}`"
-                      alt="Logo"
-                      class="preview-image"
-                    />
-                    <button
-                      class="btn-remove-image"
-                      @click="removeImage"
-                      title="Eliminar imagen"
-                    >
-                      <i class="bi bi-trash3"></i>
-                    </button>
-                  </div>
-                  <p class="image-info">
-                    <i class="bi bi-check-circle-fill text-success me-1"></i>
-                    Imagen cargada correctamente
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- COLORES -->
-            <div class="col-12 col-lg-6">
-              <div class="row g-4">
-                <!-- COLOR DE FONDO -->
-                <div class="col-12">
-                  <div class="settings-group">
-                    <label class="settings-label">
-                      <i class="bi bi-palette-fill me-2"></i>
-                      Color de fondo
-                    </label>
-                    <p class="settings-description">
-                      Definí el color de fondo de la barra del menú
-                    </p>
-                    <div class="color-picker-wrapper">
-                      <input
-                        type="color"
-                        v-model="formData.background"
-                        class="color-input"
-                      />
-                      <!-- <div class="color-preview" :style="{ background: formData.background }"></div> -->
-                      <input 
-                        type="text" 
-                        v-model="formData.background" 
-                        class="color-value-input"
-                        placeholder="#ffffff"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- COLOR DE FUENTE -->
-                <div class="col-12">
-                  <div class="settings-group">
-                    <label class="settings-label">
-                      <i class="bi bi-fonts me-2"></i>
-                      Color de fuente del menú
-                    </label>
-                    <p class="settings-description">
-                      Elegí el color del texto para asegurar buena visibilidad
-                    </p>
-                    <div class="color-picker-wrapper">
-                      <input
-                        type="color"
-                        v-model="formData.menuColor"
-                        class="color-input"
-                      />
-                      <!-- <div class="color-preview" :style="{ background: formData.menuColor }"></div> -->
-                      <input 
-                        type="text" 
-                        v-model="formData.menuColor" 
-                        class="color-value-input"
-                        placeholder="#000000"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ITEMS PERSONALIZADOS -->
-          <div class="row g-4 mt-3">
-            <div class="col-12">
-              <div class="settings-group">
-                <label class="settings-label">
-                  <i class="bi bi-link-45deg me-2"></i>
-                  Items del Menú Personalizados
-                </label>
-                <p class="settings-description">
-                  Agregá hasta 2 items personalizados al menú (máximo 2)
-                </p>
-
-                <div class="custom-items-container">
-                  <div 
-                    v-for="(item, index) in formData.extra_items" 
-                    :key="index"
-                    class="custom-item-card mb-3"
-                  >
-                    <div class="custom-item-header">
-                      <h6 class="mb-0">Item {{ index + 1 }}</h6>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-danger"
-                        @click="removeCustomItem(index)"
-                      >
-                        <i class="bi bi-trash3"></i>
-                      </button>
-                    </div>
-
-                    <div class="row g-3">
-                      <div class="col-12 col-md-6">
-                        <label class="form-label">Label</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          v-model="item.label"
-                          placeholder="Ej: Mi Sitio Web"
-                          maxlength="50"
-                        />
-                      </div>
-
-                      <div class="col-12 col-md-6">
-                        <label class="form-label">URL</label>
-                        <input
-                          type="url"
-                          class="form-control"
-                          v-model="item.link"
-                          placeholder="Ej: https://miwebsite.com"
-                        />
-                      </div>
-
-                      <div class="col-12">
-                        <div class="form-check">
-                          <input
-                            type="checkbox"
-                            class="form-check-input ml-1"
-                            :id="`blank-${index}`"
-                            v-model="item.blank"
-                          />
-                          <label class="form-check-label" :for="`blank-${index}`">
-                            Abrir en nueva pestaña
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    v-if="formData.extra_items.length < 2"
-                    type="button"
-                    class="btn btn-outline"
-                    @click="addCustomItem"
-                  >
-                    <i class="bi bi-plus-circle me-2"></i>
-                    Agregar Item
-                  </button>
-                  <p v-else class="text-muted mt-2">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Límite máximo de 2 items alcanzado
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="menu-step-actions">
+      <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+        <i class="bi bi-arrow-left me-2"></i>Anterior
+      </button>
+      <div v-else></div>
+      <button v-if="currentStep < menuSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+        Siguiente <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+      <button v-else type="button" class="btn btn-primary" @click="saveMenuSettings" :disabled="isLoading">
+        <i class="bi bi-floppy me-2"></i>Guardar
+      </button>
     </div>
 
     <ToastComponent
@@ -319,6 +351,13 @@ export default {
     const toastMessage = ref("");
     const toastComponent = ref(null);
     const isSuccess = ref(true);
+    const currentStep = ref(0);
+    const menuSteps = ref([
+      { key: 'preview', label: 'Vista previa', description: 'Cómo se verá el menú final' },
+      { key: 'logo', label: 'Logo', description: 'Imagen principal del menú' },
+      { key: 'colors', label: 'Colores', description: 'Fondo y color del texto' },
+      { key: 'items', label: 'Items', description: 'Links personalizados del menú' }
+    ]);
 
     const formData = ref({
       image: "",
@@ -354,7 +393,7 @@ export default {
     };
 
     const addCustomItem = () => {
-      if (formData.value.extra_items.length < 2) {
+      if (formData.value.extra_items.length < 5) {
         formData.value.extra_items.push({
           label: "",
           link: "",
@@ -436,6 +475,22 @@ export default {
       toastComponent.value.showToas();
     };
 
+    const goToStep = (index) => {
+      currentStep.value = index;
+    };
+
+    const nextStep = () => {
+      if (currentStep.value < menuSteps.value.length - 1) {
+        currentStep.value += 1;
+      }
+    };
+
+    const prevStep = () => {
+      if (currentStep.value > 0) {
+        currentStep.value -= 1;
+      }
+    };
+
     onMounted(() => {
       getToken();
       getMenuSettings();
@@ -444,11 +499,16 @@ export default {
     return {
       formData,
       baseUrl,
+      currentStep,
+      menuSteps,
       handleImageUpload,
       removeImage,
       addCustomItem,
       removeCustomItem,
       saveMenuSettings,
+      goToStep,
+      nextStep,
+      prevStep,
       isLoading,
       toastTitle,
       toastMessage,
@@ -461,6 +521,88 @@ export default {
 </script>
 
 <style scoped>
+.menu-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.menu-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.menu-step-item:last-child { border-right: 0; }
+.menu-step-item:hover:not(.active) { background: #f8f9fa; }
+.menu-step-item.active { background: #eff6ff; }
+.menu-step-item.done .menu-step-num,
+.menu-step-item.active .menu-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.menu-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.menu-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.menu-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.menu-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.menu-step-item.active .menu-step-copy span,
+.menu-step-item.done .menu-step-copy span {
+  color: #185fa5;
+}
+
+.menu-step-content {
+  min-height: 420px;
+}
+
+.menu-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
 /* Header Section */
 .header-section {
   display: flex;
@@ -818,6 +960,30 @@ export default {
   .preview-menu-items {
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .menu-stepper {
+    flex-direction: column;
+  }
+
+  .menu-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .menu-step-item:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-step-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu-step-actions .btn {
+    width: 100%;
   }
 }
 </style>

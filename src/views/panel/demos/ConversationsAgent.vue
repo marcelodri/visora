@@ -45,7 +45,7 @@ export default {
   mounted() {
     const wasConnected = localStorage.getItem('whatsapp_connected') === 'true'
     this.connected = wasConnected
-    this.initWebSocket()
+    // WebSocket solo se inicia cuando el usuario hace clic en Conectar
   },
 
   watch: {
@@ -110,13 +110,15 @@ export default {
       }
 
       this.ws.onclose = () => {
-        console.warn('WebSocket cerrado. Reintentando...')
-        setTimeout(this.initWebSocket, 3000)
+        // No reconectar automáticamente — evita spam de errores en producción
       }
     },
 
     connectWhatsApp() {
       this.loading = true
+      if (!this.ws || this.ws.readyState === WebSocket.CLOSED) {
+        this.initWebSocket()
+      }
       if (this.ws?.readyState === WebSocket.OPEN)
         this.ws.send(JSON.stringify({ action: 'initialize' }))
     },

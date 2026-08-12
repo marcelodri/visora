@@ -274,7 +274,7 @@ export default {
       };
 
       this.htmlContent = `<div id="form-container" data-appkey="${this.settings.appkey}"></div>\n<scr` +
-        `ipt src="https://madcoder.io/cdn/form/iframe-loader.js"></scr` +
+        `ipt src="https://madcoder.io/cdn/pages/iframe-loader.js"></scr` +
         `ipt>`;
 
       this.isLoading = false;

@@ -16,6 +16,7 @@
 
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const socketIO = require('socket.io');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
@@ -47,6 +48,39 @@ const userSessions = new Map();   // socketId -> { username, eventId }
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Proxy para descargar imágenes (evita CORS)
+app.get('/api/proxy-image', (req, res) => {
+  const imageUrl = req.query.url;
+  
+  if (!imageUrl) {
+    return res.status(400).json({ error: 'URL no proporcionada' });
+  }
+  
+  try {
+    const protocol = imageUrl.startsWith('https') ? https : http;
+    
+    protocol.get(imageUrl, (response) => {
+      if (response.statusCode !== 200) {
+        return res.status(response.statusCode).send('Error descargando imagen');
+      }
+      
+      // Headers CORS
+      res.set('Content-Type', response.headers['content-type'] || 'image/jpeg');
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Cache-Control', 'public, max-age=3600');
+      
+      // Pipe de la imagen descargada
+      response.pipe(res);
+    }).on('error', (error) => {
+      console.error('Error en proxy descargando imagen:', error);
+      res.status(500).json({ error: 'Error descargando imagen' });
+    });
+  } catch (error) {
+    console.error('Error en proxy-image:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
 });
 
 // Obtener mensajes de un evento

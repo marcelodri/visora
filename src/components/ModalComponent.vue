@@ -52,7 +52,8 @@ export default {
   },
   data() {
     return {
-      modalInstance: null
+      modalInstance: null,
+      isMobile: false
     };
   },
   computed: {
@@ -63,7 +64,27 @@ export default {
       return this.class;
     }
   },
+  mounted() {
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+    // Escuchar el evento de cierre del modal de Bootstrap
+    const modalEl = document.getElementById(this.modalId);
+    if (modalEl) {
+      modalEl.addEventListener('hidden.bs.modal', this.handleModalHidden);
+    }
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkMobile);
+    // Limpiar el listener cuando el componente se desmonta
+    const modalEl = document.getElementById(this.modalId);
+    if (modalEl) {
+      modalEl.removeEventListener('hidden.bs.modal', this.handleModalHidden);
+    }
+  },
   methods: {
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
     openModal() {
       this.$nextTick(() => {
         const modalEl = document.getElementById(this.modalId);
@@ -76,6 +97,10 @@ export default {
             ? Modal.getOrCreateInstance(modalEl, options)
             : new Modal(modalEl, options);
           this.modalInstance.show();
+          // Ocultar el scroll de la página solo en desktop
+          if (!this.isMobile) {
+            document.documentElement.style.overflow = 'hidden';
+          }
         } else {
           console.error('No se encontró el elemento del modal con el ID:', this.modalId);
         }
@@ -84,7 +109,17 @@ export default {
     closeModal() {
       if (this.modalInstance) {
         this.modalInstance.hide();
+        // Mostrar el scroll de la página nuevamente
+        if (!this.isMobile) {
+          document.documentElement.style.overflowY = 'auto';
+        }
         this.$emit('modalClosed');
+      }
+    },
+    handleModalHidden() {
+      // Asegurar que el scroll se restaure si el modal se cierra de otra forma
+      if (!this.isMobile) {
+        document.documentElement.style.overflowY = 'auto';
       }
     },
     saveSearch() {

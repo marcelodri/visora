@@ -87,22 +87,49 @@
       ref="eventModal" 
       modalId="eventModal" 
       :modalTitle="editingIndex === null ? 'Nuevo Evento' : 'Editar Evento'" 
-      class="modal-xl" 
-      @closeModal="handleCloseModal"
+      class="modal-fullscreen-fixed" 
+      @modalClosed="handleCloseModal"
     >
-      <div class="modal-body">
-        <div class="accordion accordion-modern" id="eventAccordion">
+      <div class="events-step-modal">
+        <div class="events-step-shell">
+          <!--<div class="events-step-topbar">
+            <div>
+              <h3 class="events-step-title">{{ editingIndex === null ? 'Nuevo evento' : 'Editar evento' }}</h3>
+              <p class="events-step-subtitle">Organizá la configuración del evento en pasos claros y sin acordeones, con un modal de pantalla completa.</p>
+            </div>
+            <button type="button" class="btn btn-outline-secondary events-step-close" @click="closeModalEvent">
+              <i class="bi bi-x-circle me-2"></i>Cancelar
+            </button>
+          </div>-->
 
-            <!-- 1. DATOS BÁSICOS -->
-            <div class="accordion-item">
-            <h2 class="accordion-header" id="headingDatosBasicos">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDatosBasicos" aria-expanded="true">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                1. Datos Básicos del Evento
-                </button>
-            </h2>
-            <div id="collapseDatosBasicos" class="accordion-collapse collapse show">
-                <div class="accordion-body">
+          <div class="events-stepper">
+            <button
+              v-for="(step, index) in eventSteps"
+              :key="step.key"
+              type="button"
+              class="events-step-item"
+              :class="{ active: currentStep === index, done: currentStep > index }"
+              @click="goToStep(index)"
+            >
+              <div class="events-step-num">
+                <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <div class="events-step-copy">
+                <span>{{ step.label }}</span>
+                <small>{{ step.description }}</small>
+              </div>
+            </button>
+          </div>
+
+          <div class="events-step-content">
+            <div v-show="currentStep === 0" class="events-step-panel">
+              <div class="card data-card events-card">
+                <div class="events-card-head">
+                  <i class="bi bi-info-circle-fill"></i>
+                  <span>Datos Básicos del Evento</span>
+                </div>
+                <div class="events-card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
                     <label class="form-label"><i class="bi bi-calendar-event me-2"></i>Nombre del Evento:</label>
@@ -136,18 +163,16 @@
 
                 </div>
                 </div>
-                </div>
+              </div>
             </div>
 
-            <!-- 2. Fechas sesiones -->
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingFechas">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFechas">
-                    <i class="bi bi-calendar-week me-2"></i>2. Fechas/Sesiones del Evento
-                    </button>
-                </h2>
-                <div id="collapseFechas" class="accordion-collapse collapse">
-                    <div class="accordion-body">
+            <div v-show="currentStep === 1" class="events-step-panel">
+              <div class="card data-card events-card">
+                <div class="events-card-head">
+                  <i class="bi bi-calendar-week"></i>
+                  <span>Fechas/Sesiones del Evento</span>
+                </div>
+                <div class="events-card-body">
                         <div class="row g-3">
 
                             <!-- FECHAS MÚLTIPLES / SESIONES -->
@@ -406,20 +431,17 @@
 
                             </div>
                         </div>
-                    </div>
                 </div>
+              </div>
             </div>
 
-            <!-- 3. REGLAS DEL EVENTO -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReglas">
-                    <i class="bi bi-shield-check me-2"></i>
-                    3. Reglas del Evento
-                    </button>
-                </h2>
-                <div id="collapseReglas" class="accordion-collapse collapse">
-                    <div class="accordion-body">
+            <div v-show="currentStep === 2" class="events-step-panel">
+              <div class="card data-card events-card">
+                <div class="events-card-head">
+                  <i class="bi bi-shield-check"></i>
+                  <span>Reglas del Evento</span>
+                </div>
+                <div class="events-card-body">
                     <h6 class="mb-3">Reglas Generales</h6>
                     <div class="row g-3 mb-4">
                         <!-- <div class="col-12 col-md-6">
@@ -482,20 +504,17 @@
                         <small class="text-muted">La IA validará automáticamente la documentación subida</small>
                         </div>
                     </div>
-                    </div>
                 </div>
+              </div>
             </div>
 
-            <!-- 4. CONFIGURACIÓN DE PAGO (OPCIONAL) -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePago">
-                    <i class="bi bi-credit-card me-2"></i>
-                    4. Configuración de Pago (Opcional)
-                    </button>
-                </h2>
-                <div id="collapsePago" class="accordion-collapse collapse">
-                    <div class="accordion-body">
+            <div v-show="currentStep === 3" class="events-step-panel">
+              <div class="card data-card events-card">
+                <div class="events-card-head">
+                  <i class="bi bi-credit-card"></i>
+                  <span>Configuración de Pago</span>
+                </div>
+                <div class="events-card-body">
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" v-model="eventData.requires_payment" id="reqPayment">
                         <label class="form-check-label" for="reqPayment">
@@ -520,20 +539,17 @@
                         </select>
                         </div>
                     </div>
-                    </div>
                 </div>
+              </div>
             </div>
 
-            <!-- 5. IMAGEN DEL EVENTO -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImagen">
-                    <i class="bi bi-image-fill me-2"></i>
-                    5. Imagen del Evento
-                    </button>
-                </h2>
-                <div id="collapseImagen" class="accordion-collapse collapse">
-                    <div class="accordion-body">
+            <div v-show="currentStep === 4" class="events-step-panel">
+              <div class="card data-card events-card">
+                <div class="events-card-head">
+                  <i class="bi bi-image-fill"></i>
+                  <span>Imagen del Evento</span>
+                </div>
+                <div class="events-card-body">
                         <label class="form-label"><i class="bi bi-card-image me-2"></i>Imagen de portada:</label>
                         <input type="file" class="d-none" id="eventImageInput" accept="image/*" @change="handleImageUpload" />
                         <label for="eventImageInput" class="file-input-label">
@@ -548,20 +564,29 @@
                             </button>
                             </div>
                         </div>
-                    </div>
                 </div>
+              </div>
             </div>
+          </div>
 
+          <div class="events-step-actions">
+            <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+              <i class="bi bi-arrow-left me-2"></i>Anterior
+            </button>
+            <div v-else></div>
+            <div class="events-step-actions-right">
+              <!--<button type="button" class="btn btn-outline-secondary" @click="closeModalEvent">
+                Cancelar
+              </button>-->
+              <button v-if="currentStep < eventSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+                Siguiente <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+              <button v-else type="button" class="btn btn-primary" @click="saveEvent">
+                <i class="bi bi-floppy me-2"></i>Guardar Evento
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" @click="saveEvent">
-          <i class="bi bi-floppy me-2"></i>Guardar Evento
-        </button>
-        <button type="button" class="btn btn-outline-secondary" @click="closeModalEvent">
-          <i class="bi bi-x-circle me-2"></i>Cancelar
-        </button>
       </div>
       
     </ModalComponent>
@@ -611,6 +636,7 @@ export default {
     const forms = ref([]);
     const availableLists = ref([]);
     const editingIndex = ref(null);
+    const currentStep = ref(0);
     const eventModal = ref(null);
     const toastComponent = ref(null);
     const confirmPopup = ref(null);
@@ -620,6 +646,13 @@ export default {
     const isSuccess = ref(true);
     const token = ref(null);
     const isLoading = ref(false);
+    const eventSteps = ref([
+      { key: 'basic', label: 'Datos básicos', description: 'Nombre, categoría, descripción y ubicación' },
+      { key: 'sessions', label: 'Sesiones', description: 'Fechas, cupos, formularios y listas' },
+      { key: 'rules', label: 'Reglas', description: 'Validaciones y documentación requerida' },
+      { key: 'payment', label: 'Pago', description: 'Precio y método de pago' },
+      { key: 'image', label: 'Imagen', description: 'Portada del evento' }
+    ]);
 
     // URLs
     const url = "https://apis.madautomate.cloud/webhook/9ff4a876-1944-4643-b41d-37450e37e3e2";
@@ -725,6 +758,7 @@ export default {
     // ============================================
 
     const openModalEvent = (event = null) => {
+      currentStep.value = 0;
       if (event) {
         editingIndex.value = events.value.findIndex(e => e.id === event.id);
         eventData.value = { ...event };
@@ -736,6 +770,7 @@ export default {
     };
 
     const closeModalEvent = () => {
+      currentStep.value = 0;
       eventModal.value.closeModal();
       resetEventData();
     };
@@ -1051,7 +1086,24 @@ export default {
     };
 
     const handleCloseModal = () => {
+      currentStep.value = 0;
       resetEventData();
+    };
+
+    const goToStep = (index) => {
+      currentStep.value = index;
+    };
+
+    const nextStep = () => {
+      if (currentStep.value < eventSteps.value.length - 1) {
+        currentStep.value += 1;
+      }
+    };
+
+    const prevStep = () => {
+      if (currentStep.value > 0) {
+        currentStep.value -= 1;
+      }
     };
 
     const handleResponse = (response) => {
@@ -1136,6 +1188,8 @@ export default {
       columns,
       resultActions,
       editingIndex,
+      currentStep,
+      eventSteps,
       eventModal,
       toastComponent,
       confirmPopup,
@@ -1150,6 +1204,9 @@ export default {
       // Funciones de eventos
       openModalEvent,
       closeModalEvent,
+      goToStep,
+      nextStep,
+      prevStep,
       saveEvent,
       editForm,
       changeStatusForm,
@@ -1177,3 +1234,195 @@ export default {
   }
 };
 </script>
+<style scoped>
+.events-step-modal {
+  height: 100%;
+}
+
+.events-step-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.events-step-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.events-step-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.events-step-subtitle {
+  margin: 0;
+  color: #6c757d;
+  max-width: 780px;
+}
+
+.events-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.events-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.events-step-item:last-child { border-right: 0; }
+.events-step-item:hover:not(.active) { background: #f8f9fa; }
+.events-step-item.active { background: #eff6ff; }
+.events-step-item.done .events-step-num,
+.events-step-item.active .events-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.events-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.events-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.events-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.events-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.events-step-item.active .events-step-copy span,
+.events-step-item.done .events-step-copy span {
+  color: #185fa5;
+}
+
+.events-step-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.events-step-panel {
+  min-height: 100%;
+}
+
+.events-card {
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.events-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 700;
+  color: #212529;
+}
+
+.events-card-head i {
+  color: #185fa5;
+}
+
+.events-card-body {
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.events-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.events-step-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.events-step-close {
+  white-space: nowrap;
+}
+
+@media (max-width: 991px) {
+  .events-step-shell {
+    padding: 1rem;
+  }
+
+  .events-stepper {
+    flex-direction: column;
+  }
+
+  .events-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .events-step-item:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .events-step-topbar,
+  .events-step-actions,
+  .events-step-actions-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .events-step-close,
+  .events-step-actions .btn,
+  .events-step-actions-right .btn {
+    width: 100%;
+  }
+}
+</style>

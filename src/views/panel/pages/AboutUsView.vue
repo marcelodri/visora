@@ -69,159 +69,204 @@
         </div>
   
         <!-- Modal -->
-        <ModalComponent ref="formModal" modalId="formModal" :modalTitle="editingIndex === null ? 'Nueva Card' : 'Editar Card'" class="modal-xl" @modalClosed="handleCloseModal">
-        <div class="modal-body">
-
-            <!-- Segmentación -->
-            <div class="card form-card mb-3">
-                <div class="card-header-modal">
-                    <i class="bi bi-funnel-fill me-2"></i>
-                    Segmentación
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">
-                                <i class="bi bi-tag-fill me-2"></i>
-                                {{ $t('menu.brands') }}:
-                            </label>
-                            <select v-model="formData.marca_id" class="form-select custom-select">
-                                <option value="">Seleccione una marca</option>
-                                <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
-                                    {{ marca.name }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">
-                                <i class="bi bi-briefcase-fill me-2"></i>
-                                {{ $t('menu.business-types') }}:
-                            </label>
-                            <select v-model="formData.tipo_de_negocio_id" class="form-select custom-select">
-                                <option value="">Seleccione un tipo de negocio</option>
-                                <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">
-                                    {{ negocio.name }}
-                                </option>
-                            </select>
-                        </div>
+        <ModalComponent ref="formModal" modalId="formModal" :modalTitle="editingIndex === null ? 'Nueva Card' : 'Editar Card'" class="modal-fullscreen-fixed" @modalClosed="handleCloseModal">
+        <div class="about-step-modal">
+            <div class="about-step-shell">
+                <!--<div class="about-step-topbar">
+                    <div>
+                        <h3 class="about-step-title">{{ editingIndex === null ? 'Nueva card' : 'Editar card' }}</h3>
+                        <p class="about-step-subtitle">El modal ahora ocupa toda la pantalla y separa la configuración en pasos para hacer más cómoda la edición.</p>
                     </div>
-                </div>
-            </div>
+                    <button type="button" class="btn btn-outline-secondary about-step-close" @click="closeModalForm">
+                        <i class="bi bi-x-circle me-2"></i>{{$t('search_view.cancel')}}
+                    </button>
+                </div>-->
 
-            <!-- Imagen -->
-            <div class="card form-card mb-3">
-                <div class="card-header-modal">
-                    <i class="bi bi-image-fill me-2"></i>
-                    Imagen de la card
-                </div>
-                <div class="card-body">
-                    <label class="form-label">
-                        <i class="bi bi-card-image me-2"></i>
-                        {{ $t('forms.form_img') }}:
-                    </label>
-
-                    <input 
-                        type="file" 
-                        class="d-none" 
-                        id="fileInput"
-                        accept="image/png, image/jpeg, image/webp, image/gif"
-                        @change="handleImageUpload" 
-                    />
-
-                    <label for="fileInput" class="file-input-label">
-                        <i class="bi bi-cloud-upload me-2"></i>
-                        <span>{{ formData.fileName || 'Archivos permitidos: jpg, jpeg, png, gif, webp' }}</span>
-                    </label>
-
-                    <div v-if="formData.image || formData.path" class="image-preview-container">
-                        <div class="image-preview">
-                            <img 
-                                :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`" 
-                                alt="Imagen" 
-                                class="preview-image"
-                            />
-                            <button
-                                class="btn-remove-image"
-                                @click="removeImage"
-                                title="Eliminar imagen"
-                            >
-                                <i class="bi bi-trash3"></i>
-                            </button>
+                <div class="about-stepper">
+                    <button
+                        v-for="(step, index) in formSteps"
+                        :key="step.key"
+                        type="button"
+                        class="about-step-item"
+                        :class="{ active: currentStep === index, done: currentStep > index }"
+                        @click="goToStep(index)"
+                    >
+                        <div class="about-step-num">
+                            <i v-if="currentStep > index" class="bi bi-check-lg"></i>
+                            <span v-else>{{ index + 1 }}</span>
                         </div>
-                        <p class="image-info">
-                            <i class="bi bi-check-circle-fill text-success me-1"></i>
-                            Imagen cargada correctamente
-                        </p>
-                    </div>
+                        <div class="about-step-copy">
+                            <span>{{ step.label }}</span>
+                            <small>{{ step.description }}</small>
+                        </div>
+                    </button>
                 </div>
-            </div>
 
-            <!-- Contenido -->
-            <div class="card form-card mb-3">
-                <div class="card-header-modal">
-                    <i class="bi bi-text-paragraph me-2"></i>
-                    Contenido de la card
-                </div>
-                <div class="card-body">
-                    <label class="form-label">
-                        <i class="bi bi-file-text-fill me-2"></i>
-                        {{$t('about.form_text')}}:
-                    </label>
-                    <div class="editor-wrapper">
-                        <QuillEditor
-                            ref="quillEditor"
-                            v-model:content="formData.text"
-                            contentType="html"
-                            theme="snow"
-                        /> 
-                    </div>
-                </div>
-            </div>
-
-            <!-- Estilos CSS -->
-            <div class="card form-card mb-3">
-                <div class="card-header-modal">
-                    <i class="bi bi-palette-fill me-2"></i>
-                    Estilos de la card
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">
-                                <i class="bi bi-paint-bucket me-2"></i>
-                                Background
-                            </label>
-                            <div class="color-picker-wrapper">
-                                <input v-model="formData.background" type="color" class="color-input" />
-                                <!-- <div class="color-preview" :style="{ background: formData.background }"></div> -->
-                                <input type="text" v-model="formData.background" class="color-value-input" placeholder="#ffffff" />
+                <div class="about-step-content">
+                    <div v-show="currentStep === 0" class="about-step-panel">
+                        <div class="card form-card about-card mb-3">
+                            <div class="card-header-modal about-card-head">
+                                <i class="bi bi-funnel-fill me-2"></i>
+                                Segmentación
                             </div>
-                        </div>
+                            <div class="card-body about-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-tag-fill me-2"></i>
+                                            {{ $t('menu.brands') }}:
+                                        </label>
+                                        <select v-model="formData.marca_id" class="form-select custom-select">
+                                            <option value="">Seleccione una marca</option>
+                                            <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
+                                                {{ marca.name }}
+                                            </option>
+                                        </select>
+                                    </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">
-                                <i class="bi bi-fonts me-2"></i>
-                                Color
-                            </label>
-                            <div class="color-picker-wrapper">
-                                <input v-model="formData.color" type="color" class="color-input" />
-                                <!-- <div class="color-preview" :style="{ background: formData.color }"></div> -->
-                                <input type="text" v-model="formData.color" class="color-value-input" placeholder="#000000" />
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-briefcase-fill me-2"></i>
+                                            {{ $t('menu.business-types') }}:
+                                        </label>
+                                        <select v-model="formData.tipo_de_negocio_id" class="form-select custom-select">
+                                            <option value="">Seleccione un tipo de negocio</option>
+                                            <option v-for="negocio in negocios" :key="negocio.id" :value="negocio.id">
+                                                {{ negocio.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <div v-show="currentStep === 1" class="about-step-panel">
+                        <div class="card form-card about-card mb-3">
+                            <div class="card-header-modal about-card-head">
+                                <i class="bi bi-image-fill me-2"></i>
+                                Imagen de la card
+                            </div>
+                            <div class="card-body about-card-body">
+                                <label class="form-label">
+                                    <i class="bi bi-card-image me-2"></i>
+                                    {{ $t('forms.form_img') }}:
+                                </label>
+
+                                <input
+                                    type="file"
+                                    class="d-none"
+                                    id="fileInput"
+                                    accept="image/png, image/jpeg, image/webp, image/gif"
+                                    @change="handleImageUpload"
+                                />
+
+                                <label for="fileInput" class="file-input-label">
+                                    <i class="bi bi-cloud-upload me-2"></i>
+                                    <span>{{ formData.fileName || 'Archivos permitidos: jpg, jpeg, png, gif, webp' }}</span>
+                                </label>
+
+                                <div v-if="formData.image || formData.path" class="image-preview-container">
+                                    <div class="image-preview">
+                                        <img
+                                            :src="formData.image || `https://madcoder.io/apis/images_upload/${formData.path}`"
+                                            alt="Imagen"
+                                            class="preview-image"
+                                        />
+                                        <button
+                                            class="btn-remove-image"
+                                            @click="removeImage"
+                                            title="Eliminar imagen"
+                                            type="button"
+                                        >
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </div>
+                                    <p class="image-info">
+                                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                        Imagen cargada correctamente
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 2" class="about-step-panel">
+                        <div class="card form-card about-card mb-3">
+                            <div class="card-header-modal about-card-head">
+                                <i class="bi bi-text-paragraph me-2"></i>
+                                Contenido de la card
+                            </div>
+                            <div class="card-body about-card-body">
+                                <label class="form-label">
+                                    <i class="bi bi-file-text-fill me-2"></i>
+                                    {{$t('about.form_text')}}:
+                                </label>
+                                <div class="editor-wrapper">
+                                    <QuillEditor
+                                        ref="quillEditor"
+                                        v-model:content="formData.text"
+                                        contentType="html"
+                                        theme="snow"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="currentStep === 3" class="about-step-panel">
+                        <div class="card form-card about-card mb-3">
+                            <div class="card-header-modal about-card-head">
+                                <i class="bi bi-palette-fill me-2"></i>
+                                Estilos de la card
+                            </div>
+                            <div class="card-body about-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-paint-bucket me-2"></i>
+                                            Background
+                                        </label>
+                                        <div class="color-picker-wrapper">
+                                            <input v-model="formData.background" type="color" class="color-input" />
+                                            <input type="text" v-model="formData.background" class="color-value-input" placeholder="#ffffff" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-fonts me-2"></i>
+                                            Color
+                                        </label>
+                                        <div class="color-picker-wrapper">
+                                            <input v-model="formData.color" type="color" class="color-input" />
+                                            <input type="text" v-model="formData.color" class="color-value-input" placeholder="#000000" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-step-actions">
+                    <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+                        <i class="bi bi-arrow-left me-2"></i>Anterior
+                    </button>
+                    <div v-else></div>
+                    <div class="about-step-actions-right">
+                        <!--<button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
+                            Cancelar
+                        </button>-->
+                        <button v-if="currentStep < formSteps.length - 1" type="button" class="btn btn-primary" @click="nextStep">
+                            Siguiente <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                        <button v-else type="button" class="btn btn-primary" @click="saveForm">
+                            <i class="bi bi-floppy me-2"></i> {{$t('search_view.save')}}
+                        </button>
+                    </div>
                 </div>
             </div>
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" @click="saveForm">
-                <i class="bi bi-floppy me-2"></i> {{$t('search_view.save')}}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" @click="closeModalForm">
-                <i class="bi bi-x-circle me-2"></i> {{$t('search_view.cancel')}}
-            </button>
         </div>
         </ModalComponent>
 
@@ -268,6 +313,13 @@
         const formData = ref(getEmptyForm());
         const formDataAbout = ref(getEmptyFormAbout());
         const editingIndex = ref(null);
+        const currentStep = ref(0);
+        const formSteps = ref([
+            { key: 'segmentacion', label: 'Segmentación', description: 'Marca y tipo de negocio' },
+            { key: 'imagen', label: 'Imagen', description: 'Carga y reemplazo de imagen' },
+            { key: 'contenido', label: 'Contenido', description: 'Texto enriquecido de la card' },
+            { key: 'estilos', label: 'Estilos', description: 'Colores de fondo y texto' }
+        ]);
         const isLoading = ref(false);
         const showToastFlag = ref(false);
         const toastTitle = ref('');
@@ -355,6 +407,7 @@
         function editForm(item) {
             editingIndex.value = item;
             formData.value = item;
+            currentStep.value = 0;
             openModalForm();
         }
   
@@ -368,12 +421,14 @@
                 formData.value = getEmptyForm();
                 editingIndex.value = null;
             }
+            currentStep.value = 0;
             formModal.value.openModal();
         };
   
         const cleanData = () => {
             editingIndex.value = null;
-            formData.text = '';
+            currentStep.value = 0;
+            formData.value = getEmptyForm();
         };
         
         const closeModalForm = () => {
@@ -383,6 +438,22 @@
   
         const handleCloseModal = () => {
             cleanData()
+        };
+
+        const goToStep = (index) => {
+            currentStep.value = index;
+        };
+
+        const nextStep = () => {
+            if (currentStep.value < formSteps.value.length - 1) {
+                currentStep.value += 1;
+            }
+        };
+
+        const prevStep = () => {
+            if (currentStep.value > 0) {
+                currentStep.value -= 1;
+            }
         };
 
         function getEmptyForm() {
@@ -495,8 +566,13 @@
             resultActions,
             formData,
             editingIndex,
+            currentStep,
+            formSteps,
             openModalForm,
             closeModalForm,
+            goToStep,
+            nextStep,
+            prevStep,
             saveForm,
             isLoading,
             toastTitle,
@@ -525,6 +601,162 @@
 </script>
    
 <style scoped>
+.about-step-modal {
+  height: 100%;
+}
+
+.about-step-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.about-step-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.about-step-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.about-step-subtitle {
+  margin: 0;
+  color: #6c757d;
+  max-width: 760px;
+}
+
+.about-stepper {
+  display: flex;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.about-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-right: 1px solid #e9ecef;
+  background: transparent;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.about-step-item:last-child {
+  border-right: 0;
+}
+
+.about-step-item:hover:not(.active) {
+  background: #f8f9fa;
+}
+
+.about-step-item.active {
+  background: #eff6ff;
+}
+
+.about-step-item.done .about-step-num,
+.about-step-item.active .about-step-num {
+  background: #185fa5;
+  border-color: #185fa5;
+  color: #fff;
+}
+
+.about-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dee2e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.about-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.about-step-copy span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.about-step-copy small {
+  font-size: 0.74rem;
+  color: #6c757d;
+}
+
+.about-step-item.active .about-step-copy span,
+.about-step-item.done .about-step-copy span {
+  color: #185fa5;
+}
+
+.about-step-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.about-step-panel {
+  min-height: 100%;
+}
+
+.about-card {
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.about-card-head {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.about-card-body {
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.about-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.about-step-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.about-step-close {
+  white-space: nowrap;
+}
+
 /* Header Section */
 .header-section {
   display: flex;
@@ -774,6 +1006,38 @@
   .btn-add {
     width: 100%;
     justify-content: center;
+  }
+
+  .about-step-topbar,
+  .about-step-actions,
+  .about-step-actions-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .about-step-close,
+  .about-step-actions .btn,
+  .about-step-actions-right .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 991px) {
+  .about-step-shell {
+    padding: 1rem;
+  }
+
+  .about-stepper {
+    flex-direction: column;
+  }
+
+  .about-step-item {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .about-step-item:last-child {
+    border-bottom: 0;
   }
 }
 </style>

@@ -91,6 +91,15 @@ const router = createRouter({
               }
             },
             {
+              path: 'stock',
+              name: 'stock-pilot',
+              component: () => import('@/views/panel/pages/StockView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'pages'
+              }
+            },
+            {
               path: 'header_footer',
               name: 'forms-header_footer',
               component: () => import('@/views/panel/pages/HeaderFooter.vue'),
@@ -227,46 +236,46 @@ const router = createRouter({
         //         label: 'Pilot Post'
         //       }
         //     },
-        //     {
-        //       path: 'facebookpost',
-        //       name: 'social-facebookpost',
-        //       component: () => import('@/views/panel/social/MultiPostView.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'social',
-        //         label: 'Publicar en Facebook'
-        //       }
-        //     },
-        //     {
-        //       path: 'listpost',
-        //       name: 'social-listpost',
-        //       component: () => import('@/views/panel/social/ListPostView.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'social',
-        //         label: 'Lista de Publicaciones'
-        //       }
-        //     },
-        //     {
-        //       path: 'facebookmuro',
-        //       name: 'social-facebookmuro',
-        //       component: () => import('@/views/panel/social/FacebookMuroView.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'social',
-        //         label: 'Muro de Facebook'
-        //       }
-        //     },
-        //     {
-        //       path: 'igmuro',
-        //       name: 'social-igmuro',
-        //       component: () => import('@/views/panel/social/IGMuroView.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'social',
-        //         label: 'Muro de Facebook'
-        //       }
-        //     }
+        //     // {
+        //     //   path: 'facebookpost',
+        //     //   name: 'social-facebookpost',
+        //     //   component: () => import('@/views/panel/social/MultiPostView.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'social',
+        //     //     label: 'Publicar en Facebook'
+        //     //   }
+        //     // },
+        //     // {
+        //     //   path: 'listpost',
+        //     //   name: 'social-listpost',
+        //     //   component: () => import('@/views/panel/social/ListPostView.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'social',
+        //     //     label: 'Lista de Publicaciones'
+        //     //   }
+        //     // },
+        //     // {
+        //     //   path: 'facebookmuro',
+        //     //   name: 'social-facebookmuro',
+        //     //   component: () => import('@/views/panel/social/FacebookMuroView.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'social',
+        //     //     label: 'Muro de Facebook'
+        //     //   }
+        //     // },
+        //     // {
+        //     //   path: 'igmuro',
+        //     //   name: 'social-igmuro',
+        //     //   component: () => import('@/views/panel/social/IGMuroView.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'social',
+        //     //     label: 'Muro de Facebook'
+        //     //   }
+        //     // }
         //   ]
         // },
 
@@ -406,24 +415,24 @@ const router = createRouter({
         //     //     category: 'demos'
         //     //   }
         //     // },
-        //     {
-        //       path: 'advancedSearch',
-        //       name: 'demos-advancedSearch',
-        //       component: () => import('@/views/panel/demos/AdvancedSearchView.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'demos'
-        //       }
-        //     },
-        //     {
-        //       path: 'reports',
-        //       name: 'demos-reports',
-        //       component: () => import('@/views/panel/demos/ReportsView.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'demos'
-        //       }
-        //     },
+        //     // {
+        //     //   path: 'advancedSearch',
+        //     //   name: 'demos-advancedSearch',
+        //     //   component: () => import('@/views/panel/demos/AdvancedSearchView.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'demos'
+        //     //   }
+        //     // },
+        //     // {
+        //     //   path: 'reports',
+        //     //   name: 'demos-reports',
+        //     //   component: () => import('@/views/panel/demos/ReportsView.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'demos'
+        //     //   }
+        //     // },
         //     // {
         //     //   path: 'search_ai',
         //     //   name: 'demos-search_ai',
@@ -451,15 +460,15 @@ const router = createRouter({
         //     //     category: 'demos'
         //     //   }
         //     // },
-        //     {
-        //       path: 'myagent',
-        //       name: 'demos-myagent',
-        //       component: () => import('@/views/panel/demos/ConversationsAgent.vue'),
-        //       meta: {
-        //         requiresAuth: true,
-        //         category: 'demos'
-        //       }
-        //     }
+        //     // {
+        //     //   path: 'myagent',
+        //     //   name: 'demos-myagent',
+        //     //   component: () => import('@/views/panel/demos/ConversationsAgent.vue'),
+        //     //   meta: {
+        //     //     requiresAuth: true,
+        //     //     category: 'demos'
+        //     //   }
+        //     // }
         //     // ,
         //     // {
         //     //   path: 'gantt',
@@ -471,7 +480,37 @@ const router = createRouter({
         //     //   }
         //     // }
         //   ]
-        // }
+        // },
+
+        // Vehículos
+        {
+          path: 'vehicles',
+          name: 'vehicles',
+          redirect: '/panel/vehicles/vehicle-share',
+          meta: { category: 'pdf-vehicles', icon: '<i class="bi bi-car-front"></i>' },
+          children: [
+            {
+              path: 'config',
+              name: 'vehicles-config',
+              component: () => import('@/views/panel/vehicles/VehicleConfigView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'pdf-vehicles',
+                label: 'Configuración'
+              }
+            },
+            {
+              path: 'vehicle-share',
+              name: 'vehicles-share',
+              component: () => import('@/views/panel/vehicles/VehicleShareView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'pdf-vehicles',
+                label: 'Compartir Vehículos'
+              }
+            }
+          ]
+        }
 
       ]
     },
