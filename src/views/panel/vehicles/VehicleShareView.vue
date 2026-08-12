@@ -166,7 +166,7 @@
     </div>
 
     <!-- Controles de paginación del grid (20 por página) -->
-    <div v-if="filteredStock.length > itemsPerPage" class="d-flex justify-content-center align-items-center gap-2 my-4">
+    <div v-if="filteredStock.length > itemsPerPage" class="d-flex justify-content-center align-items-center gap-2 my-4 flex-wrap">
       <button 
         @click="displayPage = Math.max(1, displayPage - 1)"
         :disabled="displayPage === 1"
@@ -175,7 +175,7 @@
         <i class="bi bi-chevron-left"></i> Anterior
       </button>
       
-      <div class="d-flex gap-1">
+      <div class="d-flex gap-1 flex-wrap">
         <button 
           v-for="page in totalDisplayPages"
           :key="page"
