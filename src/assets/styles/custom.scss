@@ -98,7 +98,7 @@
     box-shadow: 0 1px 15px rgba(0, 0, 0, .04), 0 1px 6px rgba(0, 0, 0, .04);
     background: rgba(255, 255,255, 1);
     border-radius: 4px;
-    width: 230px;
+    width: 80vw;
     .menu {
       padding-top: 20px;
       ul {
@@ -126,8 +126,14 @@
             a:hover {
                 color: #3939ff
             }
+
+            @media(max-width: 768px) {
+                font-size: 18px;
+            }
         }
       }
+
+       
     }
 
   }
