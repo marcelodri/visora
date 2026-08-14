@@ -138,13 +138,29 @@ export default {
         const token = response.data.token;
         sessionStorage.setItem('token', token);
 
+        // Guardar datos del usuario para usar en PDFs y otras vistas
+        sessionStorage.setItem('user_name', response.data.username || response.data.name || '');
+        sessionStorage.setItem('user_email', response.data.email || '');
+        sessionStorage.setItem('user_phone', response.data.phone || response.data.phoneNumber || response.data.telefono || response.data.phone_number || '');
+        sessionStorage.setItem('user_company', response.data.company || response.data.instance || '');
+        
+        // Debug: mostrar qué se guardó
+        console.log('📱 Datos guardados en sessionStorage:', {
+          user_name: sessionStorage.getItem('user_name'),
+          user_email: sessionStorage.getItem('user_email'),
+          user_phone: sessionStorage.getItem('user_phone'),
+          user_company: sessionStorage.getItem('user_company')
+        });
+
         const userData = {
           username: response.data.username,
           email: response.data.email,
           level: response.data.level,
           instance: response.data.instance,
           appkey: response.data.appkey,
-          details: response.data.details
+          details: response.data.details,
+          phone: response.data.phone,
+          name: response.data.name  
         };
         authStore.login(userData);
 

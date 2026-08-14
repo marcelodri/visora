@@ -152,6 +152,30 @@
                 <option value="">-- Sin asignar --</option>
                 <option v-for="col in availableColumns" :key="col" :value="col">{{ col }}</option>
               </select>
+
+              <!-- Indicador de formato detectado -->
+              <div v-if="columnMapping.fecha_venta && dateFormatDetected" class="date-format-indicator success mt-2">
+                <div class="dfi-header">
+                  <i class="bi bi-check-circle-fill me-2"></i>
+                  <strong>Formato detectado: {{ dateFormatDetected.format }}</strong>
+                </div>
+                <div class="dfi-examples">
+                  <div v-for="(example, idx) in detectedDateExamples" :key="idx" class="dfi-example">
+                    <span class="dfi-original">{{ example.original }}</span>
+                    <i class="bi bi-arrow-right mx-2"></i>
+                    <span class="dfi-formatted">{{ example.formatted }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Indicador de error si no se detectó -->
+              <div v-else-if="columnMapping.fecha_venta && !dateFormatDetected" class="date-format-indicator warning mt-2">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>No se pudo detectar el formato automáticamente</strong>
+                <p class="mt-1 mb-0 text-muted" style="font-size: 0.85rem;">
+                  Formatos soportados: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD-MM-YYYY, YYYYMMDD, DD/MM/YY, Excel Serial
+                </p>
+              </div>
             </div>
           </div>
 
@@ -622,7 +646,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import * as XLSX from 'xlsx';
 import ToastComponent from '@/components/ToastComponent.vue';
 import ModalComponent from '@/components/ModalComponent.vue';
@@ -676,6 +700,43 @@ export default {
     // Modal de resultados de integración
     const resultModal = ref(null);
     const integrationResult = ref(null);
+
+    // Detección de formato de fecha
+    const dateFormatDetected = ref(null);
+    const detectedDateExamples = ref([]);
+    const dateFormatOptions = ref([
+      { format: 'EXCEL_SERIAL', pattern: /^\d{4,5}$/, regex: /^\d{4,5}$/, parse: (d) => {
+        // Convertir número serial de Excel a fecha
+        const num = parseInt(d);
+        if (num < 1 || num > 2958465) return null; // Validar rango
+        // Excel: 1 = 1900-01-01, pero Excel tiene un bug con el año 1900
+        // Ajuste: 1 = 1899-12-31 en JavaScript
+        const date = new Date((num - 1) * 86400000 + new Date(1899, 11, 31).getTime());
+        return date;
+      }},
+      { format: 'DD/MM/YYYY', pattern: /^\d{1,2}\/\d{1,2}\/\d{4}$/, regex: /^(0?[1-9]|[12]\d|3[01])\/(0?[1-9]|1[012])\/(\d{4})$/, parse: (d) => {
+        const p = d.split('/');
+        return new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+      }},
+      { format: 'MM/DD/YYYY', pattern: /^\d{1,2}\/\d{1,2}\/\d{4}$/, regex: /^(0?[1-9]|1[012])\/(0?[1-9]|[12]\d|3[01])\/(\d{4})$/, parse: (d) => {
+        const p = d.split('/');
+        return new Date(parseInt(p[2]), parseInt(p[0])-1, parseInt(p[1]));
+      }},
+      { format: 'YYYY-MM-DD', pattern: /^\d{4}-\d{1,2}-\d{1,2}$/, regex: /^(\d{4})-(0?[1-9]|1[012])-(0?[1-9]|[12]\d|3[01])$/, parse: (d) => new Date(d) },
+      { format: 'DD-MM-YYYY', pattern: /^\d{1,2}-\d{1,2}-\d{4}$/, regex: /^(0?[1-9]|[12]\d|3[01])-(0?[1-9]|1[012])-(\d{4})$/, parse: (d) => {
+        const p = d.split('-');
+        return new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+      }},
+      { format: 'YYYYMMDD', pattern: /^\d{8}$/, regex: /^(\d{4})(0?[1-9]|1[012])(0?[1-9]|[12]\d|3[01])$/, parse: (d) => {
+        return new Date(parseInt(d.substring(0,4)), parseInt(d.substring(4,6))-1, parseInt(d.substring(6,8)));
+      }},
+      { format: 'DD/MM/YY', pattern: /^\d{1,2}\/\d{1,2}\/\d{2}$/, regex: /^(0?[1-9]|[12]\d|3[01])\/(0?[1-9]|1[012])\/(\d{2})$/, parse: (d) => {
+        const p = d.split('/');
+        const year = parseInt(p[2]) + (parseInt(p[2]) < 50 ? 2000 : 1900);
+        return new Date(year, parseInt(p[1])-1, parseInt(p[0]));
+      }}
+    ]);
+    const selectedDateFormat = ref(null);
 
     const currentStep = computed(() => {
       if (!fileName.value) return 1;
@@ -880,6 +941,94 @@ export default {
       return String(val).replace(/\./g, '').trim();
     };
 
+    // --- Funciones de detección y formateo de fecha ---
+    const detectDateFormat = (dateString) => {
+      if (!dateString) return null;
+      const str = String(dateString).trim();
+      
+      for (const fmt of dateFormatOptions.value) {
+        if (fmt.regex.test(str)) {
+          return fmt;
+        }
+      }
+      return null;
+    };
+
+    const parseDate = (dateString, format) => {
+      try {
+        if (!format || !dateString) return null;
+        const date = format.parse(String(dateString).trim());
+        if (isNaN(date.getTime())) return null;
+        return date;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const formatDateForAPI = (dateString, format) => {
+      try {
+        const date = parseDate(dateString, format);
+        if (!date) return null;
+        // Retornar en formato YYYY-MM-DD
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const detectDateFormatInColumn = (columnName) => {
+      if (!columnName || !rawData.value.length) {
+        dateFormatDetected.value = null;
+        detectedDateExamples.value = [];
+        selectedDateFormat.value = null;
+        return;
+      }
+
+      // Tomar muestras de la columna
+      const samples = [];
+      const detectedFormats = new Map();
+
+      for (let i = 0; i < Math.min(20, rawData.value.length); i++) {
+        const val = rawData.value[i][columnName];
+        if (val) {
+          samples.push(val);
+          const detected = detectDateFormat(val);
+          if (detected) {
+            const key = detected.format;
+            detectedFormats.set(key, (detectedFormats.get(key) || 0) + 1);
+          }
+        }
+      }
+
+      // Elegir el formato más frecuente
+      let mostFrequentFormat = null;
+      let maxCount = 0;
+
+      for (const [format, count] of detectedFormats) {
+        if (count > maxCount) {
+          maxCount = count;
+          mostFrequentFormat = dateFormatOptions.value.find(f => f.format === format);
+        }
+      }
+
+      if (mostFrequentFormat) {
+        dateFormatDetected.value = mostFrequentFormat;
+        selectedDateFormat.value = mostFrequentFormat;
+        // Mostrar ejemplos formateados
+        detectedDateExamples.value = samples.slice(0, 3).map(s => ({
+          original: s,
+          formatted: formatDateForAPI(s, mostFrequentFormat)
+        })).filter(e => e.formatted);
+      } else {
+        dateFormatDetected.value = null;
+        selectedDateFormat.value = null;
+        detectedDateExamples.value = [];
+      }
+    };
+
     // --- Evaluación de condiciones de la regla activa ---
     const getRowValueForConditionField = (row, field) => {
       const mapping = {
@@ -959,13 +1108,22 @@ export default {
       }
 
       return rawData.value.slice(0, 5).map(row => {
+        // Formatear fecha si está mapeada y el formato fue detectado
+        let fechaFormateada = '';
+        if (columnMapping.value.fecha_venta && selectedDateFormat.value) {
+          const rawDate = row[columnMapping.value.fecha_venta];
+          fechaFormateada = formatDateForAPI(rawDate, selectedDateFormat.value) || rawDate || '';
+        } else if (columnMapping.value.fecha_venta) {
+          fechaFormateada = row[columnMapping.value.fecha_venta] || '';
+        }
+
         return {
           dni: normalizeDocument(row[columnMapping.value.dni]),
           dni_referido: normalizeDocument(row[columnMapping.value.dni_referido]),
           nombre_referido: columnMapping.value.nombre_referido ? (row[columnMapping.value.nombre_referido] || '') : '',
           nombre_cliente: columnMapping.value.nombre_cliente ? (row[columnMapping.value.nombre_cliente] || '') : '',
           importe: row[columnMapping.value.importe] || 0,
-          fecha_venta: columnMapping.value.fecha_venta ? (row[columnMapping.value.fecha_venta] || '') : '',
+          fecha_venta: fechaFormateada,
           nro_factura: columnMapping.value.nro_factura ? (row[columnMapping.value.nro_factura] || '') : '',
           asesor: columnMapping.value.asesor ? (row[columnMapping.value.asesor] || '') : '',
           referencia: columnMapping.value.referencia ? (row[columnMapping.value.referencia] || '') : '',
@@ -1030,8 +1188,8 @@ export default {
           firstname: fullName,
           lastname: '',
           referred_document: normalizeDocument(row[columnMapping.value.dni]),
-          sale_date: columnMapping.value.fecha_venta
-            ? (row[columnMapping.value.fecha_venta] || null)
+          sale_date: columnMapping.value.fecha_venta && selectedDateFormat.value
+            ? (formatDateForAPI(row[columnMapping.value.fecha_venta], selectedDateFormat.value) || null)
             : null,
           sale_amount: Number(row[columnMapping.value.importe]) || 0,
           sale_currency: 'COL',
@@ -1140,6 +1298,20 @@ export default {
 
     onMounted(fetchActiveRule);
 
+    // Watcher para detectar formato de fecha cuando se selecciona la columna
+    watch(
+      () => columnMapping.value.fecha_venta,
+      (newVal) => {
+        if (newVal) {
+          detectDateFormatInColumn(newVal);
+        } else {
+          dateFormatDetected.value = null;
+          selectedDateFormat.value = null;
+          detectedDateExamples.value = [];
+        }
+      }
+    );
+
     return {
       fileInput,
       fileName,
@@ -1169,7 +1341,13 @@ export default {
       formatCurrency,
       resultModal,
       integrationResult,
-      closeResultModal
+      closeResultModal,
+      dateFormatDetected,
+      detectedDateExamples,
+      dateFormatOptions,
+      selectedDateFormat,
+      detectDateFormatInColumn,
+      formatDateForAPI
     };
   }
 };
@@ -1767,5 +1945,76 @@ export default {
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
+}
+
+/* ===== DATE FORMAT DETECTION ===== */
+.date-format-indicator {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.date-format-indicator.success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #86efac;
+  color: #065f46;
+}
+
+.date-format-indicator.warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.dfi-header {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.dfi-header i {
+  font-size: 1rem;
+}
+
+.dfi-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.dfi-example {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+
+.dfi-original {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+}
+
+.dfi-formatted {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #059669;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+}
+
+.date-format-indicator.warning .dfi-formatted {
+  color: #92400e;
 }
 </style>

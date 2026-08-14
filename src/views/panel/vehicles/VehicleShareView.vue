@@ -5,11 +5,25 @@
         <!-- <i class="bi bi-car-front me-2"></i> -->
         Catálogo de Vehículos
       </h2>
-      <button @click="getStock()" :disabled="loading" class="btn btn btn-add">
-        <i v-if="loading" class="bi bi-download me-2"></i>
-        {{ loading ? (loadingMessage || 'Cargando...') : 'Importar Stock' }}
-      </button>
     </div>
+
+    <!-- Loading inicial elegante -->
+    <div v-if="loading && !stock.length" class="text-center py-5">
+      <div class="spinner-border mb-3" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <h5 class="mb-2">{{ loadingMessage || 'Importando vehículos...' }}</h5>
+      <p class="text-muted small">Por favor espera mientras se cargan los datos</p>
+    </div>
+
+    <!-- Si hay vehículos cargados pero sigue cargando más -->
+    <div v-if="loading && stock.length" class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+      <i class="bi bi-arrow-repeat me-2"></i>
+      <strong>Cargando más vehículos...</strong>
+      <br>
+      <small>{{ loadingMessage }}</small>
+    </div>
+
     <hr class="header-divider">
 
     <!-- Búsqueda y Filtros -->
@@ -137,6 +151,10 @@
               </strong>
             </div>
 
+            <p class="text-muted mb-2" style="font-size: 0.8rem;">
+              {{ vehicle.accesories || 'N/D' }}
+            </p>
+
             <div class="d-grid gap-2">
               <button 
                 @click="shareVehicle(vehicle)"
@@ -195,15 +213,6 @@
       </button>
     </div>
 
-    <!-- Botón de cargar más (si hay más páginas en la API) -->
-    <!-- (Ya no es necesario - todas las páginas se cargan automáticamente) -->
-
-    <!-- Estado vacío -->
-    <div v-if="!loading && !stock.length" class="text-center py-5">
-      <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-      <p class="text-muted mt-3">No hay vehículos. Importa stock para comenzar.</p>
-    </div>
-
     <!-- Toast -->
     <ToastComponent 
       :title="toastTitle"
@@ -220,6 +229,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import ToastComponent from '@/components/ToastComponent.vue'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import JSZip from 'jszip'
 import noImage from '@/assets/images/no-image.png'
 import { stockConfig, getApiUrl, getApiCredentials } from './config/stockConfig'
 
@@ -498,12 +508,13 @@ async function getStock() {
  * Ejemplo: "Mensualidad: 2 * #sym:price / 100"
  * Resultado: "Mensualidad: 1000" (si price es 50000)
  */
-function evaluateTemplate(template, vehicle) {
+function evaluateTemplate(template, vehicle, userData = {}) {
   if (!template) return ''
   
   // Crear contexto con variables disponibles del vehículo
   const salePrice = getPrice(vehicle.prices, 'SALE_COST') || getPrice(vehicle.prices, 'PURCHASE_COST') || 0
-  const priceValue = salePrice ? parseFloat(salePrice.replace(/\D/g, '')) : 0
+  // Preservar el punto decimal al extraer el precio (mantener dígitos y puntos, eliminar todo lo demás)
+  const priceValue = salePrice ? parseFloat(salePrice.replace(/[^0-9.]/g, '')) : 0
   
   const context = {
     price: priceValue,
@@ -514,6 +525,11 @@ function evaluateTemplate(template, vehicle) {
     model: vehicle.model || '',
     color: vehicle.color || '',
     version: vehicle.version || '',
+    // Variables del usuario
+    user_name: userData.name || userData.fullName || '',
+    user_email: userData.email || '',
+    user_phone: userData.phone || userData.phoneNumber || '',
+    user_company: userData.company || '',
     // Funciones útiles
     round: Math.round,
     floor: Math.floor,
@@ -545,20 +561,26 @@ function evaluateTemplate(template, vehicle) {
   })
   
   // Evaluar líneas con cálculos (después de los reemplazos de variables)
-  // Buscar patrones como "valor: 123 * 2 / 100" o similares
+  // Buscar patrones como "Mensualidad: $ 95000 * 0.02" o similares
   result = result.split('\n').map(line => {
-    // Si la línea contiene operadores matemáticos
-    if (/[\d\s\*\/\+\-()]+/.test(line)) {
-      // Extraer la parte que podría ser una expresión matemática
-      const calcMatch = line.match(/([^:]*?):\s*([\d\s\*\/\+\-().]+)(.*)$/)
+    // Buscar líneas con formato: label: cualquier_cosa
+    const colonMatch = line.match(/([^:]*?):\s*(.*)$/)
+    
+    if (colonMatch) {
+      const prefix = colonMatch[1].trim()
+      const valueStr = colonMatch[2].trim()
       
-      if (calcMatch) {
-        const prefix = calcMatch[1].trim()
-        const expression = calcMatch[2].trim()
-        const suffix = calcMatch[3]
+      // Extraer la expresión matemática (números y operadores)
+      // Permitir caracteres especiales como $ antes de la expresión
+      const exprMatch = valueStr.match(/([^\d]*?)([\d.]+\s*[\*\/\+\-\s().\d]*)/)
+      
+      if (exprMatch) {
+        const beforeExpr = exprMatch[1] // Símbolos como $, espacios, etc
+        const expression = exprMatch[2].trim() // La expresión matemática
+        const afterExpr = valueStr.substring(beforeExpr.length + expression.length) // Resto
         
         try {
-          // Validar que solo contiene caracteres seguros
+          // Validar que solo contiene caracteres seguros para evaluar
           if (/^[0-9\s\*\/\+\-().]*$/.test(expression)) {
             const calculated = new Function('return (' + expression + ')')()
             if (!isNaN(calculated)) {
@@ -566,7 +588,7 @@ function evaluateTemplate(template, vehicle) {
               const formatted = typeof calculated === 'number' 
                 ? calculated.toLocaleString('es-CO', { maximumFractionDigits: 2 })
                 : calculated
-              return `${prefix}: ${formatted}${suffix}`
+              return `${prefix}: ${beforeExpr}${formatted}${afterExpr}`
             }
           }
         } catch {
@@ -611,6 +633,46 @@ async function urlToBase64(url) {
     console.warn('Error cargando imagen via n8n:', error)
     return null
   }
+}
+
+/**
+ * Descarga múltiples imágenes en paralelo (máximo 5 simultáneas)
+ * Retorna array con resultado de cada imagen: { url, base64, error }
+ */
+async function downloadImagesInParallel(imageUrls, maxConcurrent = 5) {
+  const results = []
+  const executing = []
+  
+  for (let i = 0; i < imageUrls.length; i++) {
+    const url = imageUrls[i]
+    
+    const promise = urlToBase64(url).then(base64 => ({
+      url,
+      base64,
+      index: i,
+      error: !base64
+    })).catch(err => ({
+      url,
+      base64: null,
+      index: i,
+      error: true,
+      errorMsg: err.message
+    }))
+    
+    results[i] = promise
+    
+    if (imageUrls.length >= maxConcurrent) {
+      executing.push(promise)
+      
+      if (executing.length >= maxConcurrent) {
+        await Promise.race(executing)
+        executing.splice(executing.findIndex(p => p === promise), 1)
+      }
+    }
+  }
+  
+  // Esperar a que todas se completen
+  return Promise.all(results)
 }
 
 async function convertImageToCompatibleFormat(imageData) {
@@ -692,16 +754,55 @@ async function shareVehicle(vehicle) {
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
     const colorRgb = hexToRgb(config.styles?.primaryColor || '#0066CC')
+    
+    // Debug: Datos del usuario
+    const userData = {
+      name: sessionStorage.getItem('user_name') || '',
+      email: sessionStorage.getItem('user_email') || '',
+      phone: sessionStorage.getItem('user_phone') || '',
+      company: sessionStorage.getItem('user_company') || ''
+    }
+    console.log('📄 Generando PDF con userData:', userData)
+    console.log('📋 Configuración empresa:', config.company)
     let y = 15
 
-    // Logo - convertir a formato compatible si es necesario
+    // ===== ENCABEZADO EN 3 COLUMNAS =====
+    const columnWidth = (pageWidth - 30) / 3
+    const lineHeight = 5 // Altura aproximada de una línea de texto
+    
+    // Columna 2: Marca, modelo, versión y año (centrada)
+    const titleText = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year || ''}`
+    doc.setFontSize(14)
+    doc.setFont(undefined, 'bold')
+    const col2X = 15 + columnWidth
+    const titleLines = doc.splitTextToSize(titleText.trim(), columnWidth - 4)
+    
+    // Obtener dimensiones del logo para calcular la altura total del encabezado
+    const logoHeight = config.company?.logoHeight || 12
+    const logoWidth = config.company?.logoWidth || 50
+    
+    // Calcular altura total del encabezado (máximo entre logo y texto)
+    const totalHeaderHeight = Math.max(logoHeight, titleLines.length * lineHeight + 5)
+    const centerY = y + totalHeaderHeight / 2
+    
+    // Columna 1: "COTIZACIÓN" (alineado al centro vertical)
+    doc.setFontSize(16)
+    doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
+    doc.setFont(undefined, 'bold')
+    doc.text('COTIZACIÓN', 15, centerY, { align: 'left' })
+    
+    // Columna 2: Título multilínea (alineado al centro vertical)
+    doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
+    const titleStartY = centerY - (titleLines.length - 1) * lineHeight / 2
+    doc.text(titleLines, col2X + columnWidth / 2, titleStartY, { align: 'center' })
+    
+    // Columna 3: Logo (alineado al centro vertical)
     if (config.company?.logo) {
       try {
         const logoData = await convertImageToCompatibleFormat(config.company.logo)
-        const logoWidth = config.company?.logoWidth || 60
-        const logoHeight = config.company?.logoHeight || 10
+        const col3X = 15 + columnWidth * 2
+        const logoY = centerY - logoHeight / 2
         
-        // Detectar formato para jsPDF
         let imageFormat = 'JPEG'
         if (logoData.includes('image/png')) {
           imageFormat = 'PNG'
@@ -709,24 +810,27 @@ async function shareVehicle(vehicle) {
           imageFormat = 'WEBP'
         }
         
-        doc.addImage(logoData, imageFormat, 15, y, logoWidth, logoHeight)
-        y += logoHeight + 10
+        doc.addImage(logoData, imageFormat, col3X + columnWidth / 2 - logoWidth / 2, logoY, logoWidth, logoHeight)
       } catch (logoErr) {
         console.warn('Error insertando logo:', logoErr)
-        // Continuar sin logo si hay error
       }
     }
+    
+    // Ajustar Y para el siguiente contenido
+    y += totalHeaderHeight + 5
 
-    // Título
-    doc.setFontSize(20)
-    doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
-    doc.text(`${vehicle.brand} ${vehicle.model}`, 15, y)
-    y += 10
-
-    // Empresa
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    doc.text(config.company?.name || 'Empresa', 15, y)
+    // Nombre de la empresa
+    try {
+      const processedCompanyName = evaluateTemplate(config.company?.name || '', vehicle, userData)
+      doc.setFontSize(10)
+      doc.setTextColor(100, 100, 100)
+      doc.setFont(undefined, 'normal')
+      doc.text(processedCompanyName, 15, y)
+    } catch (e) {
+      doc.setFontSize(10)
+      doc.setTextColor(100, 100, 100)
+      doc.text(config.company?.name || 'Empresa', 15, y)
+    }
     y += 8
 
     // Línea separadora
@@ -734,9 +838,58 @@ async function shareVehicle(vehicle) {
     doc.line(15, y, pageWidth - 15, y)
     y += 8
 
-    // Imágenes - mostrar TODAS las imágenes
+    // Detalles del vehículo
+    const detailRows = [
+      ['Marca', vehicle.brand],
+      ['Modelo', vehicle.model],
+      ['Año', vehicle.year || 'N/D'],
+      ['Color', vehicle.color || 'N/D'],
+      ['Combustible', typeof vehicle.fuel === 'object' && vehicle.fuel?.name ? vehicle.fuel.name : vehicle.fuel || 'N/D'],
+      ['Accesorios', vehicle.accesories || 'N/D'],
+      ['Precio', getPrice(vehicle.prices, 'SALE_COST') || getPrice(vehicle.prices, 'PURCHASE_COST') || 'Consultar']
+    ]
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Detalles', '']],
+      body: detailRows,
+      theme: 'striped',
+      headStyles: { fillColor: [colorRgb.r, colorRgb.g, colorRgb.b], textColor: 255, fontStyle: 'bold' },
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 }, 1: { textColor: [80, 80, 80] } },
+      styles: { fontSize: 10, cellPadding: 4 },
+      margin: { left: 15, right: 15, bottom: 35 }
+    })
+
+    y = doc.lastAutoTable.finalY + 8
+
+    // Cotización Financiera
+    if (config.company?.financialInfo) {
+      try {
+        doc.setFontSize(11)
+        doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
+        doc.text('Cotización Financiera', 15, y)
+        y += 6
+
+        doc.setFontSize(9)
+        doc.setTextColor(50, 50, 50)
+        // Evaluar el template con variables dinámicas del vehículo y usuario
+        const processedInfo = evaluateTemplate(config.company.financialInfo, vehicle, userData)
+        const lines = doc.splitTextToSize(processedInfo, pageWidth - 30)
+        doc.text(lines, 15, y)
+      } catch (e) {
+        console.warn('Error procesando información financiera:', e)
+      }
+    }
+
+    y += 15
+
+    // Imágenes - mostrar TODAS las imágenes AL FINAL
     const images = getDesktopImages(vehicle)
     if (images.length > 0) {
+      // Descargar TODAS las imágenes en paralelo ANTES de insertarlas
+      const imageUrls = images.map(img => img.full_path)
+      const downloadedImages = await downloadImagesInParallel(imageUrls)
+      
       const imgW = (pageWidth - 35) / 2
       const imgH = 60
       let currentPageImages = 0  // Contador de imágenes en página actual
@@ -773,9 +926,9 @@ async function shareVehicle(vehicle) {
           yImg = y
         }
 
-        // Insertar imagen
+        // Insertar imagen (ya descargada en paralelo)
         try {
-          const b64 = await urlToBase64(images[imageIndex].full_path)
+          const b64 = downloadedImages[imageIndex].base64
           if (b64) {
             doc.addImage(b64, 'JPEG', xImg, yImg, imgW, imgH)
           } else {
@@ -797,58 +950,35 @@ async function shareVehicle(vehicle) {
       y = y + Math.ceil(currentPageImages / 2) * (imgH + 3) + 8
     }
 
-    // Detalles del vehículo
-    const detailRows = [
-      ['Marca', vehicle.brand],
-      ['Modelo', vehicle.model],
-      ['Año', vehicle.year || 'N/D'],
-      ['Color', vehicle.color || 'N/D'],
-      ['Combustible', typeof vehicle.fuel === 'object' && vehicle.fuel?.name ? vehicle.fuel.name : vehicle.fuel || 'N/D'],
-      ['Accesorios', vehicle.accesories || 'N/D'],
-      ['Precio', getPrice(vehicle.prices, 'SALE_COST') || getPrice(vehicle.prices, 'PURCHASE_COST') || 'Consultar']
-    ]
-
-    autoTable(doc, {
-      startY: y,
-      head: [['Detalles', '']],
-      body: detailRows,
-      theme: 'striped',
-      headStyles: { fillColor: [colorRgb.r, colorRgb.g, colorRgb.b], textColor: 255, fontStyle: 'bold' },
-      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 }, 1: { textColor: [80, 80, 80] } },
-      styles: { fontSize: 10, cellPadding: 4 },
-      margin: { left: 15, right: 15, bottom: 35 }
-    })
-
-    y = doc.lastAutoTable.finalY + 8
-
-    // Información financiera
-    if (config.company?.financialInfo) {
-      doc.setFontSize(11)
-      doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
-      doc.text('Información Financiera', 15, y)
-      y += 6
-
-      doc.setFontSize(9)
-      doc.setTextColor(50, 50, 50)
-      // Evaluar el template con variables dinámicas
-      const processedInfo = evaluateTemplate(config.company.financialInfo, vehicle)
-      const lines = doc.splitTextToSize(processedInfo, pageWidth - 30)
-      doc.text(lines, 15, y)
-    }
-
     // Pie
     const totalPages = doc.internal.getNumberOfPages()
     for (let p = 1; p <= totalPages; p++) {
-      doc.setPage(p)
-      doc.setFontSize(8)
-      doc.setTextColor(160, 160, 160)
-      doc.line(15, pageHeight - 22, pageWidth - 15, pageHeight - 22)
-      doc.text(`Tel: ${config.company?.phone || ''} | Email: ${config.company?.email || ''}`, 15, pageHeight - 16)
-      doc.text(config.footerText || '', 15, pageHeight - 10)
-      doc.text(`${p} / ${totalPages}`, pageWidth - 15, pageHeight - 10, { align: 'right' })
+      try {
+        doc.setPage(p)
+        doc.setFontSize(8)
+        doc.setTextColor(160, 160, 160)
+        doc.line(15, pageHeight - 22, pageWidth - 15, pageHeight - 22)
+        
+        // Procesar teléfono y email con variables dinámicas
+        const processedPhone = evaluateTemplate(config.company?.phone || '', vehicle, userData)
+        const processedEmail = evaluateTemplate(config.company?.email || '', vehicle, userData)
+        
+        doc.text(`Tel: ${processedPhone} | Email: ${processedEmail}`, 15, pageHeight - 16)
+        doc.text(config.footerText || '', 15, pageHeight - 10)
+        doc.text(`${p} / ${totalPages}`, pageWidth - 15, pageHeight - 10, { align: 'right' })
+      } catch (e) {
+        console.warn('Error en pie de página:', e)
+        doc.setPage(p)
+        doc.setFontSize(8)
+        doc.setTextColor(160, 160, 160)
+        doc.line(15, pageHeight - 22, pageWidth - 15, pageHeight - 22)
+        doc.text(`Tel: ${config.company?.phone || ''} | Email: ${config.company?.email || ''}`, 15, pageHeight - 16)
+        doc.text(config.footerText || '', 15, pageHeight - 10)
+        doc.text(`${p} / ${totalPages}`, pageWidth - 15, pageHeight - 10, { align: 'right' })
+      }
     }
 
-    doc.save(`${vehicle.brand}_${vehicle.model}.pdf`)
+    doc.save(`${vehicle.brand}_${vehicle.model}_${vehicle.version}.pdf`)
     showToastMsg('Éxito', 'PDF descargado correctamente')
   } catch (err) {
     console.error('Error:', err)
@@ -859,7 +989,7 @@ async function shareVehicle(vehicle) {
 }
 
 /**
- * Descargar todas las imágenes de un vehículo
+ * Descargar todas las imágenes de un vehículo en un archivo ZIP
  */
 async function downloadImages(vehicle) {
   const images = getDesktopImages(vehicle)
@@ -875,31 +1005,34 @@ async function downloadImages(vehicle) {
   let failCount = 0
 
   try {
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i]
-      // Buscar URL en los campos posibles: full_path, src, url, link
-      const imageUrl = image.full_path || image.src || image.url || image.link
+    // Extraer todas las URLs
+    const imageUrls = images.map(img => img.full_path || img.src || img.url || img.link).filter(url => url)
+    
+    // Validar URLs
+    if (imageUrls.length === 0) {
+      showToastMsg('Error', 'No hay URLs de imágenes válidas')
+      return
+    }
+    
+    // Descargar TODAS las imágenes en paralelo (máximo 5 simultáneas)
+    const downloadedImages = await downloadImagesInParallel(imageUrls)
+    
+    const zip = new JSZip()
+
+    for (let i = 0; i < downloadedImages.length; i++) {
+      const result = downloadedImages[i]
       
-      if (!imageUrl) {
-        console.warn('Imagen sin URL:', image)
+      if (!result.base64) {
+        console.error(`Imagen ${i + 1} no se descargó:`, result.errorMsg)
         failCount++
         continue
       }
       
       try {
-        // Obtener imagen en base64 via webhook (evita CORS)
-        const dataUrl = await urlToBase64(imageUrl)
-        
-        if (!dataUrl) {
-          console.error(`No se obtuvo base64 para imagen ${i + 1}`)
-          failCount++
-          continue
-        }
-        
         // Extraer el base64 puro (eliminar prefijo data:image/jpeg;base64,)
-        let base64String = dataUrl
-        if (dataUrl.includes('base64,')) {
-          base64String = dataUrl.split('base64,')[1]
+        let base64String = result.base64
+        if (result.base64.includes('base64,')) {
+          base64String = result.base64.split('base64,')[1]
         }
         
         // Convertir base64 a blob
@@ -909,39 +1042,37 @@ async function downloadImages(vehicle) {
           byteNumbers[j] = byteCharacters.charCodeAt(j)
         }
         const byteArray = new Uint8Array(byteNumbers)
-        const blob = new Blob([byteArray], { type: 'image/jpeg' })
         
-        // Crear URL temporal del blob
-        const blobUrl = URL.createObjectURL(blob)
-        
-        // Crear y ejecutar descarga
-        const link = document.createElement('a')
-        link.href = blobUrl
-        link.download = `${vehicle.brand}_${vehicle.model}_${i + 1}.jpg`
-        
-        // Agregar pequeño delay entre descargas para evitar bloqueos
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 300))
-        }
-        
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        
-        // Limpiar URL temporal
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+        // Agregar imagen al ZIP
+        const fileName = `${vehicle.brand}_${vehicle.model}_${i + 1}.jpg`
+        zip.file(fileName, byteArray)
         
         successCount++
       } catch (imgError) {
-        console.error(`Error descargando imagen ${i + 1}:`, imgError)
+        console.error(`Error procesando imagen ${i + 1}:`, imgError)
         failCount++
       }
     }
     
     if (successCount > 0) {
+      // Generar el archivo ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' })
+      const zipUrl = URL.createObjectURL(zipBlob)
+      
+      // Crear y ejecutar descarga del ZIP
+      const link = document.createElement('a')
+      link.href = zipUrl
+      link.download = `IMG_${vehicle.brand}_${vehicle.model}_${vehicle.version || 'v'}.zip`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Limpiar URL temporal
+      setTimeout(() => URL.revokeObjectURL(zipUrl), 100)
+      
       const msg = failCount > 0 
-        ? `Se descargaron ${successCount} de ${images.length} imagen(es)`
-        : `Se descargaron ${successCount} imagen(es) correctamente`
+        ? `Se comprimieron ${successCount} de ${images.length} imagen(es) en ZIP`
+        : `Se descargó ZIP con ${successCount} imagen(es) correctamente`
       showToastMsg('Éxito', msg)
     } else {
       showToastMsg('Error', 'No se pudieron descargar las imágenes')
@@ -955,7 +1086,8 @@ async function downloadImages(vehicle) {
 }
 
 onMounted(() => {
-  getToken()
+  getToken();
+  getStock();
 })
 </script>
 
@@ -963,6 +1095,42 @@ onMounted(() => {
 .header-section {
   display: flex;
 }
+
+/* Loading Spinner Mejorado */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3rem;
+  color: #185fa5;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+  animation: slideDown 0.3s ease-out;
+}
+
+.alert-info .bi {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Card compacta de vehículos */
 .vehicle-card-compact {
   transition: all 0.3s ease;

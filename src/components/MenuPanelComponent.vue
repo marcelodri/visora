@@ -39,12 +39,15 @@
             </button> -->
             <!-- Dropdown 1 -->
             <div class="link dropdown text-start">
-              <button class="btn-menu user" @click="toggleDropdown('dropdown1')">{{ user?.username?.charAt(0) }}</button>
+              <button class="btn-menu user" @click="toggleDropdown('dropdown1')">{{ user?.name?.charAt(0) }}</button>
               <div class="menuitem" v-if="openDropdown === 'dropdown1'">
                 <!-- <p>{{ user?.username }} ({{ user?.level }})</p> -->
-                <p><b>{{ user?.email }}</b></p>
-                <p>{{ user?.level }}</p>
-                <p>{{ user?.instance }}</p><hr>
+                <p>User: <b>{{ user?.name }}</b></p>
+                <p>mail: <b>{{ user?.email }}</b></p>
+                <p>Tel: {{ user?.phone }}</p>
+                <p>Rol: {{ user?.level }}</p>
+                <p>Instance: {{ user?.instance }}</p>
+                <hr>
                 <router-link class="btn-link px-0" :to="{ name: 'changePassword' }">
                   <i class="bi bi-pencil-square"></i> {{ $t(`menu.password`) }}
                 </router-link><br>
