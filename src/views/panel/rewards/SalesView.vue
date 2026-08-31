@@ -142,7 +142,7 @@
               <label class="mapping-label">
                 <i class="bi bi-calendar-event me-2"></i>
                 Fecha de Venta
-                <span class="optional-badge">Opcional</span>
+                <span class="required-badge">Requerido</span>
               </label>
               <select
                 v-model="columnMapping.fecha_venta"
@@ -157,7 +157,7 @@
               <div v-if="columnMapping.fecha_venta && dateFormatDetected" class="date-format-indicator success mt-2">
                 <div class="dfi-header">
                   <i class="bi bi-check-circle-fill me-2"></i>
-                  <strong>Formato detectado: {{ dateFormatDetected.format }}</strong>
+                  <strong>Fechas normalizadas a DD/MM/YYYY</strong>
                 </div>
                 <div class="dfi-examples">
                   <div v-for="(example, idx) in detectedDateExamples" :key="idx" class="dfi-example">
@@ -173,7 +173,7 @@
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <strong>No se pudo detectar el formato automáticamente</strong>
                 <p class="mt-1 mb-0 text-muted" style="font-size: 0.85rem;">
-                  Formatos soportados: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD-MM-YYYY, YYYYMMDD, DD/MM/YY, Excel Serial
+                  Formatos soportados: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD-MM-YYYY, YYYYMMDD, DD/MM/YY y seriales de Excel
                 </p>
               </div>
             </div>
@@ -613,27 +613,39 @@
     <ModalComponent
       ref="resultModal"
       modalId="integrationResultModal"
-      modalTitle="Resultados de la Ingesta"
-      class="modal-xl"
+      :modalTitle="integrationHasErrors ? 'Importación con observaciones' : 'Importación completada'"
+      class="modal-xxl"
     >
       <div v-if="integrationResult" class="integration-result">
+        <div class="ir-hero" :class="integrationHasErrors ? 'ir-hero--warning' : 'ir-hero--success'">
+          <div class="ir-hero-icon">
+            <i :class="integrationHasErrors ? 'bi bi-exclamation-triangle-fill' : 'bi bi-check-circle-fill'"></i>
+          </div>
+          <div>
+            <h6>{{ integrationHasErrors ? 'La importación finalizó con observaciones' : 'Las ventas se importaron correctamente' }}</h6>
+            <p>
+              {{ integrationHasErrors
+                ? 'Revisá los registros indicados antes de volver a importarlos.'
+                : 'Todos los registros del archivo fueron procesados sin inconvenientes.' }}
+            </p>
+          </div>
+        </div>
 
-        <!-- Summary stats -->
         <div class="ir-stats">
           <div class="ir-stat ir-stat--ok">
             <i class="bi bi-check-circle-fill"></i>
-            <div class="ir-stat-num">{{ integrationResult.integration_ok }}</div>
-            <div class="ir-stat-label">Registros OK</div>
+            <div class="ir-stat-num">{{ integrationSuccessCount }}</div>
+            <div class="ir-stat-label">Procesados</div>
           </div>
           <div class="ir-stat ir-stat--err">
             <i class="bi bi-x-circle-fill"></i>
-            <div class="ir-stat-num">{{ integrationResult.integration_error }}</div>
+            <div class="ir-stat-num">{{ integrationErrorCount }}</div>
             <div class="ir-stat-label">Con error</div>
           </div>
           <div class="ir-stat ir-stat--total">
             <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-            <div class="ir-stat-num">{{ integrationResult.total_registros }}</div>
-            <div class="ir-stat-label">Total</div>
+            <div class="ir-stat-num">{{ integrationTotalCount }}</div>
+            <div class="ir-stat-label">Registros enviados</div>
           </div>
         </div>
 
@@ -666,8 +678,11 @@
         </div>
 
         <div v-else class="ir-no-errors">
-          <i class="bi bi-check-circle-fill me-2"></i>
-          No hubo registros con errores
+          <i class="bi bi-check-circle-fill"></i>
+          <div>
+            <strong>Sin errores para revisar</strong>
+            <span>No se detectaron registros rechazados durante la importación.</span>
+          </div>
         </div>
 
         <!-- Footer -->
@@ -685,7 +700,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import * as XLSX from 'xlsx';
 import ToastComponent from '@/components/ToastComponent.vue';
 import ModalComponent from '@/components/ModalComponent.vue';
@@ -741,18 +756,28 @@ export default {
     const resultModal = ref(null);
     const integrationResult = ref(null);
 
+    const integrationSuccessCount = computed(() => Number(integrationResult.value?.integration_ok) || 0);
+    const integrationErrorCount = computed(() => {
+      const reportedErrors = Number(integrationResult.value?.integration_error) || 0;
+      const listedErrors = Array.isArray(integrationResult.value?.files_error)
+        ? integrationResult.value.files_error.length
+        : 0;
+      return Math.max(reportedErrors, listedErrors);
+    });
+    const integrationTotalCount = computed(() =>
+      Number(integrationResult.value?.total_registros) || integrationSuccessCount.value + integrationErrorCount.value
+    );
+    const integrationHasErrors = computed(() => integrationErrorCount.value > 0);
+
     // Detección de formato de fecha
     const dateFormatDetected = ref(null);
     const detectedDateExamples = ref([]);
     const dateFormatOptions = ref([
       { format: 'EXCEL_SERIAL', pattern: /^\d{4,5}$/, regex: /^\d{4,5}$/, parse: (d) => {
-        // Convertir número serial de Excel a fecha
-        const num = parseInt(d);
-        if (num < 1 || num > 2958465) return null; // Validar rango
-        // Excel: 1 = 1900-01-01, pero Excel tiene un bug con el año 1900
-        // Ajuste: 1 = 1899-12-31 en JavaScript
-        const date = new Date((num - 1) * 86400000 + new Date(1899, 11, 31).getTime());
-        return date;
+        const serial = Number(d);
+        if (!Number.isInteger(serial) || serial < 1 || serial > 2958465) return null;
+        // Excel considera 1900 como bisiesto; esta base contempla su desfase histórico.
+        return new Date(Date.UTC(1899, 11, 30 + serial));
       }},
       { format: 'DD/MM/YYYY', pattern: /^\d{1,2}\/\d{1,2}\/\d{4}$/, regex: /^(0?[1-9]|[12]\d|3[01])\/(0?[1-9]|1[012])\/(\d{4})$/, parse: (d) => {
         const p = d.split('/');
@@ -762,7 +787,10 @@ export default {
         const p = d.split('/');
         return new Date(parseInt(p[2]), parseInt(p[0])-1, parseInt(p[1]));
       }},
-      { format: 'YYYY-MM-DD', pattern: /^\d{4}-\d{1,2}-\d{1,2}$/, regex: /^(\d{4})-(0?[1-9]|1[012])-(0?[1-9]|[12]\d|3[01])$/, parse: (d) => new Date(d) },
+      { format: 'YYYY-MM-DD', pattern: /^\d{4}-\d{1,2}-\d{1,2}$/, regex: /^(\d{4})-(0?[1-9]|1[012])-(0?[1-9]|[12]\d|3[01])$/, parse: (d) => {
+        const p = d.split('-');
+        return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+      }},
       { format: 'DD-MM-YYYY', pattern: /^\d{1,2}-\d{1,2}-\d{4}$/, regex: /^(0?[1-9]|[12]\d|3[01])-(0?[1-9]|1[012])-(\d{4})$/, parse: (d) => {
         const p = d.split('-');
         return new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
@@ -788,7 +816,8 @@ export default {
     const allFieldsMapped = computed(() => {
       return columnMapping.value.dni && 
              columnMapping.value.dni_referido && 
-             columnMapping.value.importe;
+             columnMapping.value.importe &&
+             columnMapping.value.fecha_venta;
     });
 
     // --- Auto-match: keywords por campo ---
@@ -1023,8 +1052,33 @@ export default {
     const parseDate = (dateString, format) => {
       try {
         if (!format || !dateString) return null;
-        const date = format.parse(String(dateString).trim());
+        const source = String(dateString).trim();
+        const date = format.parse(source);
         if (isNaN(date.getTime())) return null;
+
+        // Date normaliza valores imposibles (por ejemplo 31/02). Verificamos que
+        // las partes obtenidas sean exactamente las mismas que venían en el Excel.
+        let expected;
+        if (['DD/MM/YYYY', 'DD-MM-YYYY', 'DD/MM/YY'].includes(format.format)) {
+          const parts = source.split(/[-/]/).map(Number);
+          expected = {
+            day: parts[0],
+            month: parts[1],
+            year: format.format === 'DD/MM/YY' ? (parts[2] < 50 ? 2000 + parts[2] : 1900 + parts[2]) : parts[2]
+          };
+        } else if (format.format === 'MM/DD/YYYY') {
+          const parts = source.split('/').map(Number);
+          expected = { day: parts[1], month: parts[0], year: parts[2] };
+        } else if (format.format === 'YYYY-MM-DD') {
+          const parts = source.split('-').map(Number);
+          expected = { day: parts[2], month: parts[1], year: parts[0] };
+        } else if (format.format === 'YYYYMMDD') {
+          expected = { day: Number(source.slice(6, 8)), month: Number(source.slice(4, 6)), year: Number(source.slice(0, 4)) };
+        }
+
+        if (expected && (date.getDate() !== expected.day || date.getMonth() + 1 !== expected.month || date.getFullYear() !== expected.year)) {
+          return null;
+        }
         return date;
       } catch (e) {
         return null;
@@ -1035,14 +1089,31 @@ export default {
       try {
         const date = parseDate(dateString, format);
         if (!date) return null;
-        // Retornar en formato YYYY-MM-DD
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        // El backend recibe todas las fechas en el formato acordado DD/MM/YYYY.
+        const year = format?.format === 'EXCEL_SERIAL' ? date.getUTCFullYear() : date.getFullYear();
+        const month = String((format?.format === 'EXCEL_SERIAL' ? date.getUTCMonth() : date.getMonth()) + 1).padStart(2, '0');
+        const day = String(format?.format === 'EXCEL_SERIAL' ? date.getUTCDate() : date.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
       } catch (e) {
         return null;
       }
+    };
+
+    const formatDateForDisplay = (dateString, format) => {
+      const date = parseDate(dateString, format);
+      if (!date) return null;
+      const useUtc = format?.format === 'EXCEL_SERIAL';
+      const day = String(useUtc ? date.getUTCDate() : date.getDate()).padStart(2, '0');
+      const month = String((useUtc ? date.getUTCMonth() : date.getMonth()) + 1).padStart(2, '0');
+      const year = useUtc ? date.getUTCFullYear() : date.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
+    const isValidApiDate = (value) => {
+      if (typeof value !== 'string' || !/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return false;
+      const [day, month, year] = value.split('/').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
     };
 
     const detectDateFormatInColumn = (columnName) => {
@@ -1086,7 +1157,7 @@ export default {
         // Mostrar ejemplos formateados
         detectedDateExamples.value = samples.slice(0, 3).map(s => ({
           original: s,
-          formatted: formatDateForAPI(s, mostFrequentFormat)
+          formatted: formatDateForDisplay(s, detectDateFormat(s))
         })).filter(e => e.formatted);
       } else {
         dateFormatDetected.value = null;
@@ -1213,11 +1284,9 @@ export default {
       return rawData.value.slice(0, 5).map(row => {
         // Formatear fecha si está mapeada y el formato fue detectado
         let fechaFormateada = '';
-        if (columnMapping.value.fecha_venta && selectedDateFormat.value) {
+        if (columnMapping.value.fecha_venta) {
           const rawDate = row[columnMapping.value.fecha_venta];
-          fechaFormateada = formatDateForAPI(rawDate, selectedDateFormat.value) || rawDate || '';
-        } else if (columnMapping.value.fecha_venta) {
-          fechaFormateada = row[columnMapping.value.fecha_venta] || '';
+          fechaFormateada = formatDateForDisplay(rawDate, detectDateFormat(rawDate)) || rawDate || '';
         }
 
         return {
@@ -1255,7 +1324,7 @@ export default {
       showValidation.value = true;
 
       if (!validateMapping()) {
-        showToast('Error', 'Debes seleccionar las tres columnas requeridas', false);
+        showToast('Error', 'Debes seleccionar las columnas requeridas, incluida la fecha de venta', false);
         return;
       }
 
@@ -1273,9 +1342,15 @@ export default {
       const rand = Math.floor(Math.random() * 10000);
       const batchId = `${now}${String(rand).padStart(4, '0')}`;
 
-      // Armar filas en formato del stored procedure sp_register_sale
-      const sales = rawData.value.map(row => {
+      // Validar y armar filas antes de enviarlas. Una fecha inválida nunca llega al backend.
+      const sales = [];
+      const clientValidationErrors = [];
+
+      rawData.value.forEach((row, index) => {
         const pointsAwarded = Number(calculatePoints(row)) || 0;
+        const rawDate = row[columnMapping.value.fecha_venta];
+        const rowDateFormat = detectDateFormat(rawDate);
+        const saleDate = formatDateForAPI(rawDate, rowDateFormat);
 
         // nombre del Cliente VIP (va con document, es quien acumula puntos)
         const fullName = columnMapping.value.nombre_referido
@@ -1286,14 +1361,23 @@ export default {
           ? String(row[columnMapping.value[field]] || '').trim()
           : '';
 
-        return {
+        // Nunca se envía una fecha nula o sin normalizar a DD/MM/YYYY.
+        if (!isValidApiDate(saleDate)) {
+          clientValidationErrors.push({
+            firstname: fullName || optStr('nombre_cliente') || `Fila ${index + 2}`,
+            document: normalizeDocument(row[columnMapping.value.dni_referido]),
+            invoice_number: optStr('nro_factura'),
+            error_message: `Fila ${index + 2}: fecha de venta inválida (${rawDate ?? 'vacía'}). Debe tener un formato de fecha válido.`
+          });
+          return;
+        }
+
+        sales.push({
           document: normalizeDocument(row[columnMapping.value.dni_referido]),
           firstname: fullName,
           lastname: '',
           referred_document: normalizeDocument(row[columnMapping.value.dni]),
-          sale_date: columnMapping.value.fecha_venta && selectedDateFormat.value
-            ? (formatDateForAPI(row[columnMapping.value.fecha_venta], selectedDateFormat.value) || null)
-            : null,
+          sale_date: saleDate,
           sale_amount: Number(row[columnMapping.value.importe]) || 0,
           sale_currency: 'COL',
           points_awarded: pointsAwarded,
@@ -1312,8 +1396,20 @@ export default {
             : 1,
           location: optStr('location'),
           batch_id: batchId
-        };
+        });
       });
+
+      if (clientValidationErrors.length && sales.length === 0) {
+        integrationResult.value = {
+          integration_ok: 0,
+          integration_error: clientValidationErrors.length,
+          total_registros: rawData.value.length,
+          files_error: clientValidationErrors
+        };
+        resultModal.value.openModal();
+        showToast('Fechas inválidas', 'No se enviaron ventas al backend: todas las filas tienen una fecha inválida.', false);
+        return;
+      }
 
       isLoading.value = true;
 
@@ -1334,12 +1430,51 @@ export default {
         });
 
         console.log('response importSales', response);
-        showToast('Éxito', `${sales.length} registros enviados correctamente`, true);
 
-        const raw = Array.isArray(response.data) ? response.data[0] : response.data;
-        if (raw?.success) {
-          integrationResult.value = raw;
-          resultModal.value.openModal();
+        const responseData = response.data?.data ?? response.data;
+        const raw = Array.isArray(responseData) ? responseData[0] : responseData;
+        const hasSummary = raw && typeof raw === 'object' && [
+          'integration_ok', 'integration_error', 'total_registros', 'files_error'
+        ].some(key => Object.prototype.hasOwnProperty.call(raw, key));
+        const isExplicitFailure = raw?.success === false || raw?.success === 0 || raw?.success === 'false'
+          || raw?.ok === false || raw?.status === 'error' || raw?.status === 'failed';
+        const apiMessage = raw?.message || raw?.error_message || raw?.error?.message;
+
+        if (!raw || typeof raw !== 'object') {
+          throw new Error('El servicio no devolvió un resultado válido para la importación.');
+        }
+
+        if (isExplicitFailure && !hasSummary) {
+          throw new Error(apiMessage || 'La importación fue rechazada por el servicio.');
+        }
+
+        if (!hasSummary && raw.success !== true && raw.ok !== true && raw.status !== 'success') {
+          throw new Error(apiMessage || 'No se pudo confirmar el resultado de la importación.');
+        }
+
+        const reportedSuccesses = Number(raw.integration_ok) || 0;
+        const reportedErrors = Number(raw.integration_error) || 0;
+        const backendErrors = Array.isArray(raw.files_error) ? raw.files_error : [];
+        const listedErrors = backendErrors.length;
+        const backendErrorCount = isExplicitFailure && reportedErrors === 0 && listedErrors === 0
+          ? Math.max(sales.length - reportedSuccesses, 1)
+          : Math.max(reportedErrors, listedErrors);
+        const errorCount = backendErrorCount + clientValidationErrors.length;
+
+        integrationResult.value = {
+          ...raw,
+          integration_ok: hasSummary ? reportedSuccesses : sales.length,
+          integration_error: errorCount,
+          total_registros: rawData.value.length,
+          files_error: [...clientValidationErrors, ...backendErrors]
+        };
+        resultModal.value.openModal();
+
+        if (integrationHasErrors.value || isExplicitFailure) {
+          const detail = apiMessage || `${integrationErrorCount.value} registro${integrationErrorCount.value === 1 ? '' : 's'} no pudo${integrationErrorCount.value === 1 ? '' : 'ieron'} procesarse.`;
+          showToast('Importación con errores', detail, false);
+        } else {
+          showToast('Importación completada', `${integrationSuccessCount.value} registro${integrationSuccessCount.value === 1 ? '' : 's'} procesado${integrationSuccessCount.value === 1 ? '' : 's'} correctamente.`, true);
         }
 
       } catch (error) {
@@ -1356,11 +1491,16 @@ export default {
       clearFile();
     };
 
-    const showToast = (title, message, success) => {
+    const showToast = async (title, message, success) => {
       toastTitle.value = title;
       toastMessage.value = message;
       isSuccess.value = success;
-      toastComponent.value.showToas();
+      showToastFlag.value = true;
+
+      // Esperar a que Vue pinte el contenido actualizado antes de crear y abrir
+      // la instancia de Bootstrap. Sin esto el toast puede conservar datos vacíos.
+      await nextTick();
+      toastComponent.value?.showToas?.();
     };
 
     const getAvailableColumnsForField = (fieldName) => {
@@ -1464,13 +1604,18 @@ export default {
       formatCurrency,
       resultModal,
       integrationResult,
+      integrationSuccessCount,
+      integrationErrorCount,
+      integrationTotalCount,
+      integrationHasErrors,
       closeResultModal,
       dateFormatDetected,
       detectedDateExamples,
       dateFormatOptions,
       selectedDateFormat,
       detectDateFormatInColumn,
-      formatDateForAPI
+      formatDateForAPI,
+      formatDateForDisplay
     };
   }
 };
@@ -2048,11 +2193,60 @@ export default {
 
 /* ===== INTEGRATION RESULT MODAL ===== */
 .integration-result {
-  padding: 1rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+}
+
+.ir-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid;
+  border-radius: 14px;
+}
+
+.ir-hero--success {
+  color: #065f46;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border-color: #a7f3d0;
+}
+
+.ir-hero--warning {
+  color: #92400e;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fde68a;
+}
+
+.ir-hero-icon {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  color: white;
+  font-size: 1.5rem;
+  border-radius: 50%;
+}
+
+.ir-hero--success .ir-hero-icon { background: #10b981; }
+.ir-hero--warning .ir-hero-icon { background: #f59e0b; }
+
+.ir-hero h6 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.ir-hero p {
+  margin: 0;
+  font-size: 0.88rem;
 }
 
 .ir-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -2062,17 +2256,20 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  padding: 1.1rem;
-  border-radius: 12px;
+  gap: 0.45rem;
+  padding: 1.25rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
 }
 
-.ir-stat--ok    { background: #d1fae5; color: #065f46; }
-.ir-stat--err   { background: #fee2e2; color: #991b1b; }
-.ir-stat--total { background: #eff6ff; color: #1e40af; }
+.ir-stat > i { font-size: 1.25rem; }
+.ir-stat--ok    { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.ir-stat--err   { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.ir-stat--total { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
 
-.ir-stat-num   { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-.ir-stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.ir-stat-num   { font-size: 2rem; font-weight: 800; line-height: 1; }
+.ir-stat-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
 .ir-errors-header {
   font-weight: 700;
@@ -2138,14 +2335,22 @@ export default {
 }
 
 .ir-no-errors {
-  text-align: center;
-  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
   color: #065f46;
-  background: #d1fae5;
-  border-radius: 10px;
-  font-weight: 600;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
   margin-bottom: 1rem;
 }
+
+.ir-no-errors > i { font-size: 1.35rem; }
+.ir-no-errors > div { display: flex; flex-direction: column; }
+.ir-no-errors strong { font-size: 0.9rem; }
+.ir-no-errors span { font-size: 0.8rem; color: #047857; }
 
 .ir-footer {
   display: flex;
@@ -2153,6 +2358,17 @@ export default {
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 575.98px) {
+  .integration-result { padding: 1rem; }
+  .ir-hero { align-items: flex-start; }
+  .ir-hero-icon { flex-basis: 40px; width: 40px; height: 40px; font-size: 1.2rem; }
+  .ir-stats { grid-template-columns: 1fr; gap: 0.65rem; }
+  .ir-stat { flex-direction: row; justify-content: flex-start; padding: 0.85rem 1rem; }
+  .ir-stat-num { font-size: 1.35rem; }
+  .ir-stat-label { order: 3; }
+  .ir-no-errors { align-items: flex-start; text-align: left; }
 }
 
 /* ===== DATE FORMAT DETECTION ===== */
