@@ -78,7 +78,18 @@
               <input type="checkbox" :value="row.id" v-model="selectedRows" class="custom-checkbox">
             </td>
 
-            <td v-for="column in columns" :key="column.key" v-html="column.render ? column.render(row) : formatCell(row[column.key], row, column.key)" :class="getColumnClass(column)"></td>
+            <td
+              v-for="column in columns"
+              :key="column.key"
+              v-html="column.render ? column.render(row) : formatCell(row[column.key], row, column.key)"
+              :class="[getColumnClass(column), { 'cell-action': column.action }]"
+              :role="column.action ? 'button' : undefined"
+              :tabindex="column.action ? 0 : undefined"
+              :title="column.actionTitle"
+              @click="handleColumnAction(column, row, $event)"
+              @keydown.enter.prevent="handleColumnAction(column, row, $event)"
+              @keydown.space.prevent="handleColumnAction(column, row, $event)"
+            ></td>
 
             <td v-if="actions.length > 0" class="actions-col">
               <div class="action-buttons">
@@ -423,6 +434,11 @@ export default {
     getVisibleActions(row) {
       return this.actions.filter(action => !action.show || action.show(row));
     },
+    handleColumnAction(column, row, event) {
+      if (typeof column.action !== 'function') return;
+      event.stopPropagation();
+      column.action(row);
+    },
     isInteractiveElement(target) {
       if (!target || typeof target.closest !== 'function') return false;
       return Boolean(
@@ -463,6 +479,15 @@ export default {
 </script>
 
 <style scoped>
+.cell-action {
+  cursor: pointer;
+}
+
+.cell-action:focus-visible {
+  outline: 2px solid var(--bs-primary, #0d6efd);
+  outline-offset: -2px;
+}
+
 .datatable-wrapper {
   padding: 1.5rem;
 }

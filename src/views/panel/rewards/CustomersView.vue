@@ -202,149 +202,200 @@
             </div>
         </div>
 
-        <!-- Detail Modal (Create + Edit) -->
+        <!-- Detail Modal (Edit - Datos Personales) -->
         <ModalComponent
             ref="detailModal"
             modalId="detailModal"
-            :modalTitle="detailCustomer && detailCustomer.id ? '' : '➕ Nuevo Cliente'"
-            class="modal-xxl"
+            :modalTitle="detailCustomer && detailCustomer.id ? '✏️ Editar Datos Personales' : '➕ Nuevo Cliente'"
+            class="modal-lg"
             @modalClosed="detailCustomer = null"
         >
-            <div class="detail-horizontal" v-if="detailCustomer">
+            <div class="edit-modal-content" v-if="detailCustomer">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-person me-1"></i>Nombre / Apellido *</label>
+                        <input type="text" v-model="detailCustomer.firstname" class="form-control"
+                            :class="{'is-invalid': validationErrors.firstname}" placeholder="Ej: Juan">
+                        <div v-if="validationErrors.firstname" class="invalid-feedback">{{ validationErrors.firstname }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-envelope me-1"></i>Email *</label>
+                        <input type="email" v-model="detailCustomer.email" class="form-control"
+                            :class="{'is-invalid': validationErrors.email}" placeholder="cliente@email.com">
+                        <div v-if="validationErrors.email" class="invalid-feedback">{{ validationErrors.email }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-credit-card me-1"></i>Documento *</label>
+                        <input type="text" v-model="detailCustomer.document" class="form-control"
+                            :class="{'is-invalid': validationErrors.document}" placeholder="Ej: 12345678">
+                        <div v-if="validationErrors.document" class="invalid-feedback">{{ validationErrors.document }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-telephone me-1"></i>Teléfono</label>
+                        <input type="text" v-model="detailCustomer.phone" class="form-control" placeholder="Ej: +54 11 1234-5678">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label"><i class="bi bi-geo-alt me-1"></i>Dirección</label>
+                        <input type="text" v-model="detailCustomer.address" class="form-control" placeholder="Ej: Av. Corrientes 1234, CABA">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-calendar-event me-1"></i>Fecha de Nacimiento</label>
+                        <input type="date" v-model="detailCustomer.birth_date" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-gender-ambiguous me-1"></i>Género</label>
+                        <select v-model="detailCustomer.gender" class="form-select">
+                            <option value="">Seleccionar...</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="edit-modal-actions mt-4 pt-4">
+                    <button type="button" class="btn btn-primary" @click="saveDetailCustomer">
+                        <i class="bi bi-check-circle me-1"></i> {{ detailCustomer.id ? 'Guardar Cambios' : 'Crear Cliente' }}
+                    </button>
+                </div>
+            </div>
+        </ModalComponent>
+
+        <!-- Commercial Modal (View - Información Comercial) -->
+        <ModalComponent
+            ref="commercialModal"
+            modalId="commercialModal"
+            :modalTitle="commercialCustomer ? `📊 Información Comercial - ${commercialCustomer.firstname}` : ''"
+            class="modal-xxl"
+            @modalClosed="commercialCustomer = null"
+        >
+            <div class="commercial-modal-content" v-if="commercialCustomer">
                 <!-- LEFT: Profile + Stats -->
-                <div class="detail-left">
-                    <div class="detail-profile">
-                        <div class="detail-avatar">
-                            <span>{{ (detailCustomer.firstname || '?')[0] }}</span>
+                <div class="commercial-left">
+                    <div class="commercial-profile">
+                        <div class="commercial-avatar">
+                            <span>{{ (commercialCustomer.firstname || '?')[0] }}</span>
                         </div>
-                        <!-- <h4 class="detail-name">{{ detailCustomer.firstname }} {{ detailCustomer.lastname }}</h4> -->
-                        <span class="detail-doc"><i class="bi bi-credit-card me-1"></i>{{ detailCustomer.document }}</span>
-                        <span class="detail-since">Cliente desde {{ formatDate(detailCustomer.created_dt) }}</span>
+                        <span class="commercial-doc"><i class="bi bi-credit-card me-1"></i>{{ commercialCustomer.document }}</span>
+                        <span class="commercial-since">Cliente desde {{ formatDate(commercialCustomer.created_dt) }}</span>
                     </div>
 
-                    <div class="detail-stats-vertical" v-if="detailCustomer.id">
-                        <div class="detail-stat-row stat-points">
-                            <div class="detail-stat-icon"><i class="bi bi-trophy-fill"></i></div>
-                            <div class="detail-stat-info">
-                                <div class="detail-stat-value">{{ formatNumber(detailCustomer.total_puntos) }}</div>
-                                <div class="detail-stat-label">Puntos</div>
+                    <div class="commercial-stats-vertical" v-if="commercialCustomer.id">
+                        <div class="commercial-stat-row stat-points">
+                            <div class="commercial-stat-icon"><i class="bi bi-trophy-fill"></i></div>
+                            <div class="commercial-stat-info">
+                                <div class="commercial-stat-value">{{ formatNumber(commercialCustomer.total_puntos) }}</div>
+                                <div class="commercial-stat-label">Puntos</div>
                             </div>
                         </div>
-                        <div class="detail-stat-row stat-sales">
-                            <div class="detail-stat-icon"><i class="bi bi-bag-check-fill"></i></div>
-                            <div class="detail-stat-info">
-                                <div class="detail-stat-value">{{ detailCustomer.total_ventas || 0 }}</div>
-                                <div class="detail-stat-label">Ventas</div>
+                        <div class="commercial-stat-row stat-sales">
+                            <div class="commercial-stat-icon"><i class="bi bi-bag-check-fill"></i></div>
+                            <div class="commercial-stat-info">
+                                <div class="commercial-stat-value">{{ commercialCustomer.total_ventas || 0 }}</div>
+                                <div class="commercial-stat-label">Ventas</div>
                             </div>
                         </div>
-                        <div class="detail-stat-row stat-total">
-                            <div class="detail-stat-icon"><i class="bi bi-cash-stack"></i></div>
-                            <div class="detail-stat-info">
-                                <div class="detail-stat-value">{{ formatCurrency(detailCustomer.total_facturado) }}</div>
-                                <div class="detail-stat-label">Facturado</div>
+                        <div class="commercial-stat-row stat-total">
+                            <div class="commercial-stat-icon"><i class="bi bi-cash-stack"></i></div>
+                            <div class="commercial-stat-info">
+                                <div class="commercial-stat-value">{{ formatCurrency(commercialCustomer.total_facturado) }}</div>
+                                <div class="commercial-stat-label">Facturado</div>
                             </div>
                         </div>
-                        <div class="detail-stat-row stat-avg">
-                            <div class="detail-stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
-                            <div class="detail-stat-info">
-                                <div class="detail-stat-value">{{ formatCurrency(averageSale) }}</div>
-                                <div class="detail-stat-label">Promedio</div>
+                        <div class="commercial-stat-row stat-avg">
+                            <div class="commercial-stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div class="commercial-stat-info">
+                                <div class="commercial-stat-value">{{ formatCurrency(averageSaleCommercial) }}</div>
+                                <div class="commercial-stat-label">Promedio</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- RIGHT: Tabs + Content -->
-                <div class="detail-right">
-                    <div class="detail-tabs">
+                <div class="commercial-right">
+                    <div class="commercial-tabs">
+                        
                         <button 
-                            class="detail-tab" 
-                            :class="{ active: detailTab === 'persona' }" 
-                            @click="detailTab = 'persona'"
-                        >
-                            <i class="bi bi-person-lines-fill me-1"></i> Datos Personales
-                        </button>
-                        <button 
-                            v-if="detailCustomer.id"
-                            class="detail-tab" 
-                            :class="{ active: detailTab === 'ventas' }" 
-                            @click="detailTab = 'ventas'"
-                        >
-                            <i class="bi bi-receipt-cutoff me-1"></i> Ventas
-                            <span class="detail-tab-badge" v-if="parsedSales.length">{{ parsedSales.length }}</span>
-                        </button>
-                        <button 
-                            v-if="detailCustomer.id && detailCustomer.validaciones"
-                            class="detail-tab" 
-                            :class="{ active: detailTab === 'validaciones' }" 
-                            @click="detailTab = 'validaciones'"
+                            v-if="commercialCustomer.id && commercialCustomer.validaciones"
+                            class="commercial-tab"
+                            :class="{ active: commercialTab === 'validaciones' }"
+                            @click="commercialTab = 'validaciones'"
                         >
                             <i class="bi bi-shield-check me-1"></i> Condiciones
-                            <span class="detail-tab-badge val-tab-badge" v-if="parsedValidaciones.filter(v => v.cumple).length">
-                                {{ parsedValidaciones.filter(v => v.cumple).length }}/{{ parsedValidaciones.length }}
+                            <span class="commercial-tab-badge commercial-tab-badge-val" v-if="parsedValidacionesCommercial.filter(v => v.cumple).length">
+                                {{ parsedValidacionesCommercial.filter(v => v.cumple).length }}/{{ parsedValidacionesCommercial.length }}
                             </span>
                         </button>
-                        
-
+                        <button 
+                            class="commercial-tab"
+                            :class="{ active: commercialTab === 'ventas' }"
+                            @click="commercialTab = 'ventas'"
+                        >
+                            <i class="bi bi-receipt-cutoff me-1"></i> Ventas
+                            <span class="commercial-tab-badge" v-if="parsedSalesCommercial.length">{{ parsedSalesCommercial.length }}</span>
+                        </button>
                     </div>
 
-                    <!-- Tab: Datos Personales -->
-                    <div v-if="detailTab === 'persona'" class="detail-edit-section">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-person me-1"></i>Nombre / Apellido *</label>
-                                <input type="text" v-model="detailCustomer.firstname" class="form-control"
-                                    :class="{'is-invalid': validationErrors.firstname}" placeholder="Ej: Juan">
-                                <div v-if="validationErrors.firstname" class="invalid-feedback">{{ validationErrors.firstname }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-envelope me-1"></i>Email *</label>
-                                <input type="email" v-model="detailCustomer.email" class="form-control"
-                                    :class="{'is-invalid': validationErrors.email}" placeholder="cliente@email.com">
-                                <div v-if="validationErrors.email" class="invalid-feedback">{{ validationErrors.email }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-credit-card me-1"></i>Documento *</label>
-                                <input type="text" v-model="detailCustomer.document" class="form-control"
-                                    :class="{'is-invalid': validationErrors.document}" placeholder="Ej: 12345678">
-                                <div v-if="validationErrors.document" class="invalid-feedback">{{ validationErrors.document }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-telephone me-1"></i>Teléfono</label>
-                                <input type="text" v-model="detailCustomer.phone" class="form-control" placeholder="Ej: +54 11 1234-5678">
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label"><i class="bi bi-geo-alt me-1"></i>Dirección</label>
-                                <input type="text" v-model="detailCustomer.address" class="form-control" placeholder="Ej: Av. Corrientes 1234, CABA">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-calendar-event me-1"></i>Fecha de Nacimiento</label>
-                                <input type="date" v-model="detailCustomer.birth_date" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-gender-ambiguous me-1"></i>Género</label>
-                                <select v-model="detailCustomer.gender" class="form-select">
-                                    <option value="">Seleccionar...</option>
-                                    <option value="Masculino">Masculino</option>
-                                    <option value="Femenino">Femenino</option>
-                                </select>
-                            </div>
+                    <!-- Tab: Ventas -->
+                    <div v-if="commercialTab === 'ventas'" class="commercial-sales-section">
+                        <div v-if="parsedSalesCommercial.length === 0" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4"></i>
+                            <p class="mt-2">Este cliente no tiene ventas registradas</p>
                         </div>
-                        <div class="detail-edit-actions mt-4 pt-4">
-                            <button type="button" class="btn btn-primary" @click="saveDetailCustomer">
-                                <i class="bi bi-check-circle me-1"></i> {{ detailCustomer.id ? 'Guardar Cambios' : 'Crear Cliente' }}
-                            </button>
+                        <div v-else class="sales-table-container">
+                            <table class="table sales-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Referido</th>
+                                        <th>Detalle</th>
+                                        <th class="text-end">Importe</th>
+                                        <th class="text-end">Puntos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(sale, idx) in parsedSalesCommercial" :key="sale.id">
+                                        <td class="sale-idx">{{ idx + 1 }}</td>
+                                        <td>{{ formatDate(sale.created_at) }}</td>
+                                        <td>
+                                            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+                                                <span class="sale-type-badge" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
+                                                    {{ sale.product_type }}
+                                                </span>
+                                                <span v-if="sale.is_purchase == 1" class="sale-propia-badge">
+                                                    <i class="bi bi-person-fill"></i> propia
+                                                </span>
+                                                <span v-else class="sale-referida-badge">
+                                                    <i class="bi bi-person-up"></i> referida
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="sale-referido-cell">
+                                                <span class="sale-referido-dni">{{ sale.referred_document }}</span>
+                                                <span class="sale-referido-nombre">{{ sale.buyer_name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ sale.description }}</td>
+                                        <td class="text-end fw-bold">{{ formatCurrency(sale.sale_amount) }}</td>
+                                        <td class="text-end">
+                                            <span class="sale-points"><i class="bi bi-star-fill me-1"></i>{{ formatNumber(sale.points_awarded) }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
                     <!-- Tab: Condiciones -->
-                    <div v-if="detailTab === 'validaciones'" class="detail-validaciones-section">
-                        <div v-if="parsedValidaciones.length === 0" class="text-center py-5 text-muted">
+                    <div v-if="commercialTab === 'validaciones'" class="commercial-validaciones-section">
+                        <div v-if="parsedValidacionesCommercial.length === 0" class="text-center py-5 text-muted">
                             <i class="bi bi-shield-x display-4"></i>
                             <p class="mt-2">No hay validaciones disponibles</p>
                         </div>
                         <div v-else class="val-list">
-                            <div v-for="val in parsedValidaciones" :key="val.key" class="val-card" :class="val.cumple ? 'val-ok' : 'val-fail'">
+                            <div v-for="val in parsedValidacionesCommercial" :key="val.key" class="val-card" :class="val.cumple ? 'val-ok' : 'val-fail'">
                                 <!-- Header -->
                                 <div class="val-header">
                                     <div class="val-icon-wrap" :class="val.cumple ? 'val-icon-ok' : 'val-icon-fail'">
@@ -406,67 +457,8 @@
                         </div>
                     </div>
 
-                    <!-- Tab: Ventas -->
-                    <div v-if="detailTab === 'ventas'" class="detail-sales-section">
-                        <div v-if="parsedSales.length === 0" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox display-4"></i>
-                            <p class="mt-2">Este cliente no tiene ventas registradas</p>
-                        </div>
-                        <div v-else class="sales-table-container">
-                            <table class="table sales-table mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Fecha</th>
-                                        <th>Tipo</th>
-                                        <th>Referido</th>
-                                        <th>Detalle</th>
-                                        <th class="text-end">Importe</th>
-                                        <th class="text-end">Puntos</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(sale, idx) in parsedSales" :key="sale.id">
-                                        <td class="sale-idx">{{ idx + 1 }}</td>
-                                        <td>{{ formatDate(sale.created_at) }}</td>
-                                        <td>
-                                            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
-                                                <span class="sale-type-badge" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
-                                                    {{ sale.product_type }}
-                                                </span>
-                                                <span v-if="sale.is_purchase == 1" class="sale-propia-badge">
-                                                    <i class="bi bi-person-fill"></i> propia
-                                                </span>
-                                                <span v-else class="sale-referida-badge">
-                                                    <i class="bi bi-person-up"></i> referida
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="sale-referido-cell">
-                                                <span class="sale-referido-dni">{{ sale.referred_document }}</span>
-                                                <span class="sale-referido-nombre">{{ sale.buyer_name }}</span>
-                                            </div>
-                                        </td>
-                                        <td>{{ sale.description }}</td>
-                                        <td class="text-end fw-bold">{{ formatCurrency(sale.sale_amount) }}</td>
-                                        <td class="text-end">
-                                            <span class="sale-points"><i class="bi bi-star-fill me-1"></i>{{ formatNumber(sale.points_awarded) }}</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
                 </div>
             </div>
-
-            <!-- <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="closeDetailModal">
-                    <i class="bi bi-x-circle me-1"></i> Cerrar
-                </button>
-            </div> -->
         </ModalComponent>
 
         <!-- Toast Component -->
@@ -522,6 +514,9 @@ export default {
         const detailModal = ref(null);
         const detailCustomer = ref(null);
         const detailTab = ref('persona');
+        const commercialModal = ref(null);
+        const commercialCustomer = ref(null);
+        const commercialTab = ref('ventas');
         const toastComponent = ref(null);
         const confirmPopup = ref(null);
         
@@ -552,7 +547,9 @@ export default {
             { 
                 label: 'Puntos', 
                 key: 'total_puntos',
-                render: (row) => `<span style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-weight:700;font-size:0.85rem;padding:4px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(239,68,68,0.35);letter-spacing:0.3px"><i class="bi bi-trophy-fill" style="font-size:0.8rem"></i>${Number(row.total_puntos||0).toLocaleString('es-AR')}</span>`
+                render: (row) => `<span class="puntos-clickeable" style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-weight:700;font-size:0.85rem;padding:4px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(239,68,68,0.35);letter-spacing:0.3px;cursor:pointer"><i class="bi bi-trophy-fill" style="font-size:0.8rem"></i>${Number(row.total_puntos||0).toLocaleString('es-AR')}</span>`,
+                action: openCommercialModal,
+                actionTitle: 'Ver información comercial'
             },
             {
                 label: 'Condiciones',
@@ -617,6 +614,12 @@ export default {
         const averageSale = computed(() => {
             const totalFacturado = Number(detailCustomer.value?.total_facturado) || 0;
             const totalVentas = Number(detailCustomer.value?.total_ventas) || 0;
+            return totalVentas > 0 ? totalFacturado / totalVentas : 0;
+        });
+
+        const averageSaleCommercial = computed(() => {
+            const totalFacturado = Number(commercialCustomer.value?.total_facturado) || 0;
+            const totalVentas = Number(commercialCustomer.value?.total_ventas) || 0;
             return totalVentas > 0 ? totalFacturado / totalVentas : 0;
         });
 
@@ -770,9 +773,72 @@ export default {
             }
         });
 
+        const parsedSalesCommercial = computed(() => {
+            if (!commercialCustomer.value || !commercialCustomer.value.sales) return [];
+            try {
+                const sales = typeof commercialCustomer.value.sales === 'string'
+                    ? JSON.parse(commercialCustomer.value.sales)
+                    : commercialCustomer.value.sales;
+                return sales.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            } catch (e) {
+                return [];
+            }
+        });
+
         const parsedValidaciones = computed(() => {
             if (!detailCustomer.value?.validaciones) return [];
             const v = detailCustomer.value.validaciones;
+            const cfg = [
+                {
+                    key: 'validacion_compras_anuales',
+                    nombre: 'Compras Anuales',
+                    icono: 'bi-bag-check-fill',
+                    metricas: (d) => [
+                        { label: 'Compras realizadas', calc: d.valor_calculado.total_compras, des: d.valor_deseado.total_compras },
+                        { label: 'Instrumentos comprados', calc: d.valor_calculado.instrumentos, des: d.valor_deseado.instrumentos_minimos },
+                    ],
+                    detalleKey: null,
+                },
+                {
+                    key: 'validacion_referidos_anuales',
+                    nombre: 'Referidos Anuales',
+                    icono: 'bi-people-fill',
+                    metricas: (d) => [
+                        { label: 'Referidos totales', calc: d.valor_calculado.total_referidos, des: d.valor_deseado.total_referidos },
+                        { label: 'Con instrumento', calc: d.valor_calculado.referidos_con_instrumento, des: d.valor_deseado.total_referidos },
+                    ],
+                    detalleKey: 'detalle',
+                },
+                {
+                    key: 'validacion_mixta',
+                    nombre: 'Validación Mixta',
+                    icono: 'bi-intersect',
+                    metricas: (d) => [
+                        { label: 'Instrumentos propios', calc: d.valor_calculado.instrumentos_propios, des: d.valor_deseado.instrumentos_propios },
+                        { label: 'Referidos con instrumento', calc: d.valor_calculado.referidos_con_instrumento, des: d.valor_deseado.referidos_con_instrumento },
+                    ],
+                    detalleKey: 'detalle_referidos',
+                },
+            ];
+            return cfg
+                .filter(c => v[c.key])
+                .map(c => {
+                    const data = v[c.key];
+                    return {
+                        key: c.key,
+                        nombre: c.nombre,
+                        icono: c.icono,
+                        descripcion: data.descripcion,
+                        cumple: data.cumple,
+                        metricas: c.metricas(data),
+                        detalle: c.detalleKey ? (data.valor_calculado?.[c.detalleKey] || []) : [],
+                    };
+                });
+        });
+
+        const parsedValidacionesCommercial = computed(() => {
+            if (!commercialCustomer.value?.validaciones) return [];
+            const v = commercialCustomer.value.validaciones;
             const cfg = [
                 {
                     key: 'validacion_compras_anuales',
@@ -827,6 +893,12 @@ export default {
             detailCustomer.value = { ...item };
             detailTab.value = 'persona';
             detailModal.value.openModal();
+        }
+
+        function openCommercialModal(item) {
+            commercialCustomer.value = { ...item };
+            commercialTab.value = 'ventas';
+            commercialModal.value.openModal();
         }
 
         const closeDetailModal = () => {
@@ -955,13 +1027,19 @@ export default {
             totalPoints,
             totalReferrals,
             averageSale,
+            averageSaleCommercial,
             
             // Refs
             detailModal,
             detailCustomer,
             detailTab,
+            commercialModal,
+            commercialCustomer,
+            commercialTab,
             parsedSales,
+            parsedSalesCommercial,
             parsedValidaciones,
+            parsedValidacionesCommercial,
             toastComponent,
             confirmPopup,
             showToastFlag,
@@ -976,6 +1054,7 @@ export default {
             onEmptyToggle,
             openModalCustomer,
             editCustomer,
+            openCommercialModal,
             closeDetailModal,
             saveDetailCustomer,
             confirmDelete,
@@ -1239,7 +1318,17 @@ export default {
   margin-top: 0.25rem;
 }
 
-/* ===== HORIZONTAL DETAIL MODAL ===== */
+/* Puntos Clickeable */
+.puntos-clickeable {
+  transition: all 0.2s ease;
+}
+
+.puntos-clickeable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45) !important;
+}
+
+/* Detail Modal */
 .detail-horizontal {
     min-height: 0;
     height: calc(100vh - 58px);
@@ -1247,7 +1336,39 @@ export default {
     overflow: hidden;
 }
 
+/* EDIT MODAL (Datos Personales) */
+.edit-modal-content {
+  padding: 1.5rem;
+}
+
+.edit-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* ModalComponent owns the dialog markup, so these overrides must cross the scoped boundary. */
+:deep(.modal-lg) {
+    width: auto;
+    max-width: 600px;
+}
+
+:deep(.modal-lg .modal-content) {
+    height: auto;
+}
+
+:deep(.modal-lg .modal-body) {
+    padding: 0;
+}
+
+/* COMMERCIAL MODAL (Información Comercial) */
+.commercial-modal-content {
+  display: flex;
+  align-items: stretch;
+  height: calc(100vh - 58px);
+  max-height: calc(100vh - 58px);
+  overflow: hidden;
+}
+
 :deep(.modal-xxl) {
     width: 99vw;
     max-width: 1600px;
@@ -1272,6 +1393,186 @@ export default {
     height: calc(100vh - 58px);
     overflow: hidden;
     padding: 0;
+}
+
+.commercial-left {
+  width: 230px;
+  min-width: 230px;
+    min-height: 0;
+  background: linear-gradient(180deg, #3939ff 0%, #5b21b6 100%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+}
+
+.commercial-profile {
+  text-align: center;
+  padding: 2rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.commercial-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  border: 3px solid rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.commercial-doc {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.commercial-since {
+  color: rgba(255,255,255,0.55);
+  font-size: 0.75rem;
+}
+
+/* Stats vertical */
+.commercial-stats-vertical {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+
+.commercial-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.15s;
+}
+
+.commercial-stat-row:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.commercial-stat-icon {
+  font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.commercial-stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.commercial-stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.commercial-stat-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Right panel */
+.commercial-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+    min-height: 0;
+}
+
+/* Tabs */
+.commercial-tabs {
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+    overflow-x: auto;
+}
+
+.commercial-tab {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.commercial-tab:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.commercial-tab.active {
+  color: #3939ff;
+  border-bottom-color: #3939ff;
+  background: white;
+}
+
+.commercial-tab-badge {
+  background: #3939ff;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.commercial-tab-badge-val {
+  background: #10b981;
+}
+
+/* Sales and Validations Sections */
+.commercial-sales-section {
+  flex: 1;
+    min-height: 0;
+  overflow-y: auto;
+}
+
+.commercial-validaciones-section {
+  flex: 1;
+    min-height: 0;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .detail-horizontal {
