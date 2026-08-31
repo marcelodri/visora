@@ -67,9 +67,32 @@ function extractVariables(html) {
 }
 
 function parseArrayResponse(data) {
+  if (typeof data === 'string') {
+    const parsedData = safeParseJson(data);
+    if (parsedData) return parseArrayResponse(parsedData);
+  }
+
   if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.customers)) return data.customers;
+  const candidates = [
+    data?.data,
+    data?.templates,
+    data?.campaigns,
+    data?.customers,
+    data?.rows,
+    data?.result,
+    data?.results,
+    data?.items,
+    data?.body
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+    if (candidate && typeof candidate === 'object') {
+      const nestedRows = parseArrayResponse(candidate);
+      if (nestedRows.length) return nestedRows;
+    }
+  }
+
   return [];
 }
 
@@ -232,6 +255,44 @@ export async function getAccountLimits() {
 
 const WEBHOOK_EMAILS = 'https://apis.madautomate.cloud/webhook/b43f61d6-92a9-422b-935e-7e2ac527d4c7';
 
+function isTemplateRecord(data) {
+  return data && typeof data === 'object' && !Array.isArray(data) && (
+    Object.prototype.hasOwnProperty.call(data, 'html_content') ||
+    Object.prototype.hasOwnProperty.call(data, 'subject') ||
+    Object.prototype.hasOwnProperty.call(data, 'name')
+  );
+}
+
+function normalizeTemplateVariables(template) {
+  const rawVariables = template.variables;
+  const parsedVariables = safeParseJson(rawVariables);
+
+  if (Array.isArray(rawVariables)) return rawVariables;
+  if (Array.isArray(parsedVariables)) return parsedVariables;
+  if (parsedVariables && typeof parsedVariables === 'object') return Object.keys(parsedVariables);
+
+  if (typeof rawVariables === 'string' && rawVariables.trim()) {
+    return rawVariables
+      .split(',')
+      .map(variable => variable.trim().replace(/^["']|["']$/g, ''))
+      .filter(Boolean);
+  }
+
+  return extractVariables(`${template.subject || ''} ${template.html_content || ''}`);
+}
+
+function normalizeTemplate(template) {
+  const id = template.id ?? template.template_id ?? template.email_template_id ?? template.ID;
+  const html_content = template.html_content ?? template.html ?? template.content ?? '';
+
+  return {
+    ...template,
+    id,
+    html_content,
+    variables: normalizeTemplateVariables({ ...template, html_content })
+  };
+}
+
 export async function getTemplates() {
   const token = sessionStorage.getItem('token');
   const response = await axios.post(
@@ -239,10 +300,11 @@ export async function getTemplates() {
     { action: 'getTemplates' },
     { headers: { Authorization: `Bearer ${token}` } }
   );
-  return response.data.map(t => ({
-    ...t,
-    variables: typeof t.variables === 'string' ? JSON.parse(t.variables) : (t.variables ?? [])
-  }));
+
+  const rows = parseArrayResponse(response.data);
+  const templates = rows.length ? rows : (isTemplateRecord(response.data) ? [response.data] : []);
+
+  return templates.map(normalizeTemplate);
 }
 
 export async function getTemplate(id) {
@@ -268,6 +330,10 @@ export async function createTemplate(data) {
 }
 
 export async function updateTemplate(id, data) {
+  if (id === undefined || id === null || id === '') {
+    throw new Error('No se encontro el ID del template');
+  }
+
   const token = sessionStorage.getItem('token');
   const variables = JSON.stringify(extractVariables(data.html_content));
   const html_content = data.html_content.replace(/\n/g, ' ').replace(/\r/g, '');
@@ -280,12 +346,21 @@ export async function updateTemplate(id, data) {
 }
 
 export async function deleteTemplate(id) {
+  if (id === undefined || id === null || id === '') {
+    throw new Error('No se encontro el ID del template');
+  }
+
   const token = sessionStorage.getItem('token');
   const response = await axios.post(
     WEBHOOK_EMAILS,
     { action: 'deleteTemplate', id },
     { headers: { Authorization: `Bearer ${token}` } }
   );
+
+  if (response.data?.success === false || response.data?.ok === false || response.data?.error) {
+    throw new Error(response.data?.message || response.data?.error || 'No se pudo eliminar el template');
+  }
+
   return response.data;
 }
 
@@ -322,59 +397,185 @@ export async function getCampaign(id) {
   return { ...c };
 }
 
-export async function createCampaign({ campaign, template, recipients, scheduledAt, schedule, deliveryMode }) {
+export async function createCampaign({
+  campaign,
+  template,
+  recipients,
+  scheduledAt,
+  schedule,
+  deliveryMode
+}) {
   const token = sessionStorage.getItem('token');
+
   const normalizedSchedule = normalizeSchedule(schedule);
-  const resolvedScheduledAt = resolveScheduledAt(scheduledAt, normalizedSchedule);
-  const resolvedDeliveryMode = resolveDeliveryMode(deliveryMode, resolvedScheduledAt, normalizedSchedule);
+  const resolvedScheduledAt = resolveScheduledAt(
+    scheduledAt,
+    normalizedSchedule
+  );
+
+  const resolvedDeliveryMode = resolveDeliveryMode(
+    deliveryMode,
+    resolvedScheduledAt,
+    normalizedSchedule
+  );
 
   let recipient_mode = campaign.recipient_mode || 'manual';
   let segment_filter = campaign.segment_filter || null;
   let renderedRecipients = [];
 
-  // recipients puede venir undefined si es recurrente/programado sin lista fija
   const safeRecipients = recipients || [];
 
-  if (resolvedDeliveryMode === 'recurring' && recipient_mode === 'dynamic') {
+  const campanaGUID = generarId();
+
+  if (
+    resolvedDeliveryMode === 'recurring' &&
+    recipient_mode === 'dynamic'
+  ) {
     renderedRecipients = [];
   } else if (safeRecipients.length > 0) {
     renderedRecipients = safeRecipients.map(r => {
       let html = template.html_content;
       const vars = r.variables || {};
+
       Object.entries(vars).forEach(([key, val]) => {
         html = html.replaceAll(`{{${key}}}`, val || '');
       });
-      return { email: r.email, variables: vars, html };
+
+      return {
+        email: r.email,
+        variables: vars,
+        html
+      };
     });
   }
 
-  const payload = {
-    action: 'createCampaign',
-    name: campaign.name,
-    description: campaign.description || '',
-    template_id: campaign.template_id,
-    template_name: campaign.template_name || '',
-    source_type: campaign.source_type || 'db',
-    // Incluir info de la vista si aplica
-    selected_view_name: campaign.selected_view_name || null,
-    template_subject: template.subject,
-    recipients_count: safeRecipients.length,
-    scheduled_at: resolvedScheduledAt,
-    schedule: normalizedSchedule,
-    delivery_mode: resolvedDeliveryMode,
-    recipient_mode,
-    segment_filter,
-    selected_table: campaign.selected_table || null,
-    table_variable_mapping: campaign.table_variable_mapping || {},
-    recipients: renderedRecipients
-  };
+  // ============================================================
+  // ENVIAR EN LOTES DE 10 RECIPIENTS
+  // ============================================================
 
-  const response = await axios.post(
-    WEBHOOK_CAMPAIGNS,
-    payload,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  return response.data;
+  const BATCH_SIZE = 10;
+
+  let responses = [];
+
+  // Si no hay recipients, hacemos un único envío
+  if (renderedRecipients.length === 0) {
+    const payload = {
+      action: 'createCampaign',
+      name: campaign.name,
+      description: campaign.description || '',
+      template_id: campaign.template_id,
+      template_name: campaign.template_name || '',
+      source_type: campaign.source_type || 'db',
+
+      selected_view_name: campaign.selected_view_name || null,
+
+      template_subject: template.subject,
+      recipients_count: safeRecipients.length,
+      scheduled_at: resolvedScheduledAt,
+      schedule: normalizedSchedule,
+      delivery_mode: resolvedDeliveryMode,
+      recipient_mode,
+      segment_filter,
+
+      selected_table: campaign.selected_table || null,
+      table_variable_mapping: campaign.table_variable_mapping || {},
+
+      campana_GUID: campanaGUID,
+
+      recipients: []
+      
+    };
+
+    const response = await axios.post(
+      WEBHOOK_CAMPAIGNS,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    return response.data;
+  }
+
+  // ============================================================
+  // LOOP: 10 RECIPIENTS POR REQUEST
+  // ============================================================
+
+  for (let i = 0; i < renderedRecipients.length; i += BATCH_SIZE) {
+
+    // Tomar los próximos 10
+    const batch = renderedRecipients.slice(
+      i,
+      i + BATCH_SIZE
+    );
+
+    // console.log(
+    //   `Enviando batch ${Math.floor(i / BATCH_SIZE) + 1} - ` +
+    //   `recipients ${i + 1} a ${Math.min(
+    //     i + BATCH_SIZE,
+    //     renderedRecipients.length
+    //   )} de ${renderedRecipients.length}`
+    // );
+
+    const payload = {
+      action: 'createCampaign',
+      name: campaign.name,
+      description: campaign.description || '',
+      template_id: campaign.template_id,
+      template_name: campaign.template_name || '',
+      source_type: campaign.source_type || 'db',
+
+      selected_view_name: campaign.selected_view_name || null,
+
+      template_subject: template.subject,
+
+      // Mantiene la cantidad TOTAL
+      recipients_count: safeRecipients.length,
+
+      scheduled_at: resolvedScheduledAt,
+      schedule: normalizedSchedule,
+      delivery_mode: resolvedDeliveryMode,
+      recipient_mode,
+      segment_filter,
+
+      selected_table: campaign.selected_table || null,
+      table_variable_mapping: campaign.table_variable_mapping || {},
+
+      campana_GUID: campanaGUID,
+      
+      // SOLO los 10 de este batch
+      recipients: batch
+    };
+
+    const response = await axios.post(
+      WEBHOOK_CAMPAIGNS,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    responses.push(response.data);
+  }
+
+  // Devolvemos todas las respuestas
+  return responses;
+}
+
+function generarId() {
+  const caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const bytes = new Uint8Array(16);
+
+  crypto.getRandomValues(bytes);
+
+  return Array.from(bytes, byte => caracteres[byte % caracteres.length])
+    .join('')
+    .match(/.{4}/g)
+    .join('-');
 }
 
 export async function deleteCampaign(id) {
@@ -386,6 +587,19 @@ export async function deleteCampaign(id) {
   );
   return response.data;
 }
+
+export async function sendEmailTest(payload) {
+  //console.log('sendEmailTest', payload)
+  const token = sessionStorage.getItem('token');
+  
+  const response = await axios.post(
+    WEBHOOK_CAMPAIGNS,
+    payload,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+}
+
 
 // ─── CLIENTS (DB) ────────────────────────────────────────────────────────────
 

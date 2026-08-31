@@ -83,7 +83,9 @@
         "emails-builder": "Nueva Campaña",
         "stock-pilot": "Stock Pilot",
         "vehicles-config": "Configuración",
-        "vehicles-share": "Nuevo PDF"
+        "vehicles-share": "Nuevo PDF",
+        "admin-users": "Gestión de Usuarios",
+        "users": "Usuarios"
     },
     "business_type":{
         "name": "Nombre",

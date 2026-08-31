@@ -143,19 +143,21 @@ export default {
         sessionStorage.setItem('user_email', response.data.email || '');
         sessionStorage.setItem('user_phone', response.data.phone || response.data.phoneNumber || response.data.telefono || response.data.phone_number || '');
         sessionStorage.setItem('user_company', response.data.company || response.data.instance || '');
+        sessionStorage.setItem('user_role', response.data.role || response.data.level || 'user');
         
         // Debug: mostrar qué se guardó
-        console.log('📱 Datos guardados en sessionStorage:', {
-          user_name: sessionStorage.getItem('user_name'),
-          user_email: sessionStorage.getItem('user_email'),
-          user_phone: sessionStorage.getItem('user_phone'),
-          user_company: sessionStorage.getItem('user_company')
-        });
+        // console.log('📱 Datos guardados en sessionStorage:', {
+        //   user_name: sessionStorage.getItem('user_name'),
+        //   user_email: sessionStorage.getItem('user_email'),
+        //   user_phone: sessionStorage.getItem('user_phone'),
+        //   user_company: sessionStorage.getItem('user_company')
+        // });
 
         const userData = {
           username: response.data.username,
           email: response.data.email,
           level: response.data.level,
+          role: response.data.role,
           instance: response.data.instance,
           appkey: response.data.appkey,
           details: response.data.details,
@@ -173,7 +175,26 @@ export default {
           }
         );
 
-        const menuData = menuResponse.data;
+        let menuData = menuResponse.data;
+        
+        // Si el usuario es admin, agregar categoría de administración
+        const userRole = response.data.role || response.data.level || 'admin';
+        if (userRole.toLowerCase() === 'admin') {
+          // Asegurarse de que es un array
+          if (!Array.isArray(menuData)) {
+            menuData = [];
+          }
+          
+          // Agregar la categoría 'admin' si no existe
+          if (!menuData.some(item => item.category === 'admin')) {
+            menuData.push({
+              category: 'admin',
+              icon: '<i class="bi bi-shield-lock"></i>',
+              label: 'Administración'
+            });
+          }
+        }
+        
         sessionStorage.setItem('menu', JSON.stringify(menuData));
         authStore.setMenu(menuData);
 

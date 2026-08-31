@@ -1241,14 +1241,48 @@ export default {
 
 /* ===== HORIZONTAL DETAIL MODAL ===== */
 .detail-horizontal {
+    min-height: 0;
+    height: calc(100vh - 58px);
+    max-height: calc(100vh - 58px);
+    overflow: hidden;
+}
+
+/* ModalComponent owns the dialog markup, so these overrides must cross the scoped boundary. */
+:deep(.modal-xxl) {
+    width: 99vw;
+    max-width: 1600px;
+    height: 100vh;
+    margin: 0 auto;
+}
+
+:deep(.modal-xxl .modal-content) {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+:deep(.modal-xxl .modal-header) {
+    min-height: 58px;
+    flex-shrink: 0;
+    padding: 0.85rem 1.25rem;
+}
+
+:deep(.modal-xxl .modal-body) {
+    min-height: 0;
+    height: calc(100vh - 58px);
+    overflow: hidden;
+    padding: 0;
+}
+
+.detail-horizontal {
   display: flex;
-  min-height: 460px;
-  height: 100%;
+    align-items: stretch;
 }
 
 .detail-left {
   width: 230px;
   min-width: 230px;
+    min-height: 0;
   background: linear-gradient(180deg, #3939ff 0%, #5b21b6 100%);
   display: flex;
   flex-direction: column;
@@ -1365,6 +1399,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-width: 0;
+    min-height: 0;
 }
 
 /* Tabs */
@@ -1373,6 +1408,7 @@ export default {
   border-bottom: 2px solid #e5e7eb;
   background: #f9fafb;
   flex-shrink: 0;
+    overflow-x: auto;
 }
 
 .detail-tab {
@@ -1419,6 +1455,7 @@ export default {
 .detail-edit-section {
   padding: 1.5rem;
   flex: 1;
+    min-height: 0;
   overflow-y: auto;
 }
 
@@ -1430,8 +1467,8 @@ export default {
 /* Sales Table */
 .detail-sales-section {
   flex: 1;
+    min-height: 0;
   overflow-y: auto;
-  max-height: 420px;
 }
 
 .sales-table-container {
@@ -1554,9 +1591,9 @@ export default {
 /* ===== VALIDACIONES ===== */
 .detail-validaciones-section {
   flex: 1;
+    min-height: 0;
   overflow-y: auto;
   padding: 1.25rem;
-  max-height: 480px;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1772,13 +1809,36 @@ export default {
 
 /* Responsive */
 @media (max-width: 768px) {
+    :deep(.modal-xxl) {
+        width: 100vw;
+        max-width: 100vw;
+        margin: 0;
+    }
+
+    :deep(.modal-xxl .modal-content) {
+        height: auto;
+        min-height: 100vh;
+        max-height: none;
+    }
+
+    :deep(.modal-xxl .modal-body) {
+        height: auto;
+        min-height: calc(100vh - 58px);
+        max-height: none;
+        overflow-y: auto;
+    }
+
   .detail-horizontal {
     flex-direction: column;
+        height: auto;
+        max-height: none;
+        overflow: visible;
   }
 
   .detail-left {
     width: 100%;
     min-width: auto;
+        flex-shrink: 0;
   }
 
   .detail-stats-vertical {
@@ -1792,5 +1852,21 @@ export default {
     border-top: none;
     border-bottom: 1px solid rgba(255,255,255,0.12);
   }
+
+    .detail-edit-section,
+    .detail-sales-section,
+    .detail-validaciones-section {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .detail-tabs {
+        flex-wrap: nowrap;
+    }
+
+    .detail-tab {
+        flex: 0 0 auto;
+        min-width: 150px;
+    }
 }
 </style>

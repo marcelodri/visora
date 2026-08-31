@@ -23,11 +23,11 @@
       isSuccess: { type: Boolean, default: true },
       show: { type: Boolean, default: false },
     },
-    // mounted() {
-    //   const toastEl = this.$el.querySelector('.toast');
-    //   const toast = new Toast(toastEl);
-    //   toast.show();
-    // },
+    mounted() {
+      const toastEl = this.$el.querySelector('.toast');
+      const toast = new Toast(toastEl);
+      //toast.show();
+    },
     methods: {
       showToas() {
         const toastEl = this.$el.querySelector('.toast');

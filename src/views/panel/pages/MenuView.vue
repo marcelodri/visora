@@ -216,6 +216,56 @@
                   </div>
                 </div>
               </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="settings-group">
+                  <label class="settings-label">
+                    <i class="bi bi-circle-fill me-2"></i>
+                    Color de overlay del spinner
+                  </label>
+                  <p class="settings-description">
+                    Color de fondo semitransparente que cubre la pantalla durante la carga
+                  </p>
+                  <div class="color-picker-wrapper">
+                    <input
+                      type="color"
+                      v-model="formData.spinnerOverlayColor"
+                      class="color-input"
+                    />
+                    <input 
+                      type="text" 
+                      v-model="formData.spinnerOverlayColor" 
+                      class="color-value-input"
+                      placeholder="rgba(0, 0, 0, 0.5)"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="settings-group">
+                  <label class="settings-label">
+                    <i class="bi bi-arrow-clockwise me-2"></i>
+                    Color del spinner
+                  </label>
+                  <p class="settings-description">
+                    Color del indicador de carga (spinner)
+                  </p>
+                  <div class="color-picker-wrapper">
+                    <input
+                      type="color"
+                      v-model="formData.spinnerColor"
+                      class="color-input"
+                    />
+                    <input 
+                      type="text" 
+                      v-model="formData.spinnerColor" 
+                      class="color-value-input"
+                      placeholder="#3939ff"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -309,7 +359,7 @@
     </div>
 
     <div class="menu-step-actions">
-      <button v-if="currentStep > 0" type="button" class="btn btn-outline-secondary" @click="prevStep">
+      <button v-if="currentStep > 0" type="button" class="btn btn-outline" @click="prevStep">
         <i class="bi bi-arrow-left me-2"></i>Anterior
       </button>
       <div v-else></div>
@@ -365,6 +415,8 @@ export default {
       path: "",
       background: "#ffffff",
       menuColor: "#000000",
+      spinnerOverlayColor: "rgba(0, 0, 0, 0.5)",
+      spinnerColor: "#3939ff",
       extra_items: [],
     });
 
@@ -416,6 +468,8 @@ export default {
         path: formData.value.path,
         background: formData.value.background || "#ffffff",
         menuColor: formData.value.menuColor || "#000000",
+        spinnerOverlayColor: formData.value.spinnerOverlayColor || "rgba(0, 0, 0, 0.5)",
+        spinnerColor: formData.value.spinnerColor || "#3939ff",
         imageDelete: formData.value.imageDelete,
         extra_items: JSON.stringify(formData.value.extra_items),
       };
@@ -452,6 +506,13 @@ export default {
             }
           } else if (!data.extra_items) {
             data.extra_items = [];
+          }
+          // Ensure new fields have default values if not present
+          if (!data.spinnerOverlayColor) {
+            data.spinnerOverlayColor = "rgba(0, 0, 0, 0.5)";
+          }
+          if (!data.spinnerColor) {
+            data.spinnerColor = "#3939ff";
           }
           formData.value = {
             ...formData.value,

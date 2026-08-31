@@ -89,7 +89,7 @@ export default {
     return {
       groupedMenu: [],
       openDropdown: null,
-      activeRoute: "",
+      activeRoute: null,
       allowedCategories: [], // 🔥 categorías permitidas desde sessionStorage
     };
   },
@@ -141,11 +141,6 @@ export default {
               path: `${parent.path}/${child.path}`.replace(/\/+$/, ""),
             })),
         }));
-
-      // 👇 Abre automáticamente el primer dropdown al iniciar
-      if (this.groupedMenu.length && !this.openDropdown) {
-        this.openDropdown = this.groupedMenu[0].name;
-      }
     },
 
     toggleDropdown(name) {

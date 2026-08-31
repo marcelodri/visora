@@ -479,12 +479,51 @@
             <strong>Regla activa: {{ activeRule.name }}</strong>
           </div>
           <p class="rule-info-desc mb-0" v-if="activeRule.points_type === 'percentage'">
-            Se calculará el <strong>{{ activeRule.points_percentage }}%</strong> sobre la columna <strong>{{ columnMapping.importe }}</strong> (Importe) para asignar puntos.
+            Se calculará el <strong>{{ activeRule.points_percentage }}%</strong> sobre la columna <strong>{{ columnMapping.columna_puntos }}</strong> para asignar puntos.
+            <span v-if="!columnMapping.columna_puntos" class="text-warning">(Selecciona la columna arriba)</span>
           </p>
           <p class="rule-info-desc mb-0" v-else>
             Se asignarán <strong>{{ activeRule.points_per_sale }} puntos</strong> fijos por venta
             <span v-if="activeRule.conditions && activeRule.conditions.length"> (con {{ activeRule.conditions.length }} condición{{ activeRule.conditions.length > 1 ? 'es' : '' }})</span>.
           </p>
+        </div>
+
+        <!-- Sección separada: Columna base para puntos (solo si es porcentaje) -->
+        <div v-if="activeRule && activeRule.points_type === 'percentage'" class="points-column-section mt-4">
+          <div class="points-column-header">
+            <i class="bi bi-star-fill me-2"></i>
+            Columna para cálculo de puntos
+          </div>
+          <div class="points-column-body">
+            <p class="points-column-desc">
+              Selecciona la columna del Excel sobre la cual se aplicará el <strong>{{ activeRule.points_percentage }}%</strong>
+            </p>
+            <select 
+              id="puntosColumn"
+              v-model="columnMapping.columna_puntos" 
+              class="form-select custom-select puntos-select"
+              :class="{
+                'is-invalid': showValidation && !columnMapping.columna_puntos,
+                'custom-select--missing': isMissingMapping('columna_puntos')
+              }"
+            >
+              <option value="">-- Seleccionar columna --</option>
+              <option 
+                v-for="col in availableColumns" 
+                :key="col" 
+                :value="col"
+              >
+                {{ col }}
+              </option>
+            </select>
+            <div v-if="showValidation && !columnMapping.columna_puntos" class="invalid-feedback d-block">
+              Debes seleccionar una columna para aplicar el {{ activeRule.points_percentage }}%
+            </div>
+            <div v-if="columnMapping.columna_puntos" class="points-column-selected mt-3">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <span>Se aplicará el <strong>{{ activeRule.points_percentage }}%</strong> sobre <strong>"{{ columnMapping.columna_puntos }}"</strong></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -680,7 +719,8 @@ export default {
       tipo_producto: '',
       cantidad: '',
       compra: '',
-      location: ''
+      location: '',
+      columna_puntos: ''  // Nueva: columna que se usará para calcular puntos
     });
     const activeRule = ref(null);
     const autoMatchedCount = ref(0);
@@ -789,11 +829,18 @@ export default {
     };
 
     const autoMatchColumns = (columns) => {
+      console.log('🔍 [autoMatchColumns] Iniciando auto-match de columnas');
+      console.log('  - Columnas disponibles:', columns);
+      console.log('  - Storage key:', STORAGE_KEY);
+      
       // 1. Intentar restaurar desde localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
+          console.log('💾 [autoMatchColumns] Encontrado mapping guardado en localStorage');
           const parsed = JSON.parse(saved);
+          console.log('  - Mapping guardado:', parsed);
+          
           let matchCount = 0;
           const newMapping = {};
           for (const [field, savedCol] of Object.entries(parsed)) {
@@ -806,14 +853,23 @@ export default {
           }
           // Si al menos los 3 requeridos matchean, usar guardado
           if (newMapping.dni && newMapping.dni_referido && newMapping.importe) {
+            console.log('✅ [autoMatchColumns] Se usará mapping guardado (3 campos requeridos encontrados)');
+            console.log('  - importe -> columna:', newMapping.importe);
             columnMapping.value = { ...columnMapping.value, ...newMapping };
             autoMatchedCount.value = matchCount;
             return;
+          } else {
+            console.log('⚠️ [autoMatchColumns] Mapping guardado incompleto, usando keywords');
           }
-        } catch (e) { /* ignore parse errors */ }
+        } catch (e) { 
+          console.log('❌ [autoMatchColumns] Error al parsear localStorage:', e);
+        }
       }
 
       // 2. Fallback: auto-match por keywords
+      console.log('🔑 [autoMatchColumns] Auto-match por KEYWORDS');
+      console.log('  - Keywords para "importe":', FIELD_KEYWORDS.importe);
+      
       const lowerColumns = columns.map(c => c.toLowerCase().trim());
       const used = new Set();
       const newMapping = {};
@@ -822,6 +878,7 @@ export default {
         const keywords = FIELD_KEYWORDS[field] || [];
         let bestMatch = '';
         let bestLen = 0;
+        const matches = [];
 
         for (let i = 0; i < lowerColumns.length; i++) {
           if (used.has(i)) continue;
@@ -830,6 +887,7 @@ export default {
             if (colLower.includes(kw) && kw.length > bestLen) {
               bestMatch = columns[i];
               bestLen = kw.length;
+              matches.push({ keyword: kw, column: columns[i], keywordLen: kw.length });
             }
           }
         }
@@ -837,6 +895,11 @@ export default {
         if (bestMatch) {
           newMapping[field] = bestMatch;
           used.add(columns.indexOf(bestMatch));
+          if (field === 'importe') {
+            console.log(`  ✅ Campo "importe" detectado:`);
+            console.log(`    - Columna mapeada: "${bestMatch}"`);
+            console.log(`    - Keywords que coincidieron:`, matches);
+          }
         } else {
           newMapping[field] = '';
         }
@@ -844,6 +907,8 @@ export default {
 
       columnMapping.value = { ...columnMapping.value, ...newMapping };
       autoMatchedCount.value = Object.values(newMapping).filter(v => v !== '').length;
+      console.log('✨ [autoMatchColumns] Auto-match completado');
+      console.log('  - Mapping final (importe):', columnMapping.value.importe);
     };
 
     const loadSheetData = (sheetName) => {
@@ -926,7 +991,8 @@ export default {
         tipo_producto: '',
         cantidad: '',
         compra: '',
-        location: ''
+        location: '',
+        columna_puntos: ''
       };
       autoMatchedCount.value = 0;
       showValidation.value = false;
@@ -1086,20 +1152,57 @@ export default {
     };
 
     const calculatePoints = (row) => {
-      if (!activeRule.value) return null;
+      if (!activeRule.value) {
+        console.log('🚫 [calculatePoints] No hay regla activa');
+        return null;
+      }
+
+      console.log('💰 [calculatePoints] Procesando fila:', row);
+      console.log('  - Tipo de regla:', activeRule.value.points_type);
+      console.log('  - Columna seleccionada para puntos:', columnMapping.value.columna_puntos);
 
       if (activeRule.value.points_type === 'percentage') {
-        if (!columnMapping.value.importe) return '—';
-        const base = Number(row[columnMapping.value.importe]) || 0;
-        return Math.round((base * activeRule.value.points_percentage / 100) * 100) / 100;
+        if (!columnMapping.value.columna_puntos) {
+          console.log('⚠️ [calculatePoints] No hay columna seleccionada para calcular puntos');
+          return '—';
+        }
+        
+        const puntosValue = row[columnMapping.value.columna_puntos];
+        const base = Number(puntosValue) || 0;
+        const percentage = activeRule.value.points_percentage;
+        const result = Math.round((base * percentage / 100) * 100) / 100;
+        
+        console.log('📊 [calculatePoints] PORCENTAJE:');
+        console.log(`  - Columna base seleccionada: "${columnMapping.value.columna_puntos}"`);
+        console.log(`  - Valor bruto en fila: ${puntosValue}`);
+        console.log(`  - Valor convertido: ${base}`);
+        console.log(`  - Porcentaje aplicado: ${percentage}%`);
+        console.log(`  - Cálculo: ${base} × ${percentage}% = ${result}`);
+        
+        return result;
       }
 
       // Tipo fijo: evaluar condiciones
       const conditions = activeRule.value.conditions || [];
-      if (conditions.length === 0 || conditions.every(c => evaluateCondition(row, c))) {
+      console.log('🔧 [calculatePoints] PUNTOS FIJOS:');
+      console.log(`  - Puntos a asignar: ${activeRule.value.points_per_sale}`);
+      console.log(`  - Cantidad de condiciones: ${conditions.length}`);
+      
+      if (conditions.length === 0) {
+        console.log('  - Sin condiciones, asignando puntos fijos');
         return activeRule.value.points_per_sale;
       }
-      return 0;
+      
+      const allConditionsMet = conditions.every(c => evaluateCondition(row, c));
+      console.log(`  - Todas las condiciones se cumplen: ${allConditionsMet}`);
+      
+      if (allConditionsMet) {
+        console.log('  ✅ Condiciones OK, asignando puntos fijos');
+        return activeRule.value.points_per_sale;
+      } else {
+        console.log('  ❌ Condiciones NO se cumplen, puntos = 0');
+        return 0;
+      }
     };
 
     const previewData = computed(() => {
@@ -1157,8 +1260,8 @@ export default {
       }
 
       // Validar columna de porcentaje si la regla activa lo requiere
-      if (activeRule.value && activeRule.value.points_type === 'percentage' && !columnMapping.value.importe) {
-        showToast('Error', 'Seleccioná la columna de Importe para calcular el porcentaje', false);
+      if (activeRule.value && activeRule.value.points_type === 'percentage' && !columnMapping.value.columna_puntos) {
+        showToast('Error', 'Selecciona la columna base para calcular el porcentaje de puntos', false);
         return;
       }
 
@@ -1214,7 +1317,12 @@ export default {
 
       isLoading.value = true;
 
-      console.log('sales', sales)
+      console.log('📋 [submitData] RESUMEN DEL MAPEO:');
+      console.log('  - Regla activa:', activeRule.value?.name);
+      console.log('  - Tipo de regla:', activeRule.value?.points_type);
+      console.log('  - Campo "importe" mapeado a:', columnMapping.value.importe);
+      console.log('\n📊 [submitData] CÁLCULO DE PUNTOS POR FILA:');
+      console.log('sales', sales);
 
       try {
         const response = await axios.post(URL_API_SALES, {
@@ -1273,10 +1381,16 @@ export default {
 
     const fetchActiveRule = async () => {
       try {
+        console.log('📡 [fetchActiveRule] Solicitando regla activa a:', URL_API);
         const response = await axios.post(URL_API, { action: 'getActiveRule' }, {
           headers: { Authorization: `Bearer ${token.value}` }
         });
+        
+        console.log('📥 [fetchActiveRule] Respuesta completa de la API:', response.data);
+        
         const raw = response.data.data || response.data;
+        console.log('📋 [fetchActiveRule] Datos extraídos (raw):', raw);
+        
         if (raw && raw.id) {
           activeRule.value = {
             ...raw,
@@ -1287,11 +1401,20 @@ export default {
               ? (typeof raw.conditions === 'string' ? JSON.parse(raw.conditions) : raw.conditions)
               : []
           };
+          
+          console.log('✅ [fetchActiveRule] Regla activa cargada:');
+          console.log('  - ID:', activeRule.value.id);
+          console.log('  - Nombre:', activeRule.value.name);
+          console.log('  - Tipo:', activeRule.value.points_type);
+          console.log('  - Porcentaje:', activeRule.value.points_percentage);
+          console.log('  - Puntos fijos:', activeRule.value.points_per_sale);
+          console.log('  - Condiciones:', activeRule.value.conditions);
         } else {
+          console.log('⚠️ [fetchActiveRule] No se encontró regla activa en la respuesta');
           activeRule.value = null;
         }
       } catch (err) {
-        console.error('Error al cargar regla activa', err);
+        console.error('❌ [fetchActiveRule] Error al cargar regla activa', err);
         activeRule.value = null;
       }
     };
@@ -1831,6 +1954,91 @@ export default {
 .rule-info-desc {
   color: #166534;
   font-size: 0.88rem;
+}
+
+/* Sección separada: Columna para puntos */
+.points-column-section {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fcd34d;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.points-column-header {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+}
+
+.points-column-header i {
+  font-size: 1.3rem;
+}
+
+.points-column-body {
+  padding: 1.5rem;
+}
+
+.points-column-desc {
+  color: #92400e;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.puntos-select {
+  border: 2px solid #fcd34d;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  font-size: 1rem;
+  background-color: white;
+  min-height: 45px;
+}
+
+.puntos-select:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+}
+
+.puntos-select.is-invalid {
+  border-color: #dc2626;
+  background: #fff5f5;
+}
+
+.points-column-selected {
+  background: linear-gradient(135deg, #dcfce7 0%, #a7f3d0 100%);
+  border: 1px solid #86efac;
+  color: #065f46;
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.points-column-selected i {
+  font-size: 1.2rem;
+  color: #10b981;
+}
+
+.points-calc-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #93c5fd;
+  color: #1e40af;
+  padding: 0.65rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+}
+
+.points-calc-info i {
+  font-size: 1rem;
 }
 
 .data-cell.points {

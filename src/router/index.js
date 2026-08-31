@@ -510,6 +510,26 @@ const router = createRouter({
               }
             }
           ]
+        },
+
+        // Administración (Solo para Admin)
+        {
+          path: 'admin',
+          name: 'admin',
+          redirect: '/panel/admin/users',
+          meta: { category: 'admin', icon: '<i class="bi bi-shield-lock"></i>' },
+          children: [
+            {
+              path: 'users',
+              name: 'admin-users',
+              component: () => import('@/views/panel/users/UsersView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'admin',
+                label: 'Gestión de Usuarios'
+              }
+            }
+          ]
         }
 
       ]

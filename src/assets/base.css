@@ -129,8 +129,8 @@ border-radius: 0.75rem;
 
 .tip-icon {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   background: #2196f3;
   border-radius: 50%;
   display: flex;

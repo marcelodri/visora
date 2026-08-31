@@ -1015,16 +1015,25 @@
             }
         };
 
+        // Peso máximo permitido por imagen (en bytes). 2 MB por defecto.
+        const MAX_IMAGE_SIZE = 0.5 * 1024 * 1024;
+
         const handleImageUpload = (event) => {
             const file = event.target.files[0];
-            formData.value.fileName = file.name; // Guardar el nombre del archivo
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                formData.value.image = reader.result;
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            if (file.size > MAX_IMAGE_SIZE) {
+                triggerToast('Error', 'La imagen supera el peso máximo permitido (0,5 MB).', false);
+                event.target.value = '';
+                return;
             }
+
+            formData.value.fileName = file.name; // Guardar el nombre del archivo
+            const reader = new FileReader();
+            reader.onload = () => {
+                formData.value.image = reader.result;
+            };
+            reader.readAsDataURL(file);
         };
   
         // Manejador para cargar múltiples imágenes
@@ -1032,6 +1041,11 @@
             const files = Array.from(event.target.files);
             
             files.forEach(file => {
+                if (file.size > MAX_IMAGE_SIZE) {
+                    triggerToast('Error', `La imagen "${file.name}" supera el peso máximo permitido (2 MB).`, false);
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = () => {
                 formData.value.images.push({
@@ -1042,6 +1056,8 @@
                 };
                 reader.readAsDataURL(file);
             });
+
+            event.target.value = '';
         };
 
       
@@ -1097,14 +1113,14 @@
                 }
                 await getPages();
 
-                setTimeout(() => {
-                    triggerToast('Realizado!', 'Formulario eliminado!', true);
+                setTimeout(async () => {
+                    await triggerToast('Realizado!', 'Formulario eliminado!', true);
                 }, 1000)
                 }
             } catch (error) {
                 console.error('Error al obtener las columnas:', error);
-                setTimeout(() => {
-                triggerToast('Error!', $t('limit_form'), false);
+                setTimeout(async () => {
+                await triggerToast('Error!', $t('limit_form'), false);
                 }, 1000)
             } finally {
                 isLoading.value = false;
@@ -1284,8 +1300,8 @@
             pages.value.push(JSON.parse(JSON.stringify(data)));
             closeModalForm();
             await getPages();
-            setTimeout(() => {
-                triggerToast('Realizado!', 'Formulario creado!', true);
+            setTimeout(async () => {
+                await triggerToast('Realizado!', 'Formulario creado!', true);
             }, 1000)
             }
 
@@ -1297,8 +1313,8 @@
 
             // Verificamos si existe la clave
             const translated = t(errorKey) !== errorKey ? t(errorKey) : t('forms.message_error');
-            setTimeout(() => {
-            triggerToast('Error', translated, false);
+            setTimeout(async () => {
+            await triggerToast('Error', translated, false);
             }, 1000);
 
         } finally {
@@ -1333,8 +1349,8 @@
                 });
                 if(postdata.status == 200) {
                 await getPages();
-                setTimeout(() => {
-                    triggerToast('Realizado!', 'Formulario actualizado!', true);
+                setTimeout(async () => {
+                    await triggerToast('Realizado!', 'Formulario actualizado!', true);
                 }, 1000)
                 }
                 closeStyleModalForm();
@@ -1379,11 +1395,12 @@
             instance.proxy.updateForm(formDataToSend); // Enviar la data corregida
         };
   
-        const triggerToast = (title, message, success) => {
+        const triggerToast = async (title, message, success) => {
             toastTitle.value = title;
             toastMessage.value = message;
             isSuccess.value = success;
-            toastComponent.value.showToas();
+            await nextTick();
+            toastComponent.value?.showToas?.();
         };
 
         const removeImageByIndex = (index, img) => {
@@ -1417,7 +1434,7 @@
             return;
             }
 
-            const url = `${domainPage}/${data.code}`;
+            const url = `${domainPage}${data.code}`;
 
             // Abrir en una nueva pestaña
             window.open(url, "_blank");

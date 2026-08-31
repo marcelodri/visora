@@ -152,7 +152,7 @@
             </div>
 
             <p class="text-muted mb-2" style="font-size: 0.8rem;">
-              {{ vehicle.accesories || 'N/D' }}
+              {{ decodeHtmlEntities(vehicle.accesories) || 'N/D' }}
             </p>
 
             <div class="d-grid gap-2">
@@ -741,6 +741,7 @@ async function loadPdfConfig() {
   }
 }
 
+
 async function shareVehicle(vehicle) {
   if (!vehicle || getDesktopImages(vehicle).length === 0) {
     showToastMsg('Error', 'El vehículo no tiene imágenes', false)
@@ -748,105 +749,202 @@ async function shareVehicle(vehicle) {
   }
 
   loadingPDF.value[vehicle.id] = true
+
   try {
     const config = await loadPdfConfig()
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
     const colorRgb = hexToRgb(config.styles?.primaryColor || '#0066CC')
-    
-    // Debug: Datos del usuario
+
+    // ============================================================
+    // DATOS DEL USUARIO
+    // ============================================================
+
     const userData = {
       name: sessionStorage.getItem('user_name') || '',
       email: sessionStorage.getItem('user_email') || '',
       phone: sessionStorage.getItem('user_phone') || '',
       company: sessionStorage.getItem('user_company') || ''
     }
-    console.log('📄 Generando PDF con userData:', userData)
-    console.log('📋 Configuración empresa:', config.company)
+
     let y = 15
 
-    // ===== ENCABEZADO EN 3 COLUMNAS =====
+    // ============================================================
+    // ENCABEZADO EN 3 COLUMNAS
+    // ============================================================
+
     const columnWidth = (pageWidth - 30) / 3
-    const lineHeight = 5 // Altura aproximada de una línea de texto
-    
-    // Columna 2: Marca, modelo, versión y año (centrada)
+    const lineHeight = 5
+
+    // Columna 2: Marca, modelo, versión y año
     const titleText = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year || ''}`
+
     doc.setFontSize(14)
     doc.setFont(undefined, 'bold')
+
     const col2X = 15 + columnWidth
-    const titleLines = doc.splitTextToSize(titleText.trim(), columnWidth - 4)
-    
-    // Obtener dimensiones del logo para calcular la altura total del encabezado
+
+    const titleLines = doc.splitTextToSize(
+      titleText.trim(),
+      columnWidth - 4
+    )
+
+    // Dimensiones del logo
     const logoHeight = config.company?.logoHeight || 12
     const logoWidth = config.company?.logoWidth || 50
-    
-    // Calcular altura total del encabezado (máximo entre logo y texto)
-    const totalHeaderHeight = Math.max(logoHeight, titleLines.length * lineHeight + 5)
+
+    // Altura total del encabezado
+    const totalHeaderHeight = Math.max(
+      logoHeight,
+      titleLines.length * lineHeight + 5
+    )
+
     const centerY = y + totalHeaderHeight / 2
-    
-    // Columna 1: "COTIZACIÓN" (alineado al centro vertical)
+
+    // Columna 1: COTIZACIÓN
     doc.setFontSize(16)
-    doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
+    doc.setTextColor(
+      colorRgb.r,
+      colorRgb.g,
+      colorRgb.b
+    )
     doc.setFont(undefined, 'bold')
-    doc.text('COTIZACIÓN', 15, centerY, { align: 'left' })
-    
-    // Columna 2: Título multilínea (alineado al centro vertical)
-    doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
-    const titleStartY = centerY - (titleLines.length - 1) * lineHeight / 2
-    doc.text(titleLines, col2X + columnWidth / 2, titleStartY, { align: 'center' })
-    
-    // Columna 3: Logo (alineado al centro vertical)
+
+    doc.text(
+      'COTIZACIÓN',
+      15,
+      centerY,
+      { align: 'left' }
+    )
+
+    // Columna 2: Título
+    doc.setTextColor(
+      colorRgb.r,
+      colorRgb.g,
+      colorRgb.b
+    )
+
+    const titleStartY =
+      centerY - (titleLines.length - 1) * lineHeight / 2
+
+    doc.text(
+      titleLines,
+      col2X + columnWidth / 2,
+      titleStartY,
+      { align: 'center' }
+    )
+
+    // Columna 3: Logo
     if (config.company?.logo) {
       try {
-        const logoData = await convertImageToCompatibleFormat(config.company.logo)
+        const logoData = await convertImageToCompatibleFormat(
+          config.company.logo
+        )
+
         const col3X = 15 + columnWidth * 2
         const logoY = centerY - logoHeight / 2
-        
+
         let imageFormat = 'JPEG'
+
         if (logoData.includes('image/png')) {
           imageFormat = 'PNG'
         } else if (logoData.includes('image/webp')) {
           imageFormat = 'WEBP'
         }
-        
-        doc.addImage(logoData, imageFormat, col3X + columnWidth / 2 - logoWidth / 2, logoY, logoWidth, logoHeight)
+
+        doc.addImage(
+          logoData,
+          imageFormat,
+          col3X + columnWidth / 2 - logoWidth / 2,
+          logoY,
+          logoWidth,
+          logoHeight
+        )
       } catch (logoErr) {
-        console.warn('Error insertando logo:', logoErr)
+        console.warn(
+          'Error insertando logo:',
+          logoErr
+        )
       }
     }
-    
-    // Ajustar Y para el siguiente contenido
+
+    // Ajustar Y
     y += totalHeaderHeight + 5
 
-    // Nombre de la empresa
+    // ============================================================
+    // NOMBRE DE LA EMPRESA
+    // ============================================================
+
     try {
-      const processedCompanyName = evaluateTemplate(config.company?.name || '', vehicle, userData)
+      const processedCompanyName = evaluateTemplate(
+        config.company?.name || '',
+        vehicle,
+        userData
+      )
+
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
       doc.setFont(undefined, 'normal')
-      doc.text(processedCompanyName, 15, y)
+
+      doc.text(
+        processedCompanyName,
+        15,
+        y
+      )
     } catch (e) {
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      doc.text(config.company?.name || 'Empresa', 15, y)
+
+      doc.text(
+        config.company?.name || 'Empresa',
+        15,
+        y
+      )
     }
+
     y += 8
 
-    // Línea separadora
+    // ============================================================
+    // LÍNEA SEPARADORA
+    // ============================================================
+
     doc.setDrawColor(220, 220, 220)
-    doc.line(15, y, pageWidth - 15, y)
+
+    doc.line(
+      15,
+      y,
+      pageWidth - 15,
+      y
+    )
+
     y += 8
 
-    // Detalles del vehículo
+    // ============================================================
+    // DETALLES DEL VEHÍCULO
+    // ============================================================
+
     const detailRows = [
       ['Marca', vehicle.brand],
       ['Modelo', vehicle.model],
       ['Año', vehicle.year || 'N/D'],
       ['Color', vehicle.color || 'N/D'],
-      ['Combustible', typeof vehicle.fuel === 'object' && vehicle.fuel?.name ? vehicle.fuel.name : vehicle.fuel || 'N/D'],
-      ['Accesorios', vehicle.accesories || 'N/D'],
-      ['Precio', getPrice(vehicle.prices, 'SALE_COST') || getPrice(vehicle.prices, 'PURCHASE_COST') || 'Consultar']
+      [
+        'Combustible',
+        typeof vehicle.fuel === 'object' && vehicle.fuel?.name
+          ? vehicle.fuel.name
+          : vehicle.fuel || 'N/D'
+      ],
+      [
+        'Accesorios',
+        decodeHtmlEntities(vehicle.accesories) || 'N/D'
+      ],
+      [
+        'Precio',
+        getPrice(vehicle.prices, 'SALE_COST') ||
+        getPrice(vehicle.prices, 'PURCHASE_COST') ||
+        'Consultar'
+      ]
     ]
 
     autoTable(doc, {
@@ -854,138 +952,705 @@ async function shareVehicle(vehicle) {
       head: [['Detalles', '']],
       body: detailRows,
       theme: 'striped',
-      headStyles: { fillColor: [colorRgb.r, colorRgb.g, colorRgb.b], textColor: 255, fontStyle: 'bold' },
-      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 }, 1: { textColor: [80, 80, 80] } },
-      styles: { fontSize: 10, cellPadding: 4 },
-      margin: { left: 15, right: 15, bottom: 35 }
+
+      headStyles: {
+        fillColor: [
+          colorRgb.r,
+          colorRgb.g,
+          colorRgb.b
+        ],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+
+      columnStyles: {
+        0: {
+          fontStyle: 'bold',
+          cellWidth: 60
+        },
+        1: {
+          textColor: [80, 80, 80]
+        }
+      },
+
+      styles: {
+        fontSize: 10,
+        cellPadding: 4
+      },
+
+      margin: {
+        left: 15,
+        right: 15,
+        bottom: 35
+      }
     })
 
     y = doc.lastAutoTable.finalY + 8
 
-    // Cotización Financiera
+    // ============================================================
+    // COTIZACIÓN FINANCIERA
+    // ============================================================
+
     if (config.company?.financialInfo) {
       try {
         doc.setFontSize(11)
-        doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b)
-        doc.text('Cotización Financiera', 15, y)
+        doc.setTextColor(
+          colorRgb.r,
+          colorRgb.g,
+          colorRgb.b
+        )
+
+        doc.text(
+          'Cotización Financiera',
+          15,
+          y
+        )
+
         y += 6
 
         doc.setFontSize(9)
         doc.setTextColor(50, 50, 50)
-        // Evaluar el template con variables dinámicas del vehículo y usuario
-        const processedInfo = evaluateTemplate(config.company.financialInfo, vehicle, userData)
-        const lines = doc.splitTextToSize(processedInfo, pageWidth - 30)
-        doc.text(lines, 15, y)
+        doc.setLineHeightFactor(1.8)
+
+        const processedInfo = evaluateTemplate(
+          config.company.financialInfo,
+          vehicle,
+          userData
+        )
+
+        const lines = doc.splitTextToSize(
+          processedInfo,
+          pageWidth - 30
+        )
+
+        doc.text(
+          lines,
+          15,
+          y
+        )
+
+        const textHeight = lines.length * 5.4
+
+        y += textHeight + 2
+
+        doc.setLineHeightFactor(1.15)
       } catch (e) {
-        console.warn('Error procesando información financiera:', e)
+        console.warn(
+          'Error procesando información financiera:',
+          e
+        )
       }
     }
 
-    y += 15
+    y += 20
 
-    // Imágenes - mostrar TODAS las imágenes AL FINAL
+    // ============================================================
+    // FOTOGRAFÍAS
+    // ============================================================
+
     const images = getDesktopImages(vehicle)
+
     if (images.length > 0) {
-      // Descargar TODAS las imágenes en paralelo ANTES de insertarlas
-      const imageUrls = images.map(img => img.full_path)
-      const downloadedImages = await downloadImagesInParallel(imageUrls)
-      
-      const imgW = (pageWidth - 35) / 2
-      const imgH = 60
-      let currentPageImages = 0  // Contador de imágenes en página actual
+      // Nueva página para fotografías
+      doc.addPage()
+      y = 15
+
+      // Línea divisoria
+      doc.setDrawColor(180, 180, 180)
+
+      doc.line(
+        15,
+        y,
+        pageWidth - 15,
+        y
+      )
+
+      y += 5
+
+      // ==========================================================
+      // DESCARGAR TODAS LAS IMÁGENES EN PARALELO
+      // ==========================================================
+
+      const imageUrls = images.map(
+        img => img.full_path
+      )
+
+      const downloadedImages =
+        await downloadImagesInParallel(imageUrls)
+
+      // ==========================================================
+      // CONFIGURACIÓN DE LA GRILLA
+      // ==========================================================
+
+      // Dos cuadrados por fila.
+      // En A4:
+      //
+      // Ancho página ≈ 210 mm
+      // Márgenes = 15 + 15
+      // Separación = 5
+      //
+      // Tamaño de cada cuadrado:
+      // (210 - 30 - 5) / 2 = 87.5 mm
+      //
+      const imgSize = (pageWidth - 35) / 2
+
+      // Separación entre imágenes
+      const imgGap = 5
+
+      let currentPageImages = 0
       let isFirstImage = true
 
-      for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
-        // Encabezado de fotografías
+      // ==========================================================
+      // FUNCIÓN PARA INSERTAR IMAGEN SIN DEFORMAR
+      // ==========================================================
+
+      const addImageContain = async (
+        base64,
+        x,
+        y,
+        size
+      ) => {
+        return new Promise((resolve) => {
+          try {
+            if (!base64) {
+              throw new Error('Imagen vacía')
+            }
+
+            // Crear imagen temporal para conocer dimensiones reales
+            const img = new Image()
+
+            img.onload = () => {
+              try {
+                const originalWidth =
+                  img.naturalWidth || img.width
+
+                const originalHeight =
+                  img.naturalHeight || img.height
+
+                if (
+                  !originalWidth ||
+                  !originalHeight
+                ) {
+                  throw new Error(
+                    'No se pudieron obtener las dimensiones de la imagen'
+                  )
+                }
+
+                // ------------------------------------------------
+                // FONDO DEL CUADRADO
+                // ------------------------------------------------
+
+                doc.setFillColor(
+                  245,
+                  245,
+                  245
+                )
+
+                doc.rect(
+                  x,
+                  y,
+                  size,
+                  size,
+                  'F'
+                )
+
+                // ------------------------------------------------
+                // CALCULAR ESCALA
+                // Mantiene la proporción original
+                // ------------------------------------------------
+
+                const scale = Math.min(
+                  size / originalWidth,
+                  size / originalHeight
+                )
+
+                const finalWidth =
+                  originalWidth * scale
+
+                const finalHeight =
+                  originalHeight * scale
+
+                // ------------------------------------------------
+                // CENTRAR LA IMAGEN
+                // ------------------------------------------------
+
+                const finalX =
+                  x + (size - finalWidth) / 2
+
+                const finalY =
+                  y + (size - finalHeight) / 2
+
+                // ------------------------------------------------
+                // DETECTAR FORMATO
+                // ------------------------------------------------
+
+                let imageFormat = 'JPEG'
+
+                if (
+                  base64.includes('image/png')
+                ) {
+                  imageFormat = 'PNG'
+                } else if (
+                  base64.includes('image/webp')
+                ) {
+                  imageFormat = 'WEBP'
+                } else if (
+                  base64.includes('image/jpeg') ||
+                  base64.includes('image/jpg')
+                ) {
+                  imageFormat = 'JPEG'
+                }
+
+                // ------------------------------------------------
+                // INSERTAR IMAGEN
+                // ------------------------------------------------
+
+                doc.addImage(
+                  base64,
+                  imageFormat,
+                  finalX,
+                  finalY,
+                  finalWidth,
+                  finalHeight
+                )
+
+                resolve(true)
+
+              } catch (error) {
+                console.warn(
+                  'Error procesando imagen:',
+                  error
+                )
+
+                // Placeholder
+                doc.setFillColor(
+                  220,
+                  220,
+                  220
+                )
+
+                doc.rect(
+                  x,
+                  y,
+                  size,
+                  size,
+                  'F'
+                )
+
+                doc.setFontSize(7)
+                doc.setTextColor(
+                  150,
+                  150,
+                  150
+                )
+
+                doc.text(
+                  'Sin imagen',
+                  x + size / 2,
+                  y + size / 2,
+                  { align: 'center' }
+                )
+
+                resolve(false)
+              }
+            }
+
+            img.onerror = () => {
+              console.warn(
+                'No se pudo cargar la imagen'
+              )
+
+              // Placeholder
+              doc.setFillColor(
+                220,
+                220,
+                220
+              )
+
+              doc.rect(
+                x,
+                y,
+                size,
+                size,
+                'F'
+              )
+
+              doc.setFontSize(7)
+              doc.setTextColor(
+                150,
+                150,
+                150
+              )
+
+              doc.text(
+                'Sin imagen',
+                x + size / 2,
+                y + size / 2,
+                { align: 'center' }
+              )
+
+              resolve(false)
+            }
+
+            img.src = base64
+
+          } catch (error) {
+            console.warn(
+              'Error insertando imagen:',
+              error
+            )
+
+            // Placeholder
+            doc.setFillColor(
+              220,
+              220,
+              220
+            )
+
+            doc.rect(
+              x,
+              y,
+              size,
+              size,
+              'F'
+            )
+
+            doc.setFontSize(7)
+            doc.setTextColor(
+              150,
+              150,
+              150
+            )
+
+            doc.text(
+              'Sin imagen',
+              x + size / 2,
+              y + size / 2,
+              { align: 'center' }
+            )
+
+            resolve(false)
+          }
+        })
+      }
+
+      // ==========================================================
+      // INSERTAR TODAS LAS FOTOS
+      // ==========================================================
+
+      for (
+        let imageIndex = 0;
+        imageIndex < images.length;
+        imageIndex++
+      ) {
+
+        // --------------------------------------------------------
+        // ENCABEZADO "FOTOGRAFÍAS"
+        // --------------------------------------------------------
+
         if (isFirstImage) {
           doc.setFontSize(13)
-          doc.setTextColor(50, 50, 50)
-          doc.text('Fotografías', 15, y)
+          doc.setTextColor(
+            50,
+            50,
+            50
+          )
+
+          doc.text(
+            'Fotografías',
+            15,
+            y
+          )
+
           y += 6
+
           isFirstImage = false
         }
 
-        // Calcular posición en la grilla
-        const col = currentPageImages % 2
-        const row = Math.floor(currentPageImages / 2)
-        const xImg = 15 + col * (imgW + 5)
-        let yImg = y + row * (imgH + 3)
+        // --------------------------------------------------------
+        // POSICIÓN EN LA GRILLA
+        // --------------------------------------------------------
 
-        // Si no cabe en la página actual, crear nueva página
-        if (yImg + imgH > pageHeight - 30) {
+        const col =
+          currentPageImages % 2
+
+        const row =
+          Math.floor(
+            currentPageImages / 2
+          )
+
+        const xImg =
+          15 +
+          col * (imgSize + imgGap)
+
+        let yImg =
+          y +
+          row * (imgSize + imgGap)
+
+        // --------------------------------------------------------
+        // COMPROBAR SI CABE EN LA PÁGINA
+        // --------------------------------------------------------
+
+        if (
+          yImg + imgSize >
+          pageHeight - 30
+        ) {
           doc.addPage()
+
           y = 15
+
           currentPageImages = 0
-          
-          // Encabezado en la nueva página
+
+          // Encabezado de continuación
           doc.setFontSize(12)
-          doc.setTextColor(50, 50, 50)
-          doc.text('Fotografías (continuación)', 15, y)
+          doc.setTextColor(
+            50,
+            50,
+            50
+          )
+
+          doc.text(
+            'Fotografías (continuación)',
+            15,
+            y
+          )
+
           y += 8
-          
+
+          // Primera imagen de la nueva página
           yImg = y
         }
 
-        // Insertar imagen (ya descargada en paralelo)
+        // --------------------------------------------------------
+        // INSERTAR IMAGEN
+        // --------------------------------------------------------
+
         try {
-          const b64 = downloadedImages[imageIndex].base64
+          const downloaded =
+            downloadedImages[imageIndex]
+
+          const b64 =
+            downloaded?.base64
+
           if (b64) {
-            doc.addImage(b64, 'JPEG', xImg, yImg, imgW, imgH)
+            await addImageContain(
+              b64,
+              xImg,
+              yImg,
+              imgSize
+            )
           } else {
-            doc.setFillColor(220, 220, 220)
-            doc.rect(xImg, yImg, imgW, imgH, 'F')
+            // Placeholder
+            doc.setFillColor(
+              220,
+              220,
+              220
+            )
+
+            doc.rect(
+              xImg,
+              yImg,
+              imgSize,
+              imgSize,
+              'F'
+            )
+
             doc.setFontSize(7)
-            doc.setTextColor(150, 150, 150)
-            doc.text('Sin imagen', xImg + imgW / 2, yImg + imgH / 2, { align: 'center' })
+            doc.setTextColor(
+              150,
+              150,
+              150
+            )
+
+            doc.text(
+              'Sin imagen',
+              xImg + imgSize / 2,
+              yImg + imgSize / 2,
+              { align: 'center' }
+            )
           }
-        } catch {
-          doc.setFillColor(220, 220, 220)
-          doc.rect(xImg, yImg, imgW, imgH, 'F')
+
+        } catch (error) {
+          console.warn(
+            'Error insertando fotografía:',
+            error
+          )
+
+          doc.setFillColor(
+            220,
+            220,
+            220
+          )
+
+          doc.rect(
+            xImg,
+            yImg,
+            imgSize,
+            imgSize,
+            'F'
+          )
         }
 
         currentPageImages++
       }
 
-      // Actualizar Y para el siguiente contenido (en la última página)
-      y = y + Math.ceil(currentPageImages / 2) * (imgH + 3) + 8
+      // ==========================================================
+      // ACTUALIZAR Y PARA EL CONTENIDO SIGUIENTE
+      // ==========================================================
+
+      y =
+        y +
+        Math.ceil(
+          currentPageImages / 2
+        ) *
+          (imgSize + imgGap) +
+        8
     }
 
-    // Pie
-    const totalPages = doc.internal.getNumberOfPages()
-    for (let p = 1; p <= totalPages; p++) {
+    // ============================================================
+    // PIE DE PÁGINA
+    // ============================================================
+
+    const totalPages =
+      doc.internal.getNumberOfPages()
+
+    for (
+      let p = 1;
+      p <= totalPages;
+      p++
+    ) {
       try {
         doc.setPage(p)
+
         doc.setFontSize(8)
-        doc.setTextColor(160, 160, 160)
-        doc.line(15, pageHeight - 22, pageWidth - 15, pageHeight - 22)
-        
-        // Procesar teléfono y email con variables dinámicas
-        const processedPhone = evaluateTemplate(config.company?.phone || '', vehicle, userData)
-        const processedEmail = evaluateTemplate(config.company?.email || '', vehicle, userData)
-        
-        doc.text(`Tel: ${processedPhone} | Email: ${processedEmail}`, 15, pageHeight - 16)
-        doc.text(config.footerText || '', 15, pageHeight - 10)
-        doc.text(`${p} / ${totalPages}`, pageWidth - 15, pageHeight - 10, { align: 'right' })
+        doc.setTextColor(
+          160,
+          160,
+          160
+        )
+
+        doc.line(
+          15,
+          pageHeight - 22,
+          pageWidth - 15,
+          pageHeight - 22
+        )
+
+        // Procesar teléfono y email
+        const processedPhone =
+          evaluateTemplate(
+            config.company?.phone || '',
+            vehicle,
+            userData
+          )
+
+        const processedEmail =
+          evaluateTemplate(
+            config.company?.email || '',
+            vehicle,
+            userData
+          )
+
+        doc.text(
+          `Tel: ${processedPhone} | Email: ${processedEmail}`,
+          15,
+          pageHeight - 16
+        )
+
+        doc.text(
+          config.footerText || '',
+          15,
+          pageHeight - 10
+        )
+
+        doc.text(
+          `${p} / ${totalPages}`,
+          pageWidth - 15,
+          pageHeight - 10,
+          { align: 'right' }
+        )
+
       } catch (e) {
-        console.warn('Error en pie de página:', e)
+        console.warn(
+          'Error en pie de página:',
+          e
+        )
+
         doc.setPage(p)
+
         doc.setFontSize(8)
-        doc.setTextColor(160, 160, 160)
-        doc.line(15, pageHeight - 22, pageWidth - 15, pageHeight - 22)
-        doc.text(`Tel: ${config.company?.phone || ''} | Email: ${config.company?.email || ''}`, 15, pageHeight - 16)
-        doc.text(config.footerText || '', 15, pageHeight - 10)
-        doc.text(`${p} / ${totalPages}`, pageWidth - 15, pageHeight - 10, { align: 'right' })
+        doc.setTextColor(
+          160,
+          160,
+          160
+        )
+
+        doc.line(
+          15,
+          pageHeight - 22,
+          pageWidth - 15,
+          pageHeight - 22
+        )
+
+        doc.text(
+          `Tel: ${config.company?.phone || ''} | Email: ${config.company?.email || ''}`,
+          15,
+          pageHeight - 16
+        )
+
+        doc.text(
+          config.footerText || '',
+          15,
+          pageHeight - 10
+        )
+
+        doc.text(
+          `${p} / ${totalPages}`,
+          pageWidth - 15,
+          pageHeight - 10,
+          { align: 'right' }
+        )
       }
     }
 
-    doc.save(`${vehicle.brand}_${vehicle.model}_${vehicle.version}.pdf`)
-    showToastMsg('Éxito', 'PDF descargado correctamente')
+    // ============================================================
+    // GUARDAR PDF
+    // ============================================================
+
+    doc.save(
+      `${vehicle.brand}_${vehicle.model}_${vehicle.version}.pdf`
+    )
+
+    showToastMsg(
+      'Éxito',
+      'PDF descargado correctamente'
+    )
+
   } catch (err) {
-    console.error('Error:', err)
-    showToastMsg('Error', 'No se pudo generar el PDF', false)
+    console.error(
+      'Error:',
+      err
+    )
+
+    showToastMsg(
+      'Error',
+      'No se pudo generar el PDF',
+      false
+    )
+
   } finally {
     loadingPDF.value[vehicle.id] = false
   }
+}
+
+function decodeHtmlEntities(text) {
+  if (!text || typeof text !== 'string') {
+    return text || ''
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.innerHTML = text
+  return textarea.value
 }
 
 /**

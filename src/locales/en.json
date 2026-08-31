@@ -67,7 +67,9 @@
         "emails-start": "Start",
         "emails-templates": "Templates",
         "emails-campaigns": "Campaigns",
-        "emails-builder": "New Campaign"
+        "emails-builder": "New Campaign",
+        "admin-users": "User Management",
+        "users": "Users"
         
     },
     "reports": {

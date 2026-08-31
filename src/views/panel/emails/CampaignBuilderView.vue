@@ -716,6 +716,40 @@
           </div>
         </div>
 
+        <!-- TEST EMAIL SECTION (Step 3 only) -->
+        <div v-if="currentStep === 3" class="review-section mb-4 p-3" style="background:#f8f9fa;border-radius:10px;border:1px solid #e9ecef">
+          <div class="mb-3">
+            <h6 class="mb-3 fw-semibold"><i class="bi bi-flask me-1"></i>Envío de prueba (opcional)</h6>
+            <div class="d-flex flex-wrap gap-2 align-items-center flex-1" style="max-width:500px">
+              <input
+                v-model="testEmail"
+                type="email"
+                class="form-control form-control-sm"
+                placeholder="correo@ejemplo.com"
+                style="max-width:280px"
+                :disabled="sendingTest"
+              />
+              <button
+                class="btn btn-sm btn-outline-primary"
+                :disabled="!testEmail || sendingTest || !campaignTemplate"
+                @click="sendTestEmail"
+              >
+                <span v-if="sendingTest" class="spinner-border spinner-border-sm me-1"></span>
+                <i v-else class="bi bi-send me-1"></i>Enviar prueba
+              </button>
+            </div>
+            <div v-if="testResult" class="d-flex align-items-center gap-2" :class="testResult.success ? 'text-success' : 'text-danger'">
+              <i class="bi" :class="testResult.success ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              <small>{{ testResult.message }}</small>
+            </div>
+          </div>
+          <p class="text-muted small mb-0 mt-2">
+            <i class="bi bi-info-circle me-1"></i>
+            Envía un email de prueba a una dirección para verificar el diseño y variables antes de crear la campaña. 
+            No guarda la campaña ni programa envíos.
+          </p>
+        </div>
+
         <!-- SCHEDULE SECTION -->
         <div v-if="scheduling" class="review-section mb-4">
           <div class="mb-3">
@@ -752,7 +786,7 @@
             </div>
           </div>
         </div>
-
+        
       </div>
 
       <!-- WIZARD FOOTER -->
@@ -875,7 +909,8 @@ import {
   createTemplate,
   createCampaign,
   extractVariables,
-  executeView
+  executeView,
+  sendEmailTest
 } from '@/services/emailService';
 import ToastComponent from '@/components/ToastComponent.vue';
 import ConfirmPopup from '@/components/ConfirmPopup.vue';
@@ -936,6 +971,11 @@ export default {
       recurringTime: '15:00',
       sending: false,
       showSuccess: false,
+
+      // test email
+      testEmail: '',
+      sendingTest: false,
+      testResult: null,
 
       toastTitle: '',
       toastMessage: '',
@@ -1206,22 +1246,61 @@ export default {
 
     selectSourceExcel() {
       this.campaign.source_type = 'excel';
-      const mapping = this.campaignTemplate?.variables?.length
-        ? Object.fromEntries(this.campaignTemplate.variables.map(v => [v, '']))
+      const templateVariables = this.campaignTemplate?.variables || [];
+      const newMapping = templateVariables.length
+        ? Object.fromEntries(templateVariables.map(v => [v, '']))
         : {};
-      this.columnMapping = { ...mapping, __email: '' };
+
+      // Preserve existing mappings for variables that exist in the current template
+      const preservedColumnMapping = { ...this.columnMapping };
+      templateVariables.forEach(v => {
+        if (preservedColumnMapping[v] === undefined) {
+          preservedColumnMapping[v] = '';
+        }
+      });
+      // Ensure __email is always present
+      if (preservedColumnMapping['__email'] === undefined) {
+        preservedColumnMapping['__email'] = '';
+      }
+      // Remove mappings for variables that no longer exist in the template
+      Object.keys(preservedColumnMapping).forEach(key => {
+        if (key !== '__email' && !templateVariables.includes(key)) {
+          delete preservedColumnMapping[key];
+        }
+      });
+
+      this.columnMapping = preservedColumnMapping;
     },
 
     selectTemplate(tmpl) {
       this.campaign.template_id = tmpl.id;
       this.showInlineTemplateForm = false;
 
-      const mapping = tmpl.variables?.length
-        ? Object.fromEntries(tmpl.variables.map(v => [v, '']))
+      const newVariables = tmpl.variables || [];
+      const newMapping = newVariables.length
+        ? Object.fromEntries(newVariables.map(v => [v, '']))
         : {};
 
-      this.dbVariableMapping = { ...mapping };
-      this.columnMapping    = { ...mapping, __email: '' };
+      // Preserve existing mappings for variables that exist in both old and new template
+      const preservedColumnMapping = { ...this.columnMapping };
+      newVariables.forEach(v => {
+        if (preservedColumnMapping[v] === undefined) {
+          preservedColumnMapping[v] = '';
+        }
+      });
+      // Ensure __email is always present
+      if (preservedColumnMapping['__email'] === undefined) {
+        preservedColumnMapping['__email'] = '';
+      }
+      // Remove mappings for variables that no longer exist in the new template
+      Object.keys(preservedColumnMapping).forEach(key => {
+        if (key !== '__email' && !newVariables.includes(key)) {
+          delete preservedColumnMapping[key];
+        }
+      });
+
+      this.dbVariableMapping = { ...newMapping };
+      this.columnMapping = preservedColumnMapping;
     },
 
     openCreateTemplate() {
@@ -1310,10 +1389,30 @@ export default {
           rows
         };
         // Vue 3: asignación directa es reactiva
-        const mapping = this.campaignTemplate?.variables?.length
-          ? Object.fromEntries(this.campaignTemplate.variables.map(v => [v, '']))
+        const templateVariables = this.campaignTemplate?.variables || [];
+        const newMapping = templateVariables.length
+          ? Object.fromEntries(templateVariables.map(v => [v, '']))
           : {};
-        this.columnMapping = { ...mapping, __email: '' };
+
+        // Preserve existing mappings for variables that exist in the current template
+        const preservedColumnMapping = { ...this.columnMapping };
+        templateVariables.forEach(v => {
+          if (preservedColumnMapping[v] === undefined) {
+            preservedColumnMapping[v] = '';
+          }
+        });
+        // Ensure __email is always present
+        if (preservedColumnMapping['__email'] === undefined) {
+          preservedColumnMapping['__email'] = '';
+        }
+        // Remove mappings for variables that no longer exist in the template
+        Object.keys(preservedColumnMapping).forEach(key => {
+          if (key !== '__email' && !templateVariables.includes(key)) {
+            delete preservedColumnMapping[key];
+          }
+        });
+
+        this.columnMapping = preservedColumnMapping;
       };
       reader.readAsArrayBuffer(file);
     },
@@ -1474,7 +1573,7 @@ export default {
           payload.recipients = this.finalRecipients;
         }
 
-        console.log('Campaign payload:', payload);
+        // console.log('Campaign payload:', payload);
 
         await createCampaign(payload);
 
@@ -1485,6 +1584,91 @@ export default {
         this.showToast(err.message || 'Error al enviar la campaña', 'error');
       } finally {
         this.sending = false;
+      }
+    },
+
+    async sendTestEmail() {
+      if (!this.testEmail || !this.campaignTemplate) {
+        this.showToast('Completá el email de prueba y seleccioná un template', 'error');
+        return;
+      }
+
+      // Validar formato de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(this.testEmail)) {
+        this.showToast('El email de prueba no tiene un formato válido', 'error');
+        return;
+      }
+
+      if (!this.currentMappingComplete()) {
+        this.showToast('Mapeá todas las variables del template antes de enviar la prueba', 'error');
+        return;
+      }
+
+      this.sendingTest = true;
+      this.testResult = null;
+
+      try {
+
+        // Preparar un recipient de prueba con las variables mapeadas
+        const testRecipient = {
+          email: this.testEmail,
+          variables: {}
+        };
+
+        // Llenar variables con valores de ejemplo o mapeados
+        if (this.campaignTemplate.variables?.length) {
+          this.campaignTemplate.variables.forEach(v => {
+            const mapping = this.dbVariableMapping || this.columnMapping;
+            if (mapping[v]) {
+              // Usar el valor mapeado del primer recipient como ejemplo
+              const firstRecipient = this.finalRecipients[0];
+              testRecipient.variables[v] = firstRecipient?.variables?.[mapping[v]] || `{{${v}}}`;
+            } else {
+              testRecipient.variables[v] = `{{${v}}}`;
+            }
+          });
+        }
+
+        const payload = {
+          action: 'sendTestEmail',
+          campaign: {
+            name: this.campaign.name || 'Campaña de prueba',
+            description: this.campaign.description,
+            template_id: this.campaign.template_id,
+            template_name: this.campaignTemplate.name,
+            source_type: this.campaign.source_type,
+            recipient_mode: 'manual',
+            table_variable_mapping: this.dbVariableMapping || this.columnMapping,
+          },
+          template: this.campaignTemplate,
+          recipients: [testRecipient],
+          deliveryMode: 'test'
+        };
+
+        //console.log('Test email payload:', payload);
+
+        // Llamar al webhook con action: sendTestEmail usando axios con token de autenticación
+        const response = await sendEmailTest(payload);
+
+        //console.log('Test email response:', response.data);
+        if(response) {
+          this.testResult = {
+            success: true,
+            message: `Email de prueba enviado correctamente a ${this.testEmail}`
+          };
+          this.showToast(`Email de prueba enviado a ${this.testEmail}`, 'success');
+        }
+        
+      } catch (err) {
+        console.error('Error sending test email:', err);
+        this.testResult = {
+          success: false,
+          message: err.message || 'Error al enviar email de prueba'
+        };
+        this.showToast(err.message || 'Error al enviar email de prueba', 'error');
+      } finally {
+        this.sendingTest = false;
       }
     },
 
