@@ -360,8 +360,11 @@
                                         <td>{{ formatDate(sale.created_at) }}</td>
                                         <td>
                                             <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
-                                                <span class="sale-type-badge" :class="sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio'">
-                                                    {{ sale.product_type }}
+                                                <span
+                                                    class="sale-type-badge"
+                                                    :class="isRedemption(sale) ? 'type-redemption' : (sale.product_type === 'INSTRUMENTO' ? 'type-instrumento' : 'type-accesorio')"
+                                                >
+                                                    {{ isRedemption(sale) ? 'Redención' : sale.product_type }}
                                                 </span>
                                                 <span v-if="sale.is_purchase == 1" class="sale-propia-badge">
                                                     <i class="bi bi-person-fill"></i> propia
@@ -378,7 +381,9 @@
                                             </div>
                                         </td>
                                         <td>{{ sale.description }}</td>
-                                        <td class="text-end fw-bold">{{ formatCurrency(sale.sale_amount) }}</td>
+                                        <td class="text-end fw-bold" :class="{ 'sale-redemption-amount': isRedemption(sale) }">
+                                            {{ formatCurrency(sale.sale_amount) }}
+                                        </td>
                                         <td class="text-end">
                                             <span class="sale-points"><i class="bi bi-star-fill me-1"></i>{{ formatNumber(sale.points_awarded) }}</span>
                                         </td>
@@ -960,6 +965,8 @@ export default {
             return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(val) || 0);
         };
 
+        const isRedemption = (sale) => Number(sale?.sale_amount) < 0;
+
         function confirmDelete(item) {
             customerToDelete = item;
             confirmPopup.value.showConfirmPopup();
@@ -1061,7 +1068,8 @@ export default {
             handleResponse,
             formatDate,
             formatNumber,
-            formatCurrency
+            formatCurrency,
+            isRedemption
         };
     }
 };
@@ -1835,6 +1843,15 @@ export default {
 .type-accesorio {
   background: #dbeafe;
   color: #2563eb;
+}
+
+.type-redemption {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sale-redemption-amount {
+  color: #dc2626;
 }
 
 .sale-propia-badge {
