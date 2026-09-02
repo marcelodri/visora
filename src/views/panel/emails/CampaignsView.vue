@@ -142,7 +142,7 @@
 </template>
 
 <script>
-import { getCampaigns, deleteCampaign as deleteCampaignSvc } from '@/services/emailService';
+import { getCampaigns, deleteCampaign as deleteCampaignSvc, updateCampaignStatus } from '@/services/emailService';
 import { useAuthStore } from '@/stores/auth';
 import DataTableComponent from '@/components/DataTableComponent.vue';
 import ToastComponent from '@/components/ToastComponent.vue';
@@ -203,6 +203,13 @@ export default {
           render: (row) => this.renderDeliveryMode(row)
         },
         {
+          label: 'Activa',
+          key: 'is_active',
+          action: (row) => this.toggleActive(row),
+          actionTitle: 'Activar / Desactivar campaña',
+          render: (row) => this.renderActiveSwitch(row)
+        },
+        {
           label: 'Fecha envío',
           key: 'sent_at',
           render: (row) => this.renderCampaignDate(row)
@@ -240,6 +247,7 @@ export default {
     getDeliveryMode(row) {
       const schedule = this.parseSchedule(row);
       if (row?.delivery_mode) return row.delivery_mode;
+      if (schedule?.type === 'daily') return 'daily';
       if (schedule?.type === 'recurring') return 'recurring';
       if (row?.scheduled_at || schedule?.type === 'once') return 'once';
       return 'now';
@@ -253,19 +261,37 @@ export default {
       const labels = {
         now: 'Enviar ahora',
         once: 'Programada',
-        recurring: 'Recurrente'
+        recurring: 'Recurrente',
+        daily: 'Diario'
       };
       const icons = {
         now: 'bi-send-fill',
         once: 'bi-calendar-check',
-        recurring: 'bi-arrow-repeat'
+        recurring: 'bi-arrow-repeat',
+        daily: 'bi-calendar2-range'
       };
       return `<span class="badge bg-light text-dark border"><i class="bi ${icons[mode] || 'bi-circle'} me-1"></i>${labels[mode] || mode}</span>`;
+    },
+    isCampaignActive(row) {
+      return row?.is_active !== false;
+    },
+    renderActiveSwitch(row) {
+      const mode = this.getDeliveryMode(row);
+      if (mode !== 'recurring' && mode !== 'daily') {
+        return '<span class="text-muted">—</span>';
+      }
+      const active = this.isCampaignActive(row);
+      return `
+        <div class="form-check form-switch mb-0" style="pointer-events:none">
+          <input class="form-check-input" type="checkbox" ${active ? 'checked' : ''} readonly>
+          <label class="form-check-label small ${active ? 'text-success' : 'text-muted'}">${active ? 'Activa' : 'Desactivada'}</label>
+        </div>
+      `;
     },
     renderCampaignDate(row) {
       const mode = this.getDeliveryMode(row);
       const scheduledAt = this.getScheduledAt(row);
-      if (mode === 'recurring' && scheduledAt) {
+      if ((mode === 'recurring' || mode === 'daily') && scheduledAt) {
         return `<i class="bi bi-arrow-repeat me-1"></i>${this.formatDate(scheduledAt)}`;
       }
       if (scheduledAt) {
@@ -318,7 +344,7 @@ export default {
     async deleteCampaign() {
       this.deleting = true;
       try {
-        await deleteCampaignSvc(this.campaignToDelete.id);
+        await deleteCampaignSvc(this.campaignToDelete.campana_GUID);
         this.triggerToast('Realizado!', 'Campaña eliminada correctamente', true);
         await this.loadCampaigns();
       } catch (err) {
@@ -326,6 +352,18 @@ export default {
       } finally {
         this.deleting = false;
         this.campaignToDelete = null;
+      }
+    },
+    async toggleActive(row) {
+      const mode = this.getDeliveryMode(row);
+      if (mode !== 'recurring' && mode !== 'daily') return;
+      const newStatus = !this.isCampaignActive(row);
+      try {
+        await updateCampaignStatus(row.campana_GUID, newStatus);
+        row.is_active = newStatus;
+        this.triggerToast('Realizado!', `Campaña ${newStatus ? 'activada' : 'desactivada'} correctamente`, true);
+      } catch (err) {
+        this.triggerToast('Error', err.message || 'No se pudo actualizar el estado de la campaña', false);
       }
     },
     formatDate(d) {

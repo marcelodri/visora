@@ -766,20 +766,71 @@
 
           <!-- Recurrente -->
           <div v-if="scheduleMode === 'recurring'" class="row g-3">
-            <div class="col-6 col-md-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">¿Cómo se define el día de envío?</label>
+              <div class="btn-group d-flex flex-wrap" role="group">
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  :class="recurringAnchorType === 'day_of_month' ? 'btn-primary' : 'btn-outline'"
+                  @click="recurringAnchorType = 'day_of_month'"
+                >
+                  Día fijo de cada mes
+                </button>
+                <!-- <button
+                  type="button"
+                  class="btn btn-sm"
+                  :class="recurringAnchorType === 'specific_date' ? 'btn-primary' : 'btn-outline-secondary'"
+                  @click="recurringAnchorType = 'specific_date'"
+                >
+                  Fecha de inicio específica
+                </button> -->
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  :class="recurringAnchorType === 'daily' ? 'btn-primary' : 'btn-outline'"
+                  @click="recurringAnchorType = 'daily'"
+                >
+                  Todos los días
+                </button>
+              </div>
+            </div>
+
+            <div v-if="recurringAnchorType === 'day_of_month'" class="col-6 col-md-3">
               <label class="form-label fw-semibold">Día del mes</label>
               <select v-model="recurringDay" class="form-select">
                 <option v-for="d in 28" :key="d" :value="d">{{ d }}</option>
               </select>
             </div>
+            <div v-else-if="recurringAnchorType === 'specific_date'" class="col-6 col-md-4">
+              <label class="form-label fw-semibold">Fecha de inicio *</label>
+              <input v-model="recurringDate" type="date" class="form-control" :min="minRecurringDate" />
+            </div>
+
             <div class="col-6 col-md-3">
               <label class="form-label fw-semibold">Hora</label>
               <input v-model="recurringTime" type="time" class="form-control" />
             </div>
+
+            <div v-if="recurringAnchorType !== 'daily'" class="col-6 col-md-3">
+              <label class="form-label fw-semibold">Repetir cada</label>
+              <select v-model.number="recurringEveryMonths" class="form-select">
+                <option v-for="n in 12" :key="n" :value="n">{{ n }} {{ n === 1 ? 'mes' : 'meses' }}</option>
+              </select>
+            </div>
+
             <div class="col-12">
               <div class="alert alert-info py-2 px-3 mb-0" style="font-size:0.84rem">
                 <i class="bi bi-info-circle me-1"></i>
-                Se enviará el <strong>día {{ recurringDay }}</strong> de cada mes
+                <span v-if="recurringAnchorType === 'day_of_month'">
+                  Se enviará el <strong>día {{ recurringDay }}</strong> de cada mes, <strong>{{ recurringIntervalLabel }}</strong>
+                </span>
+                <span v-else-if="recurringAnchorType === 'specific_date'">
+                  Se enviará a partir de la fecha elegida y luego <strong>{{ recurringIntervalLabel }}</strong>
+                </span>
+                <span v-else>
+                  Se enviará <strong>todos los días</strong>
+                </span>
                 a las <strong>{{ recurringTime }}</strong>.
                 Próximo envío: <strong>{{ nextRecurringDate }}</strong>
               </div>
@@ -866,7 +917,14 @@
             <p class="text-muted">
               <strong>{{ campaign.name }}</strong> fue
               <span v-if="lastDeliveryMode === 'recurring'">
-                programada de forma recurrente el día <strong>{{ recurringDay }}</strong> de cada mes a las <strong>{{ recurringTime }}</strong>.
+                programada de forma recurrente
+                <span v-if="recurringAnchorType === 'day_of_month'">el día <strong>{{ recurringDay }}</strong> de cada mes</span>
+                <span v-else>a partir del <strong>{{ recurringDate }}</strong></span>,
+                <strong>{{ recurringIntervalLabel }}</strong> a las <strong>{{ recurringTime }}</strong>.
+                Próximo envío: {{ nextRecurringDate }}
+              </span>
+              <span v-else-if="lastDeliveryMode === 'daily'">
+                programada para enviarse <strong>todos los días</strong> a las <strong>{{ recurringTime }}</strong>.
                 Próximo envío: {{ nextRecurringDate }}
               </span>
               <span v-else-if="lastDeliveryMode === 'once'">programada para el {{ formatDate(scheduledAt) }}</span>
@@ -967,7 +1025,10 @@ export default {
       scheduling: false,
       scheduleMode: null,        // null | 'once' | 'recurring' (pregunta early en Step 2)
       scheduledAt: '',
+      recurringAnchorType: 'day_of_month', // 'day_of_month' | 'specific_date'
       recurringDay: 5,
+      recurringDate: '',
+      recurringEveryMonths: 1,
       recurringTime: '15:00',
       sending: false,
       showSuccess: false,
@@ -1087,6 +1148,15 @@ export default {
     minDatetime() {
       const d = new Date(Date.now() + 5 * 60 * 1000);
       return this.toDateTimeLocal(d);
+    },
+    minRecurringDate() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    },
+    recurringIntervalLabel() {
+      const n = Number(this.recurringEveryMonths) || 1;
+      return n === 1 ? 'cada mes' : `cada ${n} meses`;
     }
   },
   async mounted() {
@@ -1450,10 +1520,31 @@ export default {
       if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
 
       const now = new Date();
-      const day = Number(this.recurringDay) || 1;
-      const everyMonths = Number(this.recurringEveryMonths) || 1;
-      const candidate = new Date(now.getFullYear(), now.getMonth(), day, h, m, 0, 0);
 
+      if (this.recurringAnchorType === 'daily') {
+        const candidate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+        if (candidate <= now) {
+          candidate.setDate(candidate.getDate() + 1);
+        }
+        return candidate;
+      }
+
+      const everyMonths = Math.max(1, Number(this.recurringEveryMonths) || 1);
+
+      if (this.recurringAnchorType === 'specific_date') {
+        if (!this.recurringDate) return null;
+        const [y, mo, d] = this.recurringDate.split('-').map(Number);
+        if (![y, mo, d].every(Number.isFinite)) return null;
+
+        const candidate = new Date(y, mo - 1, d, h, m, 0, 0);
+        while (candidate <= now) {
+          candidate.setMonth(candidate.getMonth() + everyMonths);
+        }
+        return candidate;
+      }
+
+      const day = Number(this.recurringDay) || 1;
+      const candidate = new Date(now.getFullYear(), now.getMonth(), day, h, m, 0, 0);
       if (candidate <= now) {
         candidate.setMonth(candidate.getMonth() + everyMonths);
       }
@@ -1475,6 +1566,14 @@ export default {
         }
         if (this.scheduleMode === 'recurring' && !this.recurringTime) {
           this.showToast('Selecioná la hora de envío recurrente', 'error');
+          return;
+        }
+        if (this.scheduleMode === 'recurring' && this.recurringAnchorType === 'specific_date' && !this.recurringDate) {
+          this.showToast('Selecioná la fecha de inicio de la recurrencia', 'error');
+          return;
+        }
+        if (this.scheduleMode === 'recurring' && this.recurringAnchorType !== 'daily' && (!Number.isFinite(Number(this.recurringEveryMonths)) || Number(this.recurringEveryMonths) < 1)) {
+          this.showToast('El intervalo de repetición debe ser de al menos 1 mes', 'error');
           return;
         }
       }
@@ -1507,7 +1606,11 @@ export default {
         : `${recipientsCount} destinatario${recipientsCount !== 1 ? 's' : ''}`;
 
       const actionLabel = isScheduled
-        ? (this.scheduleMode === 'recurring' ? `programar de forma recurrente (próximo envío ${this.nextRecurringDate})` : `programar para el ${this.formatDate(this.scheduledAt)}`)
+        ? (this.scheduleMode === 'recurring'
+            ? (this.recurringAnchorType === 'daily'
+                ? `programar de forma diaria (próximo envío ${this.nextRecurringDate})`
+                : `programar de forma recurrente (próximo envío ${this.nextRecurringDate})`)
+            : `programar para el ${this.formatDate(this.scheduledAt)}`)
         : 'enviar ahora';
 
       this.confirmTitle = isScheduled ? '¿Programar campaña?' : '¿Enviar campaña?';
@@ -1524,20 +1627,30 @@ export default {
       this.sending = true;
       try {
         const deliveryMode = isScheduled
-          ? (this.scheduleMode === 'recurring' ? 'recurring' : 'once')
+          ? (this.scheduleMode === 'recurring' ? (this.recurringAnchorType === 'daily' ? 'daily' : 'recurring') : 'once')
           : 'now';
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Argentina/Buenos_Aires';
         const schedulePayload = isScheduled
           ? this.scheduleMode === 'recurring'
-            ? {
-                type: 'recurring',
-                every_months: 1,
-                day_of_month: Number(this.recurringDay),
-                time: this.recurringTime,
-                next_run_at: this.toMysqlDatetime(this.nextRecurringAt),
-                next_run: this.toMysqlDatetime(this.nextRecurringAt),
-                timezone
-              }
+            ? this.recurringAnchorType === 'daily'
+              ? {
+                  type: 'daily',
+                  time: this.recurringTime,
+                  next_run_at: this.toMysqlDatetime(this.nextRecurringAt),
+                  next_run: this.toMysqlDatetime(this.nextRecurringAt),
+                  timezone
+                }
+              : {
+                  type: 'recurring',
+                  anchor_type: this.recurringAnchorType,
+                  every_months: Number(this.recurringEveryMonths) || 1,
+                  day_of_month: this.recurringAnchorType === 'day_of_month' ? Number(this.recurringDay) : null,
+                  start_date: this.recurringAnchorType === 'specific_date' ? this.recurringDate : null,
+                  time: this.recurringTime,
+                  next_run_at: this.toMysqlDatetime(this.nextRecurringAt),
+                  next_run: this.toMysqlDatetime(this.nextRecurringAt),
+                  timezone
+                }
             : { type: 'once', scheduled_at: this.toMysqlDatetime(this.scheduledAt), timezone }
           : null;
 
@@ -1545,7 +1658,7 @@ export default {
           ? this.toMysqlDatetime(new Date().toISOString())
           : deliveryMode === 'once'
             ? this.toMysqlDatetime(this.scheduledAt)
-            : deliveryMode === 'recurring'
+            : (deliveryMode === 'recurring' || deliveryMode === 'daily')
               ? this.toMysqlDatetime(this.nextRecurringAt)
               : null;
 

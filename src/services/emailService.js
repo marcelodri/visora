@@ -126,10 +126,19 @@ function resolveScheduledAt(scheduledAt, schedule) {
 
 function resolveDeliveryMode(deliveryMode, scheduledAt, schedule) {
   if (deliveryMode) return deliveryMode;
+  if (schedule?.type === 'daily') return 'daily';
   if (schedule?.type === 'recurring') return 'recurring';
   if (schedule?.type === 'once') return 'once';
   if (scheduledAt) return 'once';
   return 'now';
+}
+
+function resolveIsActive(isActive) {
+  if (isActive === undefined || isActive === null || isActive === '') return true;
+  if (typeof isActive === 'boolean') return isActive;
+  if (typeof isActive === 'number') return isActive !== 0;
+  if (typeof isActive === 'string') return !['0', 'false', 'no'].includes(isActive.toLowerCase());
+  return Boolean(isActive);
 }
 
 function normalizeClientRecord(rawClient, index) {
@@ -385,7 +394,8 @@ export async function getCampaigns() {
       ...row,
       schedule,
       scheduled_at,
-      delivery_mode
+      delivery_mode,
+      is_active: resolveIsActive(row.is_active)
     };
   });
 }
@@ -481,6 +491,7 @@ export async function createCampaign({
       table_variable_mapping: campaign.table_variable_mapping || {},
 
       campana_GUID: campanaGUID,
+      is_active: true,
 
       recipients: []
       
@@ -544,7 +555,8 @@ export async function createCampaign({
       table_variable_mapping: campaign.table_variable_mapping || {},
 
       campana_GUID: campanaGUID,
-      
+      is_active: true,
+
       // SOLO los 10 de este batch
       recipients: batch
     };
@@ -583,6 +595,16 @@ export async function deleteCampaign(id) {
   const response = await axios.post(
     WEBHOOK_CAMPAIGNS,
     { action: 'deleteCampaign', id },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+}
+
+export async function updateCampaignStatus(campanaGUID, isActive) {
+  const token = sessionStorage.getItem('token');
+  const response = await axios.post(
+    WEBHOOK_CAMPAIGNS,
+    { action: 'setSatus', campana_GUID: campanaGUID, is_active: isActive },
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return response.data;
