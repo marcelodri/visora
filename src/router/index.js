@@ -11,6 +11,16 @@ const router = createRouter({
       component: HomeView
     },
     {
+      path: '/terminos-y-condiciones',
+      name: 'terms',
+      component: () => import('@/views/TermsView.vue')
+    },
+    {
+      path: '/politica-de-privacidad',
+      name: 'privacy',
+      component: () => import('@/views/PrivacyPolicyView.vue')
+    },
+    {
       path: '/panel',
       name: 'panel',
       component: () => import('@/layouts/PanelLayout.vue'),
@@ -512,6 +522,26 @@ const router = createRouter({
           ]
         },
 
+        // Agente de Análisis de Datos
+        {
+          path: 'agent',
+          name: 'agent',
+          redirect: '/panel/agent/data-analysis',
+          meta: { category: 'agent', icon: '<i class="bi bi-robot"></i>' },
+          children: [
+            {
+              path: 'data-analysis',
+              name: 'agent-data-analysis',
+              component: () => import('@/views/panel/agent/DataAgentView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'agent',
+                label: 'Agente de Datos'
+              }
+            }
+          ]
+        },
+
         // Administración (Solo para Admin)
         {
           path: 'admin',
@@ -611,6 +641,24 @@ router.beforeEach((to, from, next) => {
 
   // Permitir acceso
   next();
+});
+
+router.afterEach(() => {
+  // Navegación exitosa: limpiar bandera de recarga por chunk desactualizado
+  sessionStorage.removeItem('chunk-reload');
+});
+
+// Si un deploy nuevo borró los chunks viejos, el navegador puede fallar al
+// importar dinámicamente una vista. Recargamos una sola vez para traer el build actual.
+router.onError((error, to) => {
+  const isChunkLoadError = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to load module script/i.test(error.message);
+
+  if (isChunkLoadError && !sessionStorage.getItem('chunk-reload')) {
+    sessionStorage.setItem('chunk-reload', '1');
+    window.location.href = to.fullPath;
+  } else {
+    console.error(error);
+  }
 });
 
 export default router;

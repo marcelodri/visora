@@ -160,11 +160,11 @@ export default {
         return;
       }
 
-      if (!userEmail) {
-        this.isLoading = false;
-        this.errorMessage = 'No encontramos tu email de usuario.';
-        return;
-      }
+      // if (!userEmail) {
+      //   this.isLoading = false;
+      //   this.errorMessage = 'No encontramos tu email de usuario.';
+      //   return;
+      // }
 
       if (this.newPassword.length < 8) {
         this.isLoading = false;

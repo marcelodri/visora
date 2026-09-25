@@ -29,6 +29,22 @@
         "table_thead_actions": "Actions"
         
     },
+    "agent_view": {
+        "title": "Data Analysis Agent",
+        "subtitle": "Ask your data in natural language",
+        "clear": "Clear conversation",
+        "clear_title": "Clear conversation?",
+        "clear_question": "All questions and answers from this session will be removed.",
+        "placeholder": "Type your question about the data...",
+        "empty_title": "Start a conversation",
+        "empty_text": "Ask the agent about your leads, sales or other data and it will reply with text, tables or charts.",
+        "export_pdf": "Export to PDF",
+        "show_sql": "View SQL query",
+        "hide_sql": "Hide SQL query",
+        "error": "Could not get a response from the agent. Please try again.",
+        "no_response": "The agent did not return a text response.",
+        "send": "Send"
+    },
     "menu": {
         "home": "Home",
         "search": "Search",
@@ -69,7 +85,8 @@
         "emails-campaigns": "Campaigns",
         "emails-builder": "New Campaign",
         "admin-users": "User Management",
-        "users": "Users"
+        "users": "Users",
+        "agent-data-analysis": "Data Analysis"
         
     },
     "reports": {

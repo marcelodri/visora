@@ -184,7 +184,8 @@
         <div class="row">
           
           <div class="col-6">
-
+            <router-link :to="{ name: 'terms' }">Términos y Condiciones</router-link>
+            <router-link :to="{ name: 'privacy' }">Política de Privacidad</router-link>
           </div>
           <div class="col-6 text-end">
             <a href="https://madcoder.io">madcoder.io</a>
@@ -438,6 +439,21 @@ export default {
   footer {
     border: none;
     padding: 20px 80px;
+
+    a {
+      color: rgba(248, 249, 250, 0.7);
+      text-decoration: none;
+      font-size: 14px;
+
+      &:hover {
+        color: #f8f9fa;
+        text-decoration: underline;
+      }
+    }
+
+    .col-6:first-child a {
+      margin-right: 24px;
+    }
   }
 
   .mb-100 {

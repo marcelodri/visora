@@ -262,17 +262,23 @@ const loadingMessage = ref('')
 const dynamicFilters = computed(() => {
   const filters = {}
   const fieldsToFilter = stockConfig.filterFields
-  
+
   fieldsToFilter.forEach(field => {
-    const values = [...new Set(
-      stock.value
-        .map(v => v[field])
-        .filter(v => v)
-        .map(v => typeof v === 'object' && v?.name ? v.name : v)
-        .map(v => String(v).trim())  // Normalizar: convertir a string y eliminar espacios
-    )].sort()
-    if (values.length > 0) filters[field] = values
+    const values = [
+      ...new Set(
+        stock.value
+          .map(v => getNestedValue(v, field))
+          .filter(v => v !== null && v !== undefined && v !== '')
+          .map(v => typeof v === 'object' && v?.name ? v.name : v)
+          .map(v => String(v).trim())
+      )
+    ].sort()
+
+    if (values.length > 0) {
+      filters[field] = values
+    }
   })
+
   return filters
 })
 
@@ -281,8 +287,13 @@ const filteredStock = computed(() => {
 
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
+
     filtered = filtered.filter(v => {
-      const searchText = stockConfig.searchFields.map(field => v[field]).join(' ').toLowerCase()
+      const searchText = stockConfig.searchFields
+        .map(field => getNestedValue(v, field))
+        .join(' ')
+        .toLowerCase()
+
       return searchText.includes(query)
     })
   }
@@ -290,15 +301,24 @@ const filteredStock = computed(() => {
   Object.entries(activeFilters.value).forEach(([key, value]) => {
     if (value) {
       filtered = filtered.filter(v => {
-        const fieldValue = v[key]
-        const vehicleValue = typeof fieldValue === 'object' && fieldValue?.name ? fieldValue.name : fieldValue
-        return vehicleValue === value
+        const fieldValue = getNestedValue(v, key)
+
+        const vehicleValue =
+          typeof fieldValue === 'object' && fieldValue?.name
+            ? fieldValue.name
+            : fieldValue
+
+        return String(vehicleValue).trim() === String(value).trim()
       })
     }
   })
 
   return filtered
 })
+
+const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((acc, key) => acc?.[key], obj)
+}
 
 const totalDisplayPages = computed(() => {
   return Math.ceil(filteredStock.value.length / itemsPerPage.value)
@@ -351,7 +371,7 @@ function clearFilters() {
 }
 
 function formatFilterLabel(key) {
-  const labels = { brand: 'Marca', model: 'Modelo', fuel: 'Combustible', color: 'Color', year: 'Año', business_channel: 'Canal de Negocio' }
+  const labels = { brand: 'Marca', model: 'Modelo', fuel: 'Combustible', color: 'Color', year: 'Año', business_channel: 'Canal de Negocio', 'saving_plan.saving_plan_order' :'Tipo de plan' }
   return labels[key] || key
 }
 
@@ -490,7 +510,7 @@ async function getStock() {
     }
     
     currentPage.value = pageCount.value
-    //console.log('stock', stock)
+    console.log('stock', stock)
     showToastMsg("Éxito", `Se cargaron ${stock.value.length} vehículos en total`)
   } catch (err) {
     console.error('Error:', err)

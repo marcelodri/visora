@@ -38,6 +38,15 @@ const vuetify = createVuetify(); // Crear instancia de Vuetify
 
 const app = createApp(App);
 
+// Tras un nuevo deploy, los chunks viejos dejan de existir: recargamos una sola vez
+window.addEventListener('vite:preloadError', () => {
+  if (!sessionStorage.getItem('chunk-reload')) {
+    sessionStorage.setItem('chunk-reload', '1');
+    window.location.reload();
+  }
+});
+
+
 // Configura Pinia
 const pinia = createPinia();
 pinia.use(piniaPersistedState);

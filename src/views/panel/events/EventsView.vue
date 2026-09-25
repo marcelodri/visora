@@ -156,9 +156,14 @@
                     <label class="form-label"><i class="bi bi-geo-alt-fill me-2"></i>Dirección Física:</label>
                     <input v-model="eventData.physical_address" type="text" class="form-control" placeholder="Ej: Av. Corrientes 1234, CABA" />
                     </div>
-                    <div class="col-12 col-md-6">
+                    <!-- <div class="col-12 col-md-6">
                     <label class="form-label"><i class="bi bi-link-45deg me-2"></i>Link Virtual (opcional):</label>
                     <input v-model="eventData.virtual_link" type="url" class="form-control" placeholder="https://..." />
+                    </div> -->
+                    <div class="col-12 col-md-6">
+                    <label class="form-label"><i class="bi bi-calendar-plus me-2"></i>Fecha de Publicación (desde):</label>
+                    <input v-model="eventData.publication_date_start" type="datetime-local" class="form-control" />
+                    <small class="text-muted">Cuándo se hace visible el evento</small>
                     </div>
 
                 </div>
@@ -185,28 +190,40 @@
 
                                 <!-- Card por cada fecha -->
                                 <div v-if="Array.isArray(eventData.event_dates) && eventData.event_dates.length > 0">
-                                    <div v-for="(dateItem, index) in eventData.event_dates.filter(d => d)" :key="index" class="card mb-3 shadow-sm">
-                                        <div class="card-header alert-warning bg-gradient d-flex justify-content-between align-items-center">
+                                    <div v-for="(dateItem, index) in eventData.event_dates.filter(d => d)" :key="index" class="card mb-3 shadow-sm session-accordion-card">
+                                        <div 
+                                            class="card-header alert-warning bg-gradient d-flex justify-content-between align-items-center session-accordion-header"
+                                            :class="{ collapsed: index !== 0 }"
+                                            role="button"
+                                            data-bs-toggle="collapse"
+                                            :data-bs-target="'#sessionCollapse' + index"
+                                            :aria-expanded="index === 0 ? 'true' : 'false'"
+                                            :aria-controls="'sessionCollapse' + index"
+                                        >
                                             <strong><i class="bi bi-calendar-check me-2"></i>Sesión {{ index + 1 }}</strong>
-                                            <button type="button" class="btn btn-danger btn-sm pt-2" @click="removeEventDate(dateItem, index)">
-                                            <i class="bi bi-trash"></i>
-                                            </button>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button type="button" class="btn btn-danger btn-sm pt-2" @click.stop="removeEventDate(dateItem, index)">
+                                                <i class="bi bi-trash"></i>
+                                                </button>
+                                                <i class="bi bi-chevron-down session-accordion-chevron"></i>
+                                            </div>
                                         </div>
+                                        <div :id="'sessionCollapse' + index" class="collapse" :class="{ show: index === 0 }">
                                         <div class="card-body">
                                             <div class="row g-3">
-                                            
-                                            <!-- Fecha de publicación -->
-                                            <div class="col-12 col-md-6">
+
+                                            <!-- Descripción -->
+                                            <div class="col-12">
                                                 <label class="form-label">
-                                                <i class="bi bi-calendar-plus me-2"></i>
-                                                <strong>Fecha de Publicación (desde):</strong>
+                                                <i class="bi bi-card-text me-2"></i>
+                                                <strong>Descripción (opcional):</strong>
                                                 </label>
-                                                <input v-model="dateItem.publication_date_start" type="datetime-local" class="form-control" />
-                                                <small class="text-muted">Cuándo se abre la publicación para esta sesión</small>
+                                                <input v-model="dateItem.description" type="text" class="form-control" placeholder="Ej: Turno mañana, Sesión especial, etc." />
+                                                <small class="text-muted">Ayuda a identificar esta sesión</small>
                                             </div>
 
                                             <!-- Fecha del evento -->
-                                            <div class="col-12 col-md-6">
+                                            <div class="col-12 col-md-4">
                                                 <label class="form-label">
                                                 <i class="bi bi-calendar-event me-2"></i>
                                                 <strong>Fecha del Evento:</strong>
@@ -216,7 +233,7 @@
                                             </div>
 
                                             
-                                            <div class="col-12 col-md-6">
+                                            <div class="col-12 col-md-4">
                                                 <label class="form-label">
                                                 <i class="bi bi-calendar-plus me-2"></i>
                                                 <strong>Fecha de inscripción (desde):</strong>
@@ -226,7 +243,7 @@
                                             </div>
 
                                             <!-- Hasta cuando se puede registrar -->
-                                            <div class="col-12 col-md-6">
+                                            <div class="col-12 col-md-4">
                                                 <label class="form-label">
                                                 <i class="bi bi-calendar-event me-2"></i>
                                                 <strong>Fecha de inscripción (hasta):</strong>
@@ -236,7 +253,7 @@
                                             </div>
 
                                             <!-- Cupo -->
-                                            <div class="col-12 col-md-6">
+                                            <div class="col-12 col-md-4">
                                                 <label class="form-label">
                                                 <i class="bi bi-people-fill me-2"></i>
                                                 <strong>Cupo disponible:</strong>
@@ -245,18 +262,8 @@
                                                 <small class="text-muted">Cantidad máxima de inscriptos</small>
                                             </div>
 
-                                            <!-- Descripción -->
-                                            <div class="col-12 col-md-6">
-                                                <label class="form-label">
-                                                <i class="bi bi-card-text me-2"></i>
-                                                <strong>Descripción (opcional):</strong>
-                                                </label>
-                                                <input v-model="dateItem.description" type="text" class="form-control" placeholder="Ej: Turno mañana, Sesión especial, etc." />
-                                                <small class="text-muted">Ayuda a identificar esta sesión</small>
-                                            </div>
-
                                             <!-- Formulario -->
-                                            <div class="col-12 col-md-6">
+                                            <div class="col-12 col-md-4">
                                                 <label class="form-label"><i class="bi bi-ui-checks-grid me-2"></i>Formulario Asociado:</label>
                                                 <select v-model="dateItem.form_id" class="form-select">
                                                     <option value="">Seleccione un formulario</option>
@@ -265,7 +272,7 @@
                                             </div>
 
                                             <!-- Tipo de Inscripción -->
-                                            <div class="col-12 col-md-6">
+                                            <div class="col-12 col-md-4">
                                                 <label class="form-label"><i class="bi bi-lock-fill me-2"></i>Tipo de Inscripción:</label>
                                                 <select v-model="dateItem.registration_type" class="form-select" @change="() => onRegistrationTypeChange(dateItem)">
                                                     <option value="public">Pública</option>
@@ -399,6 +406,7 @@
 
                                             </div>
                                         </div>
+                                        </div>
                                     </div>
                                 </div>                        
 
@@ -448,11 +456,11 @@
                         <label class="form-label"><i class="bi bi-calendar-x me-2"></i>Fecha límite de inscripción:</label>
                         <input v-model="eventData.registration_deadline" type="date" class="form-control" />
                         </div> -->
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-3">
                         <label class="form-label"><i class="bi bi-person-badge me-2"></i>Edad mínima:</label>
                         <input v-model.number="eventData.min_age" type="number" class="form-control" min="0" placeholder="Ej: 18" />
                         </div>
-                        <div class="col-12">
+                        <div class="col-12 col-md-3">
                         <label class="form-label"><i class="bi bi-person-check me-2"></i>Límite de inscripciones por usuario:</label>
                         <input v-model.number="eventData.registrations_per_user" type="number" class="form-control" min="1" placeholder="Ej: 1" />
                         </div>
@@ -668,6 +676,7 @@ export default {
       event_dates_delete: [],
       physical_address: '',
       virtual_link: '',
+      publication_date_start: '',
       // registration_deadline: '2010-01-01T00:00:00',
       min_age: null,
       registrations_per_user: 1,
@@ -784,6 +793,7 @@ export default {
         event_dates_delete: [],
         physical_address: '',
         virtual_link: '',
+        publication_date_start: '',
         // registration_deadline: '2010-01-01T00:00:00',
         min_age: null,
         registrations_per_user: 1,
@@ -1018,7 +1028,6 @@ export default {
       const dateString = `${yyyy}-${mm}-${dd} 00:00:00`;
 
       eventData.value.event_dates.push({
-        publication_date_start: dateString,
         registration_start: dateString,
         event_date: dateString,
         capacity: null,
@@ -1390,6 +1399,19 @@ export default {
 
 .events-step-close {
   white-space: nowrap;
+}
+
+.session-accordion-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.session-accordion-chevron {
+  transition: transform 0.2s ease;
+}
+
+.session-accordion-header.collapsed .session-accordion-chevron {
+  transform: rotate(-90deg);
 }
 
 @media (max-width: 991px) {

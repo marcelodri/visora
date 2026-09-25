@@ -35,46 +35,47 @@ export const stockConfig = {
   },
 
   // Campos para filtros dinámicos
-  filterFields: ['brand', 'model', 'fuel', 'color', 'year', 'business_channel'],
+  filterFields: ['brand', 'model', 'fuel', 'color', 'year', 'business_channel', 'saving_plan.saving_plan_order'],
 
   // Campos para mostrar en detalles
-  detailFields: [
-    { key: 'brand', label: 'Marca' },
-    { key: 'model', label: 'Modelo' },
-    { key: 'version', label: 'Versión' },
-    { key: 'year', label: 'Año' },
-    { key: 'color', label: 'Color' },
-    { key: 'fuel', label: 'Combustible' },
-    { key: 'mileage', label: 'Kilometraje' },
-    { key: 'price', label: 'Precio' },
-    { key: 'location', label: 'Ubicación' }
-  ],
+  // detailFields: [
+  //   { key: 'brand', label: 'Marca' },
+  //   { key: 'model', label: 'Modelo' },
+  //   { key: 'version', label: 'Versión' },
+  //   { key: 'year', label: 'Año' },
+  //   { key: 'color', label: 'Color' },
+  //   { key: 'fuel', label: 'Combustible' },
+  //   { key: 'mileage', label: 'Kilometraje' },
+  //   { key: 'price', label: 'Precio' },
+  //   { key: 'location', label: 'Ubicación' },
+  //   { key: 'saving_plan.saving_plan_order', label: 'Tipo de plan' }
+  // ],
 
   // Campos financieros
-  financialFields: [
-    { key: 'price', label: 'Precio' },
-    { key: 'monthlyPayment', label: 'Mensualidad' },
-    { key: 'downPayment', label: 'Enganche/Apertura' },
-    { key: 'term', label: 'Plazo' }
-  ],
+  // financialFields: [
+  //   { key: 'price', label: 'Precio' },
+  //   { key: 'monthlyPayment', label: 'Mensualidad' },
+  //   { key: 'downPayment', label: 'Enganche/Apertura' },
+  //   { key: 'term', label: 'Plazo' }
+  // ],
 
   // Mock data para información financiera (temporal)
-  mockFinancialDatabase: {
-    1: {
-      vehicleId: 1,
-      price: '$100,000',
-      monthlyPayment: '$2,000',
-      downPayment: '$7,800',
-      term: '60 meses'
-    },
-    2: {
-      vehicleId: 2,
-      price: '$85,000',
-      monthlyPayment: '$1,700',
-      downPayment: '$6,375',
-      term: '48 meses'
-    }
-  },
+  // mockFinancialDatabase: {
+  //   1: {
+  //     vehicleId: 1,
+  //     price: '$100,000',
+  //     monthlyPayment: '$2,000',
+  //     downPayment: '$7,800',
+  //     term: '60 meses'
+  //   },
+  //   2: {
+  //     vehicleId: 2,
+  //     price: '$85,000',
+  //     monthlyPayment: '$1,700',
+  //     downPayment: '$6,375',
+  //     term: '48 meses'
+  //   }
+  // },
 
   // Configuración de imágenes
   imageSettings: {

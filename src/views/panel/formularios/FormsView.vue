@@ -268,6 +268,10 @@
                             <input v-model="field.label" class="form-control" placeholder="Ej: Nombre completo" />
                           </div>
                           <div class="col-12 col-lg-3">
+                            <label class="form-label">Placeholder:</label>
+                            <input v-model="field.placeholder" class="form-control" placeholder="Ej: Ingrese su nombre" />
+                          </div>
+                          <div class="col-12 col-lg-2">
                             <label class="form-label">Nombre del campo:</label>
                             <input v-model="field.name" class="form-control" placeholder="Ej: full_name" />
                           </div>
@@ -275,7 +279,7 @@
                             <label class="form-label">Valor por defecto:</label>
                             <input v-model="field.value" class="form-control" placeholder="Opcional" />
                           </div>
-                          <div class="col-12 col-lg-3">
+                          <div class="col-12 col-lg-1">
                             <label class="form-label">Ancho (%):</label>
                             <input v-model.number="field.width" type="number" min="1" max="100" class="form-control" placeholder="100" />
                           </div>
@@ -776,6 +780,7 @@ export default {
       formData.value.fields.push({ 
         label: '', 
         name: '', 
+        placeholder: '',
         type: 'text', 
         hidden: false, 
         required: false, 

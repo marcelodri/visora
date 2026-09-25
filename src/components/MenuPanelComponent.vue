@@ -166,7 +166,7 @@ nav {
     background-color: #fff;
     border: 1px solid #ddd;
     padding: 20px;
-    width: fit-content;
+    width: max-content;
     top: 40px;
     z-index: 1000;
     right: 0;

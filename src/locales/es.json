@@ -28,6 +28,26 @@
         "table_thead_value": "Condición",
         "table_thead_actions": "Acciones"
     },
+    "agent_view": {
+        "title": "Agente de Análisis de Leads",
+        "subtitle": "Preguntale a tus datos en lenguaje natural",
+        "clear": "Limpiar conversación",
+        "clear_title": "¿Limpiar conversación?",
+        "clear_question": "Se eliminarán todas las preguntas y respuestas de esta sesión.",
+        "placeholder": "Escribí tu pregunta sobre los datos...",
+        "empty_title": "Comenzá una conversación",
+        "empty_text": "Preguntale al agente sobre tus leads, ventas u otros datos y te va a responder con texto, tablas o gráficos.",
+        "export_pdf": "Exportar a PDF",
+        "show_sql": "Ver consulta SQL",
+        "hide_sql": "Ocultar consulta SQL",
+        "error": "No se pudo obtener la respuesta del agente. Intentá nuevamente.",
+        "no_response": "El agente no devolvió una respuesta de texto.",
+        "send": "Enviar",
+        "favorites": "Preguntas Favoritas",
+        "syncing": "Sincronizando...",
+        "sync_data": "Sincronizar datos",
+        "suggested_queries": "Consultas sugeridas"
+    },
     "menu": {
         "home": "Inicio",
         "search": "Buscar",
@@ -85,7 +105,8 @@
         "vehicles-config": "Configuración",
         "vehicles-share": "Nuevo PDF",
         "admin-users": "Gestión de Usuarios",
-        "users": "Usuarios"
+        "users": "Usuarios",
+        "agent-data-analysis": "Análisis de Leads"
     },
     "business_type":{
         "name": "Nombre",

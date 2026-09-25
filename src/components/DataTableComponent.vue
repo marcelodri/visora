@@ -3,7 +3,7 @@
 
     <!-- Botón de descarga de Excel -->
     <button v-if="showDownloadButton" class="btn btn-excel" @click="downloadExcel">
-      <i class="bi bi-file-earmark-excel me-2"></i> {{ $t('download') }}
+      <i class="bi bi-file-earmark-excel me-2"></i>
     </button>
     
     <!-- Campo de búsqueda -->
@@ -490,6 +490,7 @@ export default {
 
 .datatable-wrapper {
   padding: 1.5rem;
+  position: relative;
 }
 
 /* Search Container */
@@ -808,6 +809,8 @@ export default {
   font-weight: 600;
   margin-bottom: 1rem;
   transition: all 0.2s ease;
+  position: absolute;
+  right: -10px;
 }
 
 .btn-excel:hover {

@@ -221,14 +221,6 @@
           <div class="card-body">
             <div class="metric-item">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <span><i class="bi bi-clock-history me-2"></i>Tiempo Promedio de Registro</span>
-                <strong>{{ metrics.avgRegistrationTime }} min</strong>
-              </div>
-              <hr>
-            </div>
-
-            <div class="metric-item">
-              <div class="d-flex justify-content-between align-items-center mb-3">
                 <span><i class="bi bi-people me-2"></i>Registros por Hora Pico</span>
                 <strong>{{ metrics.peakHourRegistrations }}/hora</strong>
               </div>
@@ -252,17 +244,9 @@
             </div>
 
             <div class="metric-item">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-0">
                 <span><i class="bi bi-hourglass-split me-2"></i>Registros Pendientes</span>
                 <strong class="text-warning">{{ formatNumber(metrics.pendingRegistrations) }}</strong>
-              </div>
-              <hr>
-            </div>
-
-            <div class="metric-item">
-              <div class="d-flex justify-content-between align-items-center mb-0">
-                <span><i class="bi bi-star me-2"></i>Satisfacción Promedio</span>
-                <strong>{{ metrics.avgSatisfaction }}/5 ⭐</strong>
               </div>
             </div>
           </div>
@@ -305,17 +289,13 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
-import DataTableComponent from '@/components/DataTableComponent.vue';
 import { useI18n } from "vue-i18n";
 import Chart from 'chart.js/auto';
 
 export default {
   name: 'ReportsView',
-  components: {
-    DataTableComponent
-  },
   setup() {
     const { t } = useI18n();
     const isLoading = ref(false);
@@ -323,8 +303,13 @@ export default {
     const registrationsChart = ref(null);
     const statusChart = ref(null);
     let chartInstances = { registrations: null, status: null };
-    const url = "";
-    const url_eventos = "";
+    const url = 'https://apis.madautomate.cloud/webhook/1090f10d-aafd-4c67-bc72-c3365187d6df';
+    const url_eventos = 'https://apis.madautomate.cloud/webhook/9ff4a876-1944-4643-b41d-37450e37e3e2';
+
+    // Registros crudos (sin filtrar por fecha) de los eventos consultados
+    const rawRegistrations = ref([]);
+    const statusCounts = ref({ Creado: 0, Confirmado: 0, Asistió: 0, Anulado: 0 });
+    const registrationsByDay = ref({ labels: [], data: [] });
 
     const filters = ref({
       startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -335,63 +320,22 @@ export default {
     const events = ref([]);
 
     const kpis = ref({
-      totalRegistrations: 1247,
-      registrationGrowth: 12.5,
-      activeEvents: 8,
-      conversionRate: 68.5,
-      conversionGrowth: 5.2,
-      avgOccupancy: 78
+      totalRegistrations: 0,
+      registrationGrowth: 0,
+      activeEvents: 0,
+      conversionRate: 0,
+      conversionGrowth: 0,
+      avgOccupancy: 0
     });
 
-    const topEvents = ref([
-      { id: 1, name: 'Conferencia Tech 2025', registrations: 450, capacity: 500, occupancy: 90 },
-      { id: 2, name: 'Workshop IA', registrations: 280, capacity: 300, occupancy: 93 },
-      { id: 3, name: 'Networking Empresarial', registrations: 195, capacity: 250, occupancy: 78 },
-      { id: 4, name: 'Seminario Marketing', registrations: 167, capacity: 200, occupancy: 84 },
-      { id: 5, name: 'Hackathon 48h', registrations: 155, capacity: 300, occupancy: 52 }
-    ]);
+    const topEvents = ref([]);
 
     const metrics = ref({
-      avgRegistrationTime: 3.5,
-      peakHourRegistrations: 45,
-      cancellationRate: 8.2,
-      attendanceRate: 87.5,
-      pendingRegistrations: 23,
-      avgSatisfaction: 4.6
+      peakHourRegistrations: 0,
+      cancellationRate: 0,
+      attendanceRate: 0,
+      pendingRegistrations: 0
     });
-
-    const detailColumns = [
-      { key: 'name', label: 'Evento' },
-      { key: 'date', label: 'Fecha' },
-      { key: 'registrations', label: 'Registros' },
-      { key: 'capacity', label: 'Capacidad' },
-      { key: 'occupancy', label: 'Ocupación' },
-      { key: 'revenue', label: 'Ingresos' },
-      { key: 'status', label: 'Estado' }
-    ];
-
-    const eventsDetail = ref([
-      { 
-        id: 1, 
-        name: 'Conferencia Tech 2025', 
-        date: '2025-01-15', 
-        registrations: 450, 
-        capacity: 500, 
-        occupancy: '90%',
-        revenue: '$22,500',
-        status: 'Activo'
-      },
-      { 
-        id: 2, 
-        name: 'Workshop IA', 
-        date: '2025-01-20', 
-        registrations: 280, 
-        capacity: 300, 
-        occupancy: '93%',
-        revenue: '$8,400',
-        status: 'Activo'
-      }
-    ]);
 
     const formatNumber = (num) => {
       return new Intl.NumberFormat('es-AR').format(num);
@@ -419,10 +363,10 @@ export default {
         chartInstances.registrations = new Chart(ctx, {
           type: 'line',
           data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            labels: registrationsByDay.value.labels,
             datasets: [{
               label: 'Registros',
-              data: [45, 52, 38, 65, 72, 58, 49],
+              data: registrationsByDay.value.data,
               borderColor: '#0d6efd',
               backgroundColor: 'rgba(13, 110, 253, 0.1)',
               tension: 0.4,
@@ -457,10 +401,11 @@ export default {
         chartInstances.status = new Chart(ctx, {
           type: 'doughnut',
           data: {
-            labels: ['Confirmados', 'Pendientes', 'Cancelados'],
+            labels: Object.keys(statusCounts.value),
             datasets: [{
-              data: [856, 312, 79],
+              data: Object.values(statusCounts.value),
               backgroundColor: [
+                '#0dcaf0',
                 '#198754',
                 '#ffc107',
                 '#dc3545'
@@ -480,19 +425,191 @@ export default {
       }
     };
 
+    const getToken = () => {
+      token.value = sessionStorage.getItem('token');
+    };
+
+    // Trae el listado de eventos reales, parseando las sesiones para calcular cupos
+    const loadEvents = async () => {
+      const response = await axios.post(url_eventos, { action: "dataforms" }, {
+        headers: { Authorization: `Bearer ${token.value}` }
+      });
+
+      events.value = (response.data || []).map(item => {
+        let parsedDates = [];
+        try {
+          parsedDates = JSON.parse(item.event_dates || '[]') || [];
+        } catch (e) {
+          parsedDates = [];
+        }
+        const capacity = parsedDates.reduce((sum, d) => sum + (Number(d?.capacity) || 0), 0);
+        return { ...item, event_dates: parsedDates, capacity };
+      });
+    };
+
+    // Trae las inscripciones reales de cada evento indicado, etiquetadas con su evento
+    const loadRegistrationsForEvents = async (eventList) => {
+      const requests = eventList.map(ev =>
+        axios.post(url, { action: "dataforms", selectedEventId: ev.id }, {
+          headers: { Authorization: `Bearer ${token.value}` }
+        })
+          .then(res => (res.data || []).map(r => ({ ...r, event_id: ev.id, event_name: ev.name })))
+          .catch(() => [])
+      );
+      const results = await Promise.all(requests);
+      return results.flat();
+    };
+
+    const inRange = (dateStr, start, end) => {
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      if (start && d < new Date(start)) return false;
+      if (end) {
+        const endDate = new Date(end);
+        endDate.setHours(23, 59, 59, 999);
+        if (d > endDate) return false;
+      }
+      return true;
+    };
+
+    const growth = (curr, prev) => prev > 0 ? Number((((curr - prev) / prev) * 100).toFixed(1)) : 0;
+
+    const computeAvgOccupancy = (list) => {
+      const byEvent = {};
+      list.forEach(r => { byEvent[r.event_id] = (byEvent[r.event_id] || 0) + 1; });
+      const occupancies = events.value
+        .filter(e => byEvent[e.id] && e.capacity > 0)
+        .map(e => (byEvent[e.id] / e.capacity) * 100);
+      if (!occupancies.length) return 0;
+      return Number((occupancies.reduce((a, b) => a + b, 0) / occupancies.length).toFixed(1));
+    };
+
+    const computeTopEvents = (list) => {
+      const byEvent = {};
+      list.forEach(r => { byEvent[r.event_id] = (byEvent[r.event_id] || 0) + 1; });
+      return events.value
+        .filter(e => byEvent[e.id])
+        .map(e => ({
+          id: e.id,
+          name: e.name,
+          registrations: byEvent[e.id],
+          capacity: e.capacity,
+          occupancy: e.capacity > 0 ? Math.round((byEvent[e.id] / e.capacity) * 100) : 0
+        }))
+        .sort((a, b) => b.registrations - a.registrations)
+        .slice(0, 5);
+    };
+
+    const computePeakHour = (list) => {
+      const hourCounts = Array(24).fill(0);
+      list.forEach(r => {
+        if (!r.created_at) return;
+        hourCounts[new Date(r.created_at).getHours()]++;
+      });
+      return Math.max(0, ...hourCounts);
+    };
+
+    const formatShortDate = (dateStr) => {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+    };
+
+    const computeRegistrationsByDay = (list) => {
+      const counts = {};
+      list.forEach(r => {
+        if (!r.created_at) return;
+        const day = r.created_at.split('T')[0].split(' ')[0];
+        counts[day] = (counts[day] || 0) + 1;
+      });
+      const sortedDays = Object.keys(counts).sort();
+      return {
+        labels: sortedDays.map(formatShortDate),
+        data: sortedDays.map(d => counts[d])
+      };
+    };
+
+    // Calcula KPIs, top eventos, métricas y datos de gráficos a partir de las inscripciones reales
+    const computeReportData = () => {
+      const filtered = rawRegistrations.value.filter(r => inRange(r.created_at, filters.value.startDate, filters.value.endDate));
+
+      let previousFiltered = [];
+      if (filters.value.startDate && filters.value.endDate) {
+        const start = new Date(filters.value.startDate);
+        const end = new Date(filters.value.endDate);
+        const rangeDays = Math.max(1, Math.round((end - start) / 86400000) + 1);
+        const prevEnd = new Date(start);
+        prevEnd.setDate(prevEnd.getDate() - 1);
+        const prevStart = new Date(prevEnd);
+        prevStart.setDate(prevStart.getDate() - rangeDays + 1);
+        previousFiltered = rawRegistrations.value.filter(r =>
+          inRange(r.created_at, prevStart.toISOString().split('T')[0], prevEnd.toISOString().split('T')[0])
+        );
+      }
+
+      const countByStatus = (list, status) => list.filter(r => r.status === status).length;
+
+      const total = filtered.length;
+      const cancelled = countByStatus(filtered, 'cancelled');
+      const attended = countByStatus(filtered, 'attended');
+      const confirmed = countByStatus(filtered, 'confirmed');
+      const created = countByStatus(filtered, 'created');
+      const activeNow = total - cancelled;
+      // Las canceladas liberan el cupo, no deben contar para ocupación/top eventos
+      const activeFiltered = filtered.filter(r => r.status !== 'cancelled');
+
+      const prevTotal = previousFiltered.length;
+      const prevActive = previousFiltered.filter(r => r.status !== 'cancelled').length;
+
+      kpis.value = {
+        totalRegistrations: total,
+        registrationGrowth: growth(total, prevTotal),
+        activeEvents: events.value.filter(e => e.status === 'published').length,
+        conversionRate: total > 0 ? Number(((activeNow / total) * 100).toFixed(1)) : 0,
+        conversionGrowth: growth(activeNow, prevActive),
+        avgOccupancy: computeAvgOccupancy(activeFiltered)
+      };
+
+      topEvents.value = computeTopEvents(activeFiltered);
+
+      metrics.value = {
+        peakHourRegistrations: computePeakHour(filtered),
+        cancellationRate: total > 0 ? Number(((cancelled / total) * 100).toFixed(1)) : 0,
+        attendanceRate: total > 0 ? Number(((attended / total) * 100).toFixed(1)) : 0,
+        pendingRegistrations: created
+      };
+
+      statusCounts.value = {
+        Creado: created,
+        Confirmado: confirmed,
+        Asistió: attended,
+        Anulado: cancelled
+      };
+
+      registrationsByDay.value = computeRegistrationsByDay(filtered);
+    };
+
     const refreshData = async () => {
       isLoading.value = true;
       try {
-        // Simular carga de datos
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Aquí iría la llamada real a la API
+        await loadEvents();
+
+        const eventsToQuery = filters.value.eventId
+          ? events.value.filter(e => e.id === filters.value.eventId)
+          : events.value;
+
+        rawRegistrations.value = await loadRegistrationsForEvents(eventsToQuery);
+
+        computeReportData();
+        await nextTick();
+        initCharts();
+      } catch (error) {
+        console.error('Error al cargar los datos de reportes', error);
       } finally {
         isLoading.value = false;
       }
     };
 
     const applyFilters = () => {
-      console.log('Aplicando filtros:', filters.value);
       refreshData();
     };
 
@@ -501,16 +618,9 @@ export default {
       // Implementar lógica de exportación
     };
 
-    const getToken = () => {
-      token.value = sessionStorage.getItem('token');
-    };
-
     onMounted(async () => {
-      await getToken();
+      getToken();
       await refreshData();
-      setTimeout(() => {
-        initCharts();
-      }, 100);
     });
 
     return {
@@ -519,8 +629,6 @@ export default {
       kpis,
       topEvents,
       metrics,
-      detailColumns,
-      eventsDetail,
       isLoading,
       registrationsChart,
       statusChart,

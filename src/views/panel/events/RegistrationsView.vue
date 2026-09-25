@@ -371,7 +371,7 @@ export default {
     let columns = [];
 
     const url = 'https://apis.madautomate.cloud/webhook/1090f10d-aafd-4c67-bc72-c3365187d6df';
-
+    const url_events = 'https://apis.madautomate.cloud/webhook/9ff4a876-1944-4643-b41d-37450e37e3e2';
     // Computed properties para estadísticas
     const confirmedCount = computed(() => 
       registrations.value.filter(r => r.status === 'Creado').length
@@ -390,27 +390,14 @@ export default {
       try {
         isLoading.value = true;
         // Aquí iría tu llamada al API
-        // const response = await axios.get('/api/events');
-        // events.value = response.data;
+        const response = await axios.post(url_events, { action: "dataforms" }, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
         
-        // Datos de ejemplo
-        events.value = [
-          {
-            id: 1,
-            name: 'Maratón Buenos Aires 2025',
-            event_dates: [
-              { id: 'session_001', description: '42K Elite' },
-              { id: 'session_002', description: '21K' }
-            ]
-          },
-          {
-            id: 2,
-            name: 'Evento Corporativo Anual',
-            event_dates: [
-              { id: 'session_003', description: 'Cena de Gala' }
-            ]
-          }
-        ];
+        const data = await response.data;
+        console.log('data', data);
+        events.value = data;
+
       } catch (error) {
         triggerToast('Error', 'No se pudieron cargar los eventos', false);
       } finally {
@@ -775,8 +762,8 @@ export default {
 
 
     onMounted(async () => {
-      await loadEvents();
       await getToken();
+      await loadEvents();
     });
 
     return {
