@@ -569,7 +569,7 @@ export default {
 }
 
 .custom-table thead th {
-  padding: 1rem 1.25rem;
+  padding: 0.5rem 1rem;
   font-weight: 700;
   font-size: 0.875rem;
   color: #374151;
@@ -637,7 +637,7 @@ export default {
 } */
 
 .custom-table tbody td {
-  padding: 1rem 1.25rem;
+  padding: 0.8rem;
   color: #1f2937;
   font-size: 0.9rem;
   vertical-align: middle;
@@ -840,8 +840,8 @@ export default {
   }
 
   .custom-table thead th {
-    padding: 0.75rem 1rem;
-    font-size: 0.8rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
   }
 
   .custom-table tbody td {

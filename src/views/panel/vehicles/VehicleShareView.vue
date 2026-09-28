@@ -798,7 +798,7 @@ async function shareVehicle(vehicle) {
     const lineHeight = 5
 
     // Columna 2: Marca, modelo, versión y año
-    const titleText = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year || ''}`
+    const titleText = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''}`
 
     doc.setFontSize(14)
     doc.setFont(undefined, 'bold')

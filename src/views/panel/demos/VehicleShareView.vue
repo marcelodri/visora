@@ -1158,7 +1158,7 @@ async function shareViaWhatsApp() {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1050;
+  z-index: 2050;
   display: flex;
   align-items: flex-start;
   justify-content: center;

@@ -524,18 +524,18 @@ const router = createRouter({
 
         // Agente de Análisis de Datos
         {
-          path: 'agent',
-          name: 'agent',
-          redirect: '/panel/agent/data-analysis',
-          meta: { category: 'agent', icon: '<i class="bi bi-robot"></i>' },
+          path: 'agents',
+          name: 'agents',
+          redirect: '/panel/agents/data-analysis',
+          meta: { category: 'agents', icon: '<i class="bi bi-robot"></i>' },
           children: [
             {
               path: 'data-analysis',
               name: 'agent-data-analysis',
-              component: () => import('@/views/panel/agent/DataAgentView.vue'),
+              component: () => import('@/views/panel/agents/DataAgentView.vue'),
               meta: {
                 requiresAuth: true,
-                category: 'agent',
+                category: 'agents',
                 label: 'Agente de Datos'
               }
             }

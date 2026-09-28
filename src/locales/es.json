@@ -29,7 +29,7 @@
         "table_thead_actions": "Acciones"
     },
     "agent_view": {
-        "title": "Agente de Análisis de Leads",
+        "title": "Agente de Análisis de Leads abiertos",
         "subtitle": "Preguntale a tus datos en lenguaje natural",
         "clear": "Limpiar conversación",
         "clear_title": "¿Limpiar conversación?",
@@ -106,7 +106,7 @@
         "vehicles-share": "Nuevo PDF",
         "admin-users": "Gestión de Usuarios",
         "users": "Usuarios",
-        "agent-data-analysis": "Análisis de Leads"
+        "agent-data-analysis": "Análisis de Leads abiertos"
     },
     "business_type":{
         "name": "Nombre",

@@ -15,7 +15,7 @@
                     
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-12 col-xl-10 offset-xl-2 pl-xl-10">
+                            <div class="col-12 col-xl-11 offset-xl-1 pl-xl-10">
                                 <router-view /> <!-- Renderizará las vistas hijas -->
                             </div>
                         </div>

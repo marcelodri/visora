@@ -80,7 +80,8 @@
   color: #3939ff!important; /* Color para el enlace que coincide exactamente */
 }
 
-.link-exact-active, .router-link-active {
+.link-exact-active, 
+.router-link-active {
   font-weight: bold;
   color: #3939ff !important; /* Color para el enlace que coincide exactamente */
   border-left: 4px solid #3939ff !important;
