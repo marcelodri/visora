@@ -676,9 +676,9 @@ export default {
 <style scoped>
 .sidebar-root {
   --sidebar-primary: #007bff;
-  --sidebar-primary-dark: #0056b3;
+  --sidebar-primary-dark: #3939ff;
   --sidebar-rail-width: 90px;
-  --sidebar-expanded-width: 288px;
+  --sidebar-expanded-width: 300px;
   --sidebar-header-height: 72px;
   --sidebar-surface: #ffffff;
   --sidebar-text: #374151;
@@ -906,9 +906,9 @@ export default {
 .sidebar-link:hover .sidebar-link__icon,
 .sidebar-link.active .sidebar-link__icon {
   color: #fff;
-  background: linear-gradient(145deg, var(--sidebar-primary), var(--sidebar-primary-dark));
+  background: #3939ff !important;
   border-color: transparent;
-  box-shadow: 0 7px 14px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
 }
 
@@ -923,7 +923,7 @@ export default {
   min-width: 0;
   overflow: hidden;
   flex: 1;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 650;
   text-overflow: ellipsis;
   opacity: 0;
@@ -993,7 +993,7 @@ export default {
   gap: 8px;
   color: #596579;
   border-radius: 9px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   line-height: 1.25;
   text-decoration: none;

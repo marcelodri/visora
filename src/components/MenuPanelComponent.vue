@@ -400,12 +400,12 @@ export default {
   place-items: center;
   flex: 0 0 auto;
   color: #fff;
-  background: linear-gradient(145deg, var(--header-primary), var(--header-primary-dark));
+  background: #3939ff !important;
   border-radius: 10px;
   font-size: 19px;
   font-weight: 800;
   line-height: 1;
-  box-shadow: 0 7px 16px rgba(0, 123, 255, 0.22);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
 }
 
 .brand__name {
@@ -500,10 +500,10 @@ export default {
   place-items: center;
   flex: 0 0 auto;
   color: #fff;
-  background: linear-gradient(145deg, var(--header-primary), var(--header-primary-dark));
+  background: #3939ff !important;
   font-weight: 750;
   text-transform: uppercase;
-  box-shadow: 0 7px 16px rgba(0, 123, 255, 0.18);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
 }
 
 .user-avatar {

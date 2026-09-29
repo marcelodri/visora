@@ -393,20 +393,7 @@ const router = createRouter({
                 category: 'rewards',
                 label: 'Pilot Post'
               }
-            },
-            {
-              path: 'logs',
-              name: 'rewards-logs',
-              component: () => import('@/views/panel/rewards/LogsView.vue'),
-              meta: {
-                requiresAuth: true,
-                category: 'rewards',
-                label: 'Pilot Post'
-              }
-            }
-
-            
-          ]
+            }]
         },
         
         // Demos
@@ -557,6 +544,16 @@ const router = createRouter({
                 requiresAuth: true,
                 category: 'admin',
                 label: 'Gestión de Usuarios'
+              }
+            },
+            {
+              path: 'logs',
+              name: 'rewards-logs',
+              component: () => import('@/views/panel/rewards/LogsView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'admin',
+                label: 'Logs'
               }
             }
           ]

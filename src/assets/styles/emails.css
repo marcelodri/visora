@@ -287,6 +287,10 @@
   margin-top: 8px;
 }
 
+.template-meta .btn {
+  padding: 4px 8px;
+}
+
 .var-chip {
   background: rgba(57, 57, 255, 0.08);
   color: #3939ff;

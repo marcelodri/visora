@@ -478,7 +478,7 @@ export default {
         await axios.post(urlAPI, payload, {
           headers: { Authorization: `Bearer ${token.value}` },
         });
-        triggerToast("✅ Éxito", "Configuración guardada correctamente", true);
+        triggerToast("Actualizado", "Configuración guardada correctamente", true);
       } catch (error) {
         console.error(error);
         triggerToast("❌ Error", "No se pudo guardar la configuración", false);

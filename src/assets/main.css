@@ -38,22 +38,238 @@ a,
   }
 } */
 
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast-container {
+  z-index: 10000 !important;
+  padding: 1.25rem !important;
+}
+
+/* Base */
+.toast {
+  --toast-color: #3939ff;
+  --toast-soft: rgba(57, 57, 255, 0.08);
+
+  position: relative;
+  min-width: 340px;
+  max-width: 420px;
+
+  background: #ffffff !important;
+  color: #202124 !important;
+
+  border: 1px solid #e9e9ef !important;
+  border-left: 5px solid var(--toast-color) !important;
+  border-radius: 12px !important;
+
+  box-shadow:
+    0 12px 35px rgba(22, 23, 27, 0.12),
+    0 2px 8px rgba(22, 23, 27, 0.06) !important;
+
+  overflow: hidden;
+
+  animation: toast-enter 0.25s ease-out;
+}
+
+
+/* =========================================================
+   ESTADOS
+========================================================= */
+
 .toast.text-bg-success {
-  background-color: white!important;
-  border-left: 6px solid green;
-  color: #000!important
-}
-.toast .toast-header {
-  border: none;
-  color: #000!important;
-  padding-top: 16px!important;
-}
-.toast .toast-body {
-  padding-top: 0;
+  --toast-color: #198754;
+  --toast-soft: rgba(25, 135, 84, 0.09);
+
+  background: #ffffff !important;
+  color: #202124 !important;
 }
 
 .toast.text-bg-danger {
-  background-color: white!important;
-  border-left: 6px solid red;
-  color: #000!important
+  --toast-color: #dc3545;
+  --toast-soft: rgba(220, 53, 69, 0.09);
+
+  background: #ffffff !important;
+  color: #202124 !important;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.toast .toast-header {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  min-height: 52px;
+
+  padding: 14px 16px 6px 48px !important;
+
+  background: transparent !important;
+
+  border: none !important;
+
+  color: #202124 !important;
+}
+
+
+/* Icono circular */
+
+.toast .toast-header::before {
+  position: absolute;
+
+  left: 16px;
+  top: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  border-radius: 50%;
+
+  background: var(--toast-soft);
+  color: var(--toast-color);
+
+  font-family: "bootstrap-icons";
+  font-size: 13px;
+  font-weight: normal;
+}
+
+
+/* Success */
+
+.toast.text-bg-success .toast-header::before {
+  content: "\f26a";
+}
+
+
+/* Error */
+
+.toast.text-bg-danger .toast-header::before {
+  content: "\f33a";
+}
+
+
+/* Título */
+
+.toast .toast-header strong {
+  color: #202124 !important;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  letter-spacing: -0.01em;
+}
+
+
+/* =========================================================
+   CLOSE
+========================================================= */
+
+.toast .btn-close {
+  width: 10px;
+  height: 10px;
+
+  margin-left: 12px;
+
+  padding: 7px;
+
+  border-radius: 50%;
+
+  opacity: 0.4;
+
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.toast .btn-close:hover {
+  opacity: 0.8;
+
+  background-color: #f2f2f5;
+}
+
+
+/* =========================================================
+   BODY
+========================================================= */
+
+.toast .toast-body {
+  padding: 2px 44px 15px 48px !important;
+
+  color: #6f7078 !important;
+
+  font-size: 0.84rem;
+  font-weight: 400;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   DETALLE SUPERIOR
+========================================================= */
+
+.toast::after {
+  content: "";
+
+  position: absolute;
+
+  left: 5px;
+  bottom: 0;
+
+  width: calc(100% - 5px);
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    var(--toast-color),
+    transparent
+  );
+
+  opacity: 0.15;
+}
+
+
+/* =========================================================
+   ANIMACIÓN
+========================================================= */
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 576px) {
+
+  .toast-container {
+    left: 0 !important;
+    right: 0 !important;
+
+    padding: 12px !important;
+  }
+
+  .toast {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
 }

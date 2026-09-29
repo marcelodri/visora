@@ -490,7 +490,7 @@
                 const response = await axios.post(urlGetDataFooter,formData.value, {
                     headers: { Authorization: `Bearer ${token.value}` },
                 });
-                triggerToast('ok!', 'Datos guardados correctamente!', true);
+                triggerToast("Actualizado", "Configuración guardada correctamente", true);
             } catch (err) {
                 console.error(err);
                 triggerToast('Error!', 'No se pudo guardar el footer.', false);

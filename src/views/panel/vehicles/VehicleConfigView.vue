@@ -818,7 +818,9 @@ async function saveConfig() {
     const data = await response.json()
     console.log('Respuesta de la API:', data)
 
-    showToastMsg('Éxito', 'Configuración guardada correctamente en la base de datos')
+    showToastMsg('Actualizado', 'Configuración guardada correctamente!')
+
+
     if (toastComponent.value) {
       toastComponent.value.showToas()
     }

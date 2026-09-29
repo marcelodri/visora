@@ -465,6 +465,7 @@
           });
           await fetchForms();
           closeModalForm();
+          triggerToast("Actualizado", "Configuración guardada correctamente", true);
         } catch (err) {
           console.error(err);
           triggerToast('Error!', 'No se pudo guardar el producto.', false);

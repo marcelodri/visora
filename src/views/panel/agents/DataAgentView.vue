@@ -2033,7 +2033,7 @@ export default {
   gap: var(--agent-space-4);
 }
 .agent-conversation {
-  min-height: 40vh;
+  min-height: 46vh;
   display: flex;
   flex-direction: column;
   gap: var(--agent-space-4);
@@ -2718,7 +2718,6 @@ export default {
   width: min(440px, calc(100vw - 18px));
   display: flex;
   flex-direction: column;
-  border-left: 1px solid rgba(21, 23, 36, 0.08);
   background: #f6f7fb;
   color: var(--agent-ink);
   box-shadow: -28px 0 70px rgba(16, 20, 41, 0.22);
