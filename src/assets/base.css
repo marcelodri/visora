@@ -449,6 +449,7 @@ label[for="fileLogo"] {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+  
 }
 
 .btn-add {

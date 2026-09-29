@@ -8,7 +8,7 @@
     </div>
 
     <!-- Loading inicial elegante -->
-    <div v-if="loading && !stock.length" class="text-center py-5">
+    <div v-if="loading && !stock.length" class="spinner-container text-center py-5">
       <div class="spinner-border mb-3" role="status">
         <span class="visually-hidden">Cargando...</span>
       </div>
@@ -24,7 +24,7 @@
       <small>{{ loadingMessage }}</small>
     </div>
 
-    <hr class="header-divider">
+    <hr v-if="loading && !stock.length"class="header-divider">
 
     <!-- Búsqueda y Filtros -->
     <div v-if="stock.length" class="card mb-4">
@@ -198,6 +198,7 @@
           v-for="page in totalDisplayPages"
           :key="page"
           @click="displayPage = page"
+          class="pagination"
           :class="['btn btn-sm', displayPage === page ? 'btn-primary' : 'btn-outline-primary']"
         >
           {{ page }}
@@ -510,7 +511,6 @@ async function getStock() {
     }
     
     currentPage.value = pageCount.value
-    console.log('stock', stock)
     showToastMsg("Éxito", `Se cargaron ${stock.value.length} vehículos en total`)
   } catch (err) {
     console.error('Error:', err)
@@ -2305,5 +2305,16 @@ onMounted(() => {
   .pdf-detail-value {
     text-align: left;
   }
+}
+
+.pagination.btn {
+  padding: 0.5rem 1rem;
+}
+.spinner-container {
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

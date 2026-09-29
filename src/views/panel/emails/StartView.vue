@@ -260,10 +260,6 @@ export default {
 </script>
 
 <style scoped>
-.settings-container {
-  max-width: 72rem;
-  margin: 0 auto;
-}
 
 .header-section {
   text-align: center;

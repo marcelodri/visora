@@ -1,16 +1,8 @@
 <template>
     <div>
         <footer>
-            <div class="container-fuild">
-                <div class="row">
-                    <div class="col-12 col-xl-6 offset-xl-1 text-start pl-5 pl-xl-15">
-                        <p class="ml-2 mb-0"><a target="_blank" href="https://madcoder.io/privacy_policy.html">Policita de privacidad</a></p>
-                    </div>
-                    <div class="col-12 col-xl-5 text-end pr-15 pr-xl-13">
-                        <p class="ml-2 mb-0">Support: <a href="mailto:team@madcoder.io">team@madcoder.io</a> | by <a target="_blank" href="https://madcoder.io">madcoder</a></p>
-                    </div>
-                </div>
-            </div>
+            <span><a target="_blank" href="https://madcoder.io/privacy_policy.html">Policita de privacidad</a></span>
+            <span>Support: <a href="mailto:team@madcoder.io">team@madcoder.io</a> | by <a target="_blank" href="https://madcoder.io">madcoder</a></span>
         </footer>
     </div>
 </template>
@@ -20,3 +12,13 @@ export default {
     name: "FooterComponent"
 }
 </script>
+<style scoped>
+footer {
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+}
+footer span {
+    margin: 0 0.5rem;
+}
+</style>

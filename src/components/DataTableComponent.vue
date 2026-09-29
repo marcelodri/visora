@@ -3,7 +3,7 @@
 
     <!-- Botón de descarga de Excel -->
     <button v-if="showDownloadButton" class="btn btn-excel" @click="downloadExcel">
-      <i class="bi bi-file-earmark-excel me-2"></i>
+      <i class="bi bi-file-earmark-excel"></i>
     </button>
     
     <!-- Campo de búsqueda -->
@@ -854,4 +854,5 @@ export default {
     gap: 0.25rem;
   }
 }
+
 </style>

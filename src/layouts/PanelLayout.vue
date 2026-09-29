@@ -17,13 +17,14 @@
                         <div class="row">
                             <div class="col-12 col-xl-11 offset-xl-1 pl-xl-10">
                                 <router-view /> <!-- Renderizará las vistas hijas -->
+                                <FooterComponent />
                             </div>
                         </div>
                     </div>
                 </div>                
             </div>
         </div>
-        <FooterComponent />
+        
     </div>
     
 </template>
@@ -119,9 +120,16 @@ export default {
 
 <style scoped lang="scss">
 #main { padding-top: 80px; .container-fluid {min-height: 75vh}}
+.pl-xl-10 {
+    padding-right: 2.5rem !important;
+}
 
 @media(max-width: 769px) {
     #main { padding-top: 60px;}
+    .pl-xl-10 {
+        padding-right: 0rem !important;
+        padding-left: 0rem!important;
+    }
 }
 
 

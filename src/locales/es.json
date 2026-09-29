@@ -122,14 +122,99 @@
     "marketing.title": "Una Plataforma que Crece con tu Negocio<br>Módulos Inteligentes, Soluciones Adaptables",
     "marketing.message": "Visora es la plataforma modular que se adapta a tu negocio. <br>Empezá con Landing Pages y Formularios, sumá eventos y expandí con recompensas. Escalá solo cuando lo necesites, con todo integrado a Pilot.",
     "home": {
-        "title": "Tu plataforma digital que crece con tu negocio",
-        "subtitle": "Centralizá tus procesos, automatizá captación, eventos y recompensas, y sumá nuevos módulos a medida que tu empresa lo necesita.",
-        "subtitle2": "Gestiona tus datos con facilidad, sin necesidad de ser un experto",
-        "text1": "Imagina tener el poder de ver y analizar toda la información de tu base de datos de manera rápida y sencilla, en un solo lugar. <br>Con nuestra plataforma, puedes conectar cualquier base de datos, generar filtros personalizados, crear reportes y almacenarlos para futuras consultas. <br>Todo en una interfaz intuitiva y sin complicaciones.",
-        "text2": "Conexión instantánea a cualquier base de datos. <br>Filtros personalizados para consultas específicas que puedes guardar y reutilizar. <br>Generación de reportes rápidos y almacenamiento para visualizar datos cuando los necesites. <br>Accesibilidad desde cualquier dispositivo: <br>trabaja desde donde estés.",
-        "text3": "Nuestra plataforma está diseñada para que cualquier usuario, sin importar su experiencia técnica, pueda obtener el máximo valor de sus datos. Empieza a transformar tus datos hoy mismo.<br><br>¡Prueba nuestra plataforma gratis!",
-        "login": "Ingresar"
+    "eyebrow": "Una plataforma, múltiples soluciones",
+    "title": "Una plataforma modular que crece con tu negocio",
+    "subtitle": "Centralizá la captación, los eventos, las recompensas y el análisis de datos en un solo lugar. Activá sólo los módulos que necesitás y sumá nuevas capacidades cuando tu operación crezca.",
+    "actions": {
+      "explore": "Explorar módulos",
+      "how_it_works": "Cómo funciona"
     },
+    "benefits": {
+      "modular": "Implementación gradual",
+      "integrated": "Todo conectado",
+      "simple": "Sin complejidad técnica"
+    },
+    "preview": {
+      "title": "Centro de operaciones",
+      "status": "En línea",
+      "leads": "Leads activos",
+      "events": "Eventos",
+      "automations": "Automatizaciones",
+      "performance": "Rendimiento general",
+      "last_days": "Últimos 7 días",
+      "activity": "Actividad reciente",
+      "new_form": "Nuevo formulario publicado",
+      "agent_query": "Consulta analizada por IA",
+      "just_now": "Ahora mismo",
+      "minutes_ago": "Hace 8 minutos",
+      "ai_ready": "Agente de datos listo",
+      "ai_description": "Consultá en lenguaje natural",
+      "synchronized": "Datos sincronizados",
+      "updated_now": "Actualizados recientemente"
+    },
+    "stats": {
+      "modules": {
+        "title": "Módulos conectados",
+        "text": "Activá sólo las herramientas que necesitás."
+      },
+      "data": {
+        "title": "Información centralizada",
+        "text": "Una única visión de clientes, acciones y resultados."
+      },
+      "scale": {
+        "title": "Crecimiento sin fricción",
+        "text": "Sumá capacidades sin rehacer tu operación."
+      }
+    },
+    "modules_section": {
+      "eyebrow": "Capacidades",
+      "title": "Empezá por un módulo y construí desde ahí",
+      "subtitle": "Visora reúne herramientas que trabajan en conjunto. Podés comenzar con una necesidad puntual y ampliar la plataforma cuando tu negocio lo requiera."
+    },
+    "modules": {
+      "capture": {
+        "title": "Captación digital",
+        "text": "Creá landing pages y formularios profesionales para captar oportunidades sin depender de desarrollos adicionales."
+      },
+      "events": {
+        "title": "Gestión de eventos",
+        "text": "Administrá inscripciones, accesos por QR, comunicaciones y seguimiento desde un mismo flujo."
+      },
+      "rewards": {
+        "title": "Recompensas y fidelización",
+        "text": "Definí reglas, registrá ventas y acompañá la relación con tus clientes con experiencias más relevantes."
+      },
+      "data": {
+        "title": "Datos e inteligencia artificial",
+        "text": "Consultá leads y resultados en lenguaje natural, generá reportes y encontrá información accionable más rápido."
+      }
+    },
+    "process": {
+      "eyebrow": "Crecimiento ordenado",
+      "title": "Una plataforma que acompaña cada etapa",
+      "subtitle": "No necesitás implementar todo desde el primer día. Configurá una base simple, conectá tus datos y sumá nuevos módulos a medida que aparecen nuevas necesidades.",
+      "note": "Cada módulo conserva una experiencia consistente y comparte la misma información central, evitando procesos aislados.",
+      "steps": {
+        "first": {
+          "title": "Elegí el punto de partida",
+          "text": "Comenzá por captación, eventos, recompensas o análisis de datos."
+        },
+        "second": {
+          "title": "Conectá tu operación",
+          "text": "Unificá información, automatizaciones y seguimiento en una sola plataforma."
+        },
+        "third": {
+          "title": "Escalá cuando lo necesites",
+          "text": "Incorporá nuevas capacidades sin perder continuidad ni duplicar trabajo."
+        }
+      }
+    },
+    "subtitle2": "Gestiona tus datos con facilidad, sin necesidad de ser un experto",
+    "text1": "Imagina tener el poder de ver y analizar toda la información de tu base de datos de manera rápida y sencilla, en un solo lugar.",
+    "text2": "Conexión instantánea, filtros personalizados y reportes disponibles desde cualquier dispositivo.",
+    "text3": "Nuestra plataforma está diseñada para que cualquier usuario pueda obtener más valor de sus datos.",
+    "login": "Ingresar"
+  },
     "download": "Descargar",
     "forms": {
         "title": "Páginas",

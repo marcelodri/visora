@@ -27,7 +27,7 @@
       </div>
 
       <div class="app-header__right">
-        <button
+        <!--<button
           type="button"
           class="icon-button theme-button"
           :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
@@ -40,7 +40,7 @@
           ></i>
         </button>
 
-        <span class="app-header__divider" aria-hidden="true"></span>
+        <span class="app-header__divider" aria-hidden="true"></span>-->
 
         <div ref="userMenu" class="user-menu">
           <button
