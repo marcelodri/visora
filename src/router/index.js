@@ -101,15 +101,6 @@ const router = createRouter({
               }
             },
             {
-              path: 'stock',
-              name: 'stock-pilot',
-              component: () => import('@/views/panel/pages/StockView.vue'),
-              meta: {
-                requiresAuth: true,
-                category: 'pages'
-              }
-            },
-            {
               path: 'header_footer',
               name: 'forms-header_footer',
               component: () => import('@/views/panel/pages/HeaderFooter.vue'),
@@ -484,16 +475,25 @@ const router = createRouter({
           path: 'vehicles',
           name: 'vehicles',
           redirect: '/panel/vehicles/vehicle-share',
-          meta: { category: 'pdf-vehicles', icon: '<i class="bi bi-car-front"></i>' },
+          meta: { category: 'stock', icon: '<i class="bi bi-car-front"></i>' },
           children: [
+            {
+              path: 'stock',
+              name: 'stock-pilot',
+              component: () => import('@/views/panel/pages/StockView.vue'),
+              meta: {
+                requiresAuth: true,
+                category: 'stock'
+              }
+            },
             {
               path: 'config',
               name: 'vehicles-config',
               component: () => import('@/views/panel/vehicles/VehicleConfigView.vue'),
               meta: {
                 requiresAuth: true,
-                category: 'pdf-vehicles',
-                label: 'Configuración'
+                category: 'stock',
+                label: 'Configuración PDF'
               }
             },
             {
@@ -502,7 +502,7 @@ const router = createRouter({
               component: () => import('@/views/panel/vehicles/VehicleShareView.vue'),
               meta: {
                 requiresAuth: true,
-                category: 'pdf-vehicles',
+                category: 'stock',
                 label: 'Compartir Vehículos'
               }
             }

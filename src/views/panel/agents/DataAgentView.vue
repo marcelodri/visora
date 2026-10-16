@@ -176,6 +176,7 @@
       >
         {{ remainingQueries }}
       </span>
+      
     </button>
 
     <Transition name="agent-backdrop">
@@ -225,6 +226,11 @@
               <div>
                 <span class="agent-panel-kicker">Consumo</span>
                 <h4>Consultas disponibles</h4>
+                <div class="agent-usage-details">
+                  <div>
+                    <span>Reset {{ limit_expires_at }}</span>
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
@@ -492,7 +498,8 @@ export default {
       agentPanelSettingsKey: 'agent_panel_settings',
       lastSyncStorageKey: 'agent_last_sync_at',
       lastSyncAt: null,
-      previousBodyOverflow: ''
+      previousBodyOverflow: '',
+      limit_expires_at: ''
     }
   },
   mounted() {
@@ -925,6 +932,7 @@ export default {
         this.agent_name = payload.name || this.agent_name || 'Agente de datos'
         this.query_limit = Math.max(0, Number(payload.query_limit) || 0)
         this.queries_used = Math.max(0, Number(payload.queries_used) || 0)
+        this.limit_expires_at = payload.limit_expires_at || ''
       } catch (error) {
         console.error('Error cargando información del agente:', error)
         if (!silent) {

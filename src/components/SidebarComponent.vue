@@ -17,7 +17,6 @@
       :class="{
         'sidebar--open': isVisible,
         'sidebar--expanded': isExpanded,
-        'sidebar--pinned': isPinned,
       }"
       aria-label="Navegación principal"
       @mouseenter="handleMouseEnter"
@@ -27,227 +26,300 @@
       @wheel="handleSidebarWheel"
       @keydown.esc="handleEscape"
     >
-      <div class="sidebar__mobile-header d-md-none">
-        <div>
-          <span class="sidebar__mobile-eyebrow">Navegación</span>
-          <strong>Menú principal</strong>
-        </div>
-        <button
-          type="button"
-          class="sidebar__close-button"
-          aria-label="Cerrar menú"
-          @click="$emit('closeSidebar')"
-        >
-          <i class="bi bi-x-lg" aria-hidden="true"></i>
-        </button>
-      </div>
+      <div v-if="!isMobile" class="sidebar__desktop-rail d-none d-md-flex">
+        <!-- <div class="sidebar__rail-top">
+          <span class="sidebar__rail-caption">Menu</span>
+        </div> -->
 
-      <div class="sidebar__desktop-tools d-none d-md-flex">
-        <span class="sidebar__section-title">Navegación</span>
-        <button
-          type="button"
-          class="sidebar__pin-button"
-          :class="{ 'is-active': isPinned }"
-          :aria-pressed="String(isPinned)"
-          :aria-label="isPinned ? 'Desfijar menú lateral' : 'Fijar menú lateral abierto'"
-          :title="isPinned ? 'Desfijar menú' : 'Fijar menú abierto'"
-          @click="togglePinned"
-        >
-          <i :class="isPinned ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle'" aria-hidden="true"></i>
-        </button>
-      </div>
-
-      <nav ref="navigation" class="sidebar__navigation" aria-label="Secciones de la aplicación">
-        <ul class="sidebar__list">
-          <!-- <li class="sidebar__item">
-            <router-link
-              :to="{ name: 'panelHome' }"
-              class="sidebar-link"
-              :class="{ active: isHomeActive }"
-              :title="!isExpanded ? menuLabelText('home', 'Inicio') : null"
-              @click="handleNavigation"
+        <nav class="sidebar__rail-navigation" aria-label="Accesos rápidos de navegación">
+          <ul class="sidebar__list sidebar__list--rail">
+            <li
+              v-for="category in groupedMenu"
+              :key="`rail-${category.name}`"
+              class="sidebar__item sidebar__item--rail"
             >
-              <span class="sidebar-link__icon">
-                <i class="bi bi-house-door" aria-hidden="true"></i>
-              </span>
-              <span
-                class="sidebar-link__label"
-                v-html="menuLabelHtml('home', 'Inicio')"
-              ></span>
-              <span v-if="isHomeActive" class="sidebar-link__active-dot" aria-hidden="true"></span>
-            </router-link>
-          </li>
-
-          <li v-if="groupedMenu.length" class="sidebar__separator" aria-hidden="true">
-            <span></span>
-          </li> -->
-
-          <li
-            v-for="category in groupedMenu"
-            :key="category.name"
-            class="sidebar__item sidebar__item--category"
-          >
-            <button
-              type="button"
-              class="sidebar-link sidebar-link--category"
-              :class="{
-                active: isCategoryActive(category),
-                'is-open': openDropdown === category.name,
-              }"
-              :title="!isExpanded ? categoryLabelText(category.name) : null"
-              :aria-expanded="String(openDropdown === category.name)"
-              :aria-controls="categoryId(category.name)"
-              @click="toggleDropdown(category.name)"
-            >
-              <span class="sidebar-link__icon" v-html="category.icon" aria-hidden="true"></span>
-              <span
-                class="sidebar-link__label"
-                v-html="categoryLabelHtml(category.name)"
-              ></span>
-              <i class="bi bi-chevron-right sidebar-link__chevron" aria-hidden="true"></i>
-              <!-- <span
-                v-if="isCategoryActive(category)"
-                class="sidebar-link__active-dot"
-                aria-hidden="true"
-              ></span> -->
-            </button>
-
-            <Transition name="sidebar-submenu">
-              <ul
-                v-show="openDropdown === category.name && isExpanded"
-                :id="categoryId(category.name)"
-                class="sidebar-submenu"
+              <button
+                type="button"
+                class="sidebar-link sidebar-link--rail"
+                :class="{
+                  active: isDesktopRailActive(category.name, category),
+                  'is-open': openDropdown === category.name,
+                }"
+                :title="categoryLabelText(category.name)"
+                :aria-label="categoryLabelText(category.name)"
+                :aria-expanded="String(openDropdown === category.name)"
+                @mouseenter="openDesktopCategory(category.name, $event)"
+                @focus="openDesktopCategory(category.name, $event)"
+                @click="selectDesktopCategory(category.name, $event)"
               >
-                <li
-                  v-for="route in category.routes"
-                  :key="route.name"
-                  class="sidebar-submenu__item"
-                >
-                  <router-link
-                    :to="route.path"
-                    class="sidebar-submenu__link"
-                    :class="{ active: isRouteActive(route.path) }"
-                    @click="handleNavigation"
-                  >
-                    <span class="sidebar-submenu__icon" aria-hidden="true">
-                      <span v-if="route.icon" v-html="route.icon"></span>
-                      <i v-else class="bi bi-dot"></i>
-                    </span>
-                    <span
-                      class="sidebar-submenu__label"
-                      v-html="menuLabelHtml(route.name, humanize(route.name))"
-                    ></span>
-                  </router-link>
-                </li>
-              </ul>
-            </Transition>
-          </li>
-        </ul>
+                <span class="sidebar-link__icon" v-html="category.icon" aria-hidden="true"></span>
+              </button>
+            </li>
+          </ul>
+        </nav>
 
-        <div v-if="!groupedMenu.length" class="sidebar__empty" :class="{ 'is-visible': isExpanded }">
-          <span class="sidebar__empty-icon"><i class="bi bi-shield-check"></i></span>
-          <div>
-            <strong>Sin módulos adicionales</strong>
-            <small>Tu usuario no tiene más secciones habilitadas.</small>
-          </div>
-        </div>
-      </nav>
-
-      <div class="sidebar__footer">
-        <div v-if="fixedAdminItem" class="sidebar-admin">
-          <template v-if="fixedAdminItem.type === 'category'">
-            <Transition name="sidebar-submenu">
-              <ul
-                v-show="openDropdown === fixedAdminItem.name && isExpanded"
-                :id="categoryId(`fixed-${fixedAdminItem.name}`)"
-                class="sidebar-admin-submenu"
-              >
-                <li
-                  v-for="route in fixedAdminItem.routes"
-                  :key="route.name"
-                  class="sidebar-submenu__item"
-                >
-                  <router-link
-                    :to="route.path"
-                    class="sidebar-submenu__link"
-                    :class="{ active: isRouteActive(route.path) }"
-                    @click="handleNavigation"
-                  >
-                    <span class="sidebar-submenu__icon" aria-hidden="true">
-                      <span v-if="route.icon" v-html="route.icon"></span>
-                      <i v-else class="bi bi-dot"></i>
-                    </span>
-                    <span
-                      class="sidebar-submenu__label"
-                      v-html="menuLabelHtml(route.name, humanize(route.name))"
-                    ></span>
-                  </router-link>
-                </li>
-              </ul>
-            </Transition>
-
-            <button
-              type="button"
-              class="sidebar-link sidebar-link--admin"
-              :class="{
-                active: isCategoryActive(fixedAdminItem),
-                'is-open': openDropdown === fixedAdminItem.name,
-              }"
-              :title="!isExpanded ? categoryLabelText(fixedAdminItem.name) : null"
-              :aria-expanded="String(openDropdown === fixedAdminItem.name)"
-              :aria-controls="categoryId(`fixed-${fixedAdminItem.name}`)"
-              @click="toggleDropdown(fixedAdminItem.name)"
-            >
-              <span class="sidebar-link__icon" v-html="fixedAdminItem.icon" aria-hidden="true"></span>
-              <span
-                class="sidebar-link__label"
-                v-html="categoryLabelHtml(fixedAdminItem.name)"
-              ></span>
-              <i class="bi bi-chevron-up sidebar-link__chevron" aria-hidden="true"></i>
-              <!-- <span
-                v-if="isCategoryActive(fixedAdminItem)"
-                class="sidebar-link__active-dot"
-                aria-hidden="true"
-              ></span> -->
-            </button>
-          </template>
-
-          <router-link
-            v-else
-            :to="fixedAdminItem.path"
-            class="sidebar-link sidebar-link--admin"
-            :class="{ active: isRouteActive(fixedAdminItem.path) }"
-            :title="!isExpanded ? menuLabelText(fixedAdminItem.name, 'Admin') : null"
-            @click="handleNavigation"
+        <div v-if="fixedAdminItem" class="sidebar__rail-footer">
+          <button
+            type="button"
+            class="sidebar-link sidebar-link--rail sidebar-link--admin"
+            :class="{
+              active: isDesktopRailActive(fixedAdminItem.name, fixedAdminItem),
+              'is-open': openDropdown === fixedAdminItem.name,
+            }"
+            :title="
+              fixedAdminItem.type === 'category'
+                ? categoryLabelText(fixedAdminItem.name)
+                : menuLabelText(fixedAdminItem.name, 'Admin')
+            "
+            :aria-label="
+              fixedAdminItem.type === 'category'
+                ? categoryLabelText(fixedAdminItem.name)
+                : menuLabelText(fixedAdminItem.name, 'Admin')
+            "
+            :aria-expanded="String(openDropdown === fixedAdminItem.name)"
+            @mouseenter="openDesktopCategory(fixedAdminItem.name, $event)"
+            @focus="openDesktopCategory(fixedAdminItem.name, $event)"
+            @click="selectDesktopCategory(fixedAdminItem.name, $event)"
           >
             <span class="sidebar-link__icon" v-html="fixedAdminItem.icon" aria-hidden="true"></span>
-            <span
-              class="sidebar-link__label"
-              v-html="menuLabelHtml(fixedAdminItem.name, 'Admin')"
-            ></span>
-            <span
-              v-if="isRouteActive(fixedAdminItem.path)"
-              class="sidebar-link__active-dot"
-              aria-hidden="true"
-            ></span>
-          </router-link>
+          </button>
         </div>
-
-        <button
-          type="button"
-          class="sidebar__mobile-collapse d-md-none"
-          @click="$emit('closeSidebar')"
-        >
-          <i class="bi bi-arrow-left"></i>
-          <span>Cerrar menú</span>
-        </button>
       </div>
+
+      <Transition :name="isMobile ? 'sidebar-overlay' : 'sidebar-floating-panel'">
+        <div
+          ref="contentPanel"
+          v-show="isMobile || isExpanded"
+          class="sidebar__content-panel"
+          :class="{
+            'sidebar__content-panel--floating': !isMobile,
+            'is-visible': isMobile || isExpanded,
+          }"
+          :style="floatingPanelStyle"
+          @mouseenter="handlePanelEnter"
+          @mouseleave="handlePanelLeave"
+        >
+          <div class="sidebar__mobile-header d-md-none">
+            <div>
+              <span class="sidebar__mobile-eyebrow">Navegación</span>
+              <strong>Menú principal</strong>
+            </div>
+            <button
+              type="button"
+              class="sidebar__close-button"
+              aria-label="Cerrar menú"
+              @click="$emit('closeSidebar')"
+            >
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="sidebar__desktop-tools d-none d-md-flex">
+            <div class="sidebar__desktop-heading">
+              <span class="sidebar__section-title">Navegación</span>
+              <strong>{{ desktopPanelHeading }}</strong>
+            </div>
+          </div>
+
+          <template v-if="isMobile">
+            <nav ref="navigation" class="sidebar__navigation" aria-label="Secciones de la aplicación">
+              <ul class="sidebar__list">
+                <li
+                  v-for="category in groupedMenu"
+                  :key="category.name"
+                  class="sidebar__item sidebar__item--category"
+                >
+                  <button
+                    type="button"
+                    class="sidebar-link sidebar-link--category"
+                    :class="{
+                      active: isCategoryActive(category),
+                      'is-open': openDropdown === category.name,
+                    }"
+                    :title="!isExpanded ? categoryLabelText(category.name) : null"
+                    :aria-expanded="String(openDropdown === category.name)"
+                    :aria-controls="categoryId(category.name)"
+                    @click="toggleDropdown(category.name)"
+                  >
+                    <span class="sidebar-link__icon" v-html="category.icon" aria-hidden="true"></span>
+                    <span
+                      class="sidebar-link__label"
+                      v-html="categoryLabelHtml(category.name)"
+                    ></span>
+                    <i class="bi bi-chevron-right sidebar-link__chevron" aria-hidden="true"></i>
+                  </button>
+
+                  <Transition name="sidebar-submenu">
+                    <ul
+                      v-show="openDropdown === category.name && isExpanded"
+                      :id="categoryId(category.name)"
+                      class="sidebar-submenu"
+                    >
+                      <li
+                        v-for="route in category.routes"
+                        :key="route.name"
+                        class="sidebar-submenu__item"
+                      >
+                        <router-link
+                          :to="route.path"
+                          class="sidebar-submenu__link"
+                          :class="{ active: isRouteActive(route.path) }"
+                          @click="handleNavigation"
+                        >
+                          <span class="sidebar-submenu__icon" aria-hidden="true">
+                            <span v-if="route.icon" v-html="route.icon"></span>
+                            <i v-else class="bi bi-dot"></i>
+                          </span>
+                          <span
+                            class="sidebar-submenu__label"
+                            v-html="menuLabelHtml(route.name, humanize(route.name))"
+                          ></span>
+                        </router-link>
+                      </li>
+                    </ul>
+                  </Transition>
+                </li>
+              </ul>
+
+              <div v-if="!groupedMenu.length" class="sidebar__empty" :class="{ 'is-visible': isExpanded }">
+                <span class="sidebar__empty-icon"><i class="bi bi-shield-check"></i></span>
+                <div>
+                  <strong>Sin módulos adicionales</strong>
+                  <small>Tu usuario no tiene más secciones habilitadas.</small>
+                </div>
+              </div>
+            </nav>
+
+            <div class="sidebar__footer">
+              <div v-if="fixedAdminItem" class="sidebar-admin">
+                <template v-if="fixedAdminItem.type === 'category'">
+                  <Transition name="sidebar-submenu">
+                    <ul
+                      v-show="openDropdown === fixedAdminItem.name && isExpanded"
+                      :id="categoryId(`fixed-${fixedAdminItem.name}`)"
+                      class="sidebar-admin-submenu"
+                    >
+                      <li
+                        v-for="route in fixedAdminItem.routes"
+                        :key="route.name"
+                        class="sidebar-submenu__item"
+                      >
+                        <router-link
+                          :to="route.path"
+                          class="sidebar-submenu__link"
+                          :class="{ active: isRouteActive(route.path) }"
+                          @click="handleNavigation"
+                        >
+                          <span class="sidebar-submenu__icon" aria-hidden="true">
+                            <span v-if="route.icon" v-html="route.icon"></span>
+                            <i v-else class="bi bi-dot"></i>
+                          </span>
+                          <span
+                            class="sidebar-submenu__label"
+                            v-html="menuLabelHtml(route.name, humanize(route.name))"
+                          ></span>
+                        </router-link>
+                      </li>
+                    </ul>
+                  </Transition>
+
+                  <button
+                    type="button"
+                    class="sidebar-link sidebar-link--admin"
+                    :class="{
+                      active: isCategoryActive(fixedAdminItem),
+                      'is-open': openDropdown === fixedAdminItem.name,
+                    }"
+                    :title="!isExpanded ? categoryLabelText(fixedAdminItem.name) : null"
+                    :aria-expanded="String(openDropdown === fixedAdminItem.name)"
+                    :aria-controls="categoryId(`fixed-${fixedAdminItem.name}`)"
+                    @click="toggleDropdown(fixedAdminItem.name)"
+                  >
+                    <span class="sidebar-link__icon" v-html="fixedAdminItem.icon" aria-hidden="true"></span>
+                    <span
+                      class="sidebar-link__label"
+                      v-html="categoryLabelHtml(fixedAdminItem.name)"
+                    ></span>
+                    <i class="bi bi-chevron-up sidebar-link__chevron" aria-hidden="true"></i>
+                  </button>
+                </template>
+
+                <router-link
+                  v-else
+                  :to="fixedAdminItem.path"
+                  class="sidebar-link sidebar-link--admin"
+                  :class="{ active: isRouteActive(fixedAdminItem.path) }"
+                  :title="!isExpanded ? menuLabelText(fixedAdminItem.name, 'Admin') : null"
+                  @click="handleNavigation"
+                >
+                  <span class="sidebar-link__icon" v-html="fixedAdminItem.icon" aria-hidden="true"></span>
+                  <span
+                    class="sidebar-link__label"
+                    v-html="menuLabelHtml(fixedAdminItem.name, 'Admin')"
+                  ></span>
+                  <span
+                    v-if="isRouteActive(fixedAdminItem.path)"
+                    class="sidebar-link__active-dot"
+                    aria-hidden="true"
+                  ></span>
+                </router-link>
+              </div>
+
+              <button
+                type="button"
+                class="sidebar__mobile-collapse d-md-none"
+                @click="$emit('closeSidebar')"
+              >
+                <i class="bi bi-arrow-left"></i>
+                <span>Cerrar menú</span>
+              </button>
+            </div>
+          </template>
+
+          <template v-else>
+            <nav ref="navigation" class="sidebar__navigation" aria-label="Secciones de la categoría activa">
+              <div v-if="desktopPanelCategory" class="sidebar-panel">
+                <ul :id="desktopPanelCategory.id" class="sidebar-submenu sidebar-submenu--panel">
+                  <li
+                    v-for="route in desktopPanelCategory.routes"
+                    :key="route.name"
+                    class="sidebar-submenu__item"
+                  >
+                    <router-link
+                      :to="route.path"
+                      class="sidebar-submenu__link"
+                      :class="{ active: isRouteActive(route.path) }"
+                      @click="handleNavigation"
+                    >
+                      <span class="sidebar-submenu__icon" aria-hidden="true">
+                        <span v-if="route.icon" v-html="route.icon"></span>
+                        <i v-else class="bi bi-dot"></i>
+                      </span>
+                      <span
+                        class="sidebar-submenu__label"
+                        v-html="menuLabelHtml(route.name, humanize(route.name))"
+                      ></span>
+                    </router-link>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-else class="sidebar__empty is-visible">
+                <span class="sidebar__empty-icon"><i class="bi bi-hand-index-thumb"></i></span>
+                <div>
+                  <strong>Selecciona un módulo</strong>
+                  <small>Acércate a un ícono para ver solo las opciones de esa categoría.</small>
+                </div>
+              </div>
+            </nav>
+          </template>
+        </div>
+      </Transition>
     </aside>
   </div>
 </template>
 
 <script>
-const SIDEBAR_PIN_STORAGE_KEY = 'visora.sidebar.pinned';
 const MOBILE_BREAKPOINT = '(max-width: 767.98px)';
 const DEFAULT_ADMIN_ICON = '<i class="bi bi-shield-lock"></i>';
 
@@ -294,20 +366,67 @@ export default {
       openDropdown: null,
       allowedCategories: [],
       permissionsConfigured: false,
-      isPinned: false,
       isHovering: false,
       hasKeyboardFocus: false,
       isMobile: false,
       mediaQuery: null,
       previousBodyOverflow: '',
+      floatingPanelTop: 12,
+      closePanelTimer: null,
+      selectedDesktopItem: null,
     };
   },
   computed: {
     isExpanded() {
-      return this.isMobile || this.isPinned || this.isHovering || this.hasKeyboardFocus;
+      return this.isMobile || this.isHovering || this.hasKeyboardFocus;
     },
-    isHomeActive() {
-      return this.$route?.name === 'panelHome';
+    floatingPanelStyle() {
+      if (this.isMobile) {
+        return null;
+      }
+
+      return {
+        top: `${this.floatingPanelTop}px`,
+      };
+    },
+    desktopPanelCategory() {
+      const categories = [...this.groupedMenu];
+
+      if (this.fixedAdminItem?.type === 'category') {
+        categories.push(this.fixedAdminItem);
+      }
+
+      const category = categories.find((item) => item.name === this.openDropdown);
+      if (category) {
+        return {
+          id: this.categoryId(category.name),
+          icon: category.icon,
+          labelHtml: this.categoryLabelHtml(category.name),
+          labelText: this.categoryLabelText(category.name),
+          routes: category.routes,
+        };
+      }
+
+      if (this.fixedAdminItem?.type === 'route' && this.fixedAdminItem.name === this.openDropdown) {
+        return {
+          id: this.categoryId(`fixed-${this.fixedAdminItem.name}`),
+          icon: this.fixedAdminItem.icon,
+          labelHtml: this.menuLabelHtml(this.fixedAdminItem.name, 'Admin'),
+          labelText: this.menuLabelText(this.fixedAdminItem.name, 'Admin'),
+          routes: [
+            {
+              name: this.fixedAdminItem.name,
+              path: this.fixedAdminItem.path,
+              icon: this.fixedAdminItem.icon,
+            },
+          ],
+        };
+      }
+
+      return null;
+    },
+    desktopPanelHeading() {
+      return this.desktopPanelCategory?.labelText || 'Menú principal';
     },
   },
   watch: {
@@ -319,20 +438,20 @@ export default {
 
       if (this.isMobile && this.isVisible) {
         this.$emit('closeSidebar');
-      } else if (!this.isPinned && !this.isHovering) {
+      } else if (!this.isHovering) {
         this.hasKeyboardFocus = false;
       }
     },
   },
   mounted() {
     this.setupResponsiveState();
-    this.loadPinnedState();
     this.loadPermissions();
     this.loadMenu();
     this.syncActiveCategory();
     this.syncBodyScroll();
   },
   beforeUnmount() {
+    this.clearClosePanelTimer();
     this.teardownResponsiveState();
     this.restoreBodyScroll();
   },
@@ -358,43 +477,30 @@ export default {
     },
     handleBreakpointChange(event) {
       this.isMobile = event.matches;
+      this.clearClosePanelTimer();
       this.isHovering = false;
       this.hasKeyboardFocus = false;
+      this.floatingPanelTop = 12;
 
       if (!this.isMobile && this.isVisible) {
         this.$emit('closeSidebar');
       }
-
-      //this.syncBodyScroll();
-    },
-    loadPinnedState() {
-      try {
-        this.isPinned = localStorage.getItem(SIDEBAR_PIN_STORAGE_KEY) === 'true';
-      } catch (error) {
-        this.isPinned = false;
-      }
-    },
-    togglePinned() {
-      this.isPinned = !this.isPinned;
-
-      try {
-        localStorage.setItem(SIDEBAR_PIN_STORAGE_KEY, String(this.isPinned));
-      } catch (error) {
-        console.warn('No se pudo guardar el estado del sidebar:', error);
-      }
     },
     handleMouseEnter() {
-      if (!this.isMobile) this.isHovering = true;
-    },
-    handleMouseLeave() {
       if (this.isMobile) return;
 
-      this.isHovering = false;
+      this.clearClosePanelTimer();
+      this.isHovering = true;
+    },
+    handleMouseLeave(event) {
+      if (this.isMobile) return;
 
-      if (!this.isPinned) {
-        this.hasKeyboardFocus = false;
-        this.blurFocusedSidebarElement();
+      const nextElement = event?.relatedTarget;
+      if (nextElement && this.$refs.contentPanel?.contains(nextElement)) {
+        return;
       }
+
+      this.schedulePanelClose();
     },
     handleFocusIn() {
       if (!this.isMobile) this.hasKeyboardFocus = true;
@@ -416,6 +522,22 @@ export default {
       this.isHovering = false;
       this.hasKeyboardFocus = false;
       this.blurFocusedSidebarElement();
+    },
+    handlePanelEnter() {
+      if (this.isMobile) return;
+
+      this.clearClosePanelTimer();
+      this.isHovering = true;
+    },
+    handlePanelLeave(event) {
+      if (this.isMobile) return;
+
+      const nextElement = event?.relatedTarget;
+      if (nextElement && this.$refs.sidebar?.contains(nextElement)) {
+        return;
+      }
+
+      this.schedulePanelClose();
     },
     blurFocusedSidebarElement() {
       const activeElement = document.activeElement;
@@ -631,6 +753,27 @@ export default {
 
       return `sidebar-category-${normalized || 'menu'}`;
     },
+    openDesktopCategory(name, event) {
+      if (this.isMobile) return;
+
+      this.clearClosePanelTimer();
+      this.isHovering = true;
+      this.hasKeyboardFocus = true;
+      this.openDropdown = name;
+
+      this.$nextTick(() => {
+        this.updateFloatingPanelPosition(event?.currentTarget || event?.target);
+      });
+    },
+    selectDesktopCategory(name, event) {
+      if (this.isMobile) return;
+
+      this.selectedDesktopItem = name;
+      this.openDesktopCategory(name, event);
+    },
+    previewCategory(name, event) {
+      this.openDesktopCategory(name, event);
+    },
     toggleDropdown(name) {
       this.openDropdown = this.openDropdown === name ? null : name;
     },
@@ -643,6 +786,17 @@ export default {
     isCategoryActive(category) {
       return category.routes.some((route) => this.isRouteActive(route.path));
     },
+    isDesktopRailActive(name, item) {
+      if (this.selectedDesktopItem === name) {
+        return true;
+      }
+
+      if (item?.type === 'route') {
+        return this.isRouteActive(item.path);
+      }
+
+      return this.isCategoryActive(item);
+    },
     syncActiveCategory() {
       const categories = [...this.groupedMenu];
 
@@ -653,6 +807,13 @@ export default {
       const activeCategory = categories.find((category) => this.isCategoryActive(category));
       if (activeCategory) {
         this.openDropdown = activeCategory.name;
+        this.selectedDesktopItem = activeCategory.name;
+        return;
+      }
+
+      if (this.fixedAdminItem?.type === 'route' && this.isRouteActive(this.fixedAdminItem.path)) {
+        this.openDropdown = this.fixedAdminItem.name;
+        this.selectedDesktopItem = this.fixedAdminItem.name;
       }
     },
     handleNavigation() {
@@ -661,13 +822,41 @@ export default {
         return;
       }
 
-      if (!this.isPinned) {
-        this.hasKeyboardFocus = false;
+      this.hasKeyboardFocus = false;
 
-        window.requestAnimationFrame(() => {
-          this.blurFocusedSidebarElement();
-        });
+      window.requestAnimationFrame(() => {
+        this.blurFocusedSidebarElement();
+      });
+    },
+    clearClosePanelTimer() {
+      if (this.closePanelTimer) {
+        clearTimeout(this.closePanelTimer);
+        this.closePanelTimer = null;
       }
+    },
+    schedulePanelClose() {
+      this.clearClosePanelTimer();
+
+      this.closePanelTimer = window.setTimeout(() => {
+        this.isHovering = false;
+        this.hasKeyboardFocus = false;
+        this.closePanelTimer = null;
+      }, 120);
+    },
+    updateFloatingPanelPosition(triggerElement) {
+      if (this.isMobile || !triggerElement || !this.$refs.sidebar || !this.$refs.contentPanel) {
+        return;
+      }
+
+      const sidebarRect = this.$refs.sidebar.getBoundingClientRect();
+      const triggerRect = triggerElement.getBoundingClientRect();
+      const panelElement = this.$refs.contentPanel;
+      const panelHeight = panelElement.offsetHeight;
+      const minTop = 12;
+      const maxTop = Math.max(minTop, sidebarRect.height - panelHeight - 12);
+      const desiredTop = triggerRect.top - sidebarRect.top;
+
+      this.floatingPanelTop = Math.min(Math.max(desiredTop, minTop), maxTop);
     },
   },
 };
@@ -678,12 +867,13 @@ export default {
   --sidebar-primary: #007bff;
   --sidebar-primary-dark: #3939ff;
   --sidebar-rail-width: 90px;
-  --sidebar-expanded-width: 300px;
+  --sidebar-expanded-width: 320px;
   --sidebar-header-height: 72px;
   --sidebar-surface: #ffffff;
   --sidebar-text: #374151;
   --sidebar-muted: #788596;
   --sidebar-border: #e5e7eb;
+  --sidebar-floating-offset: 14px;
 }
 
 .sidebar-backdrop {
@@ -712,27 +902,132 @@ export default {
   background: var(--sidebar-surface);
   border-right: 1px solid var(--sidebar-border);
   box-shadow: 8px 0 28px rgba(15, 23, 42, 0.05);
-  overflow: hidden;
+  overflow: visible;
   overscroll-behavior: contain;
   touch-action: pan-y;
   transition:
-    width 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 260ms ease,
     transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .sidebar.sidebar--expanded {
-  width: var(--sidebar-expanded-width);
-  box-shadow: 14px 0 34px rgba(15, 23, 42, 0.11);
+  box-shadow: 10px 0 30px rgba(15, 23, 42, 0.08);
+}
+
+.sidebar__desktop-rail {
+  height: 100%;
+  padding: 12px 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar__rail-top {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__rail-caption {
+  color: #9aa5b4;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.sidebar__rail-navigation {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar__rail-navigation::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar__list,
+.sidebar-submenu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar__list--rail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar__item {
+  margin-bottom: 5px;
+}
+
+.sidebar__item--rail {
+  margin-bottom: 0;
+}
+
+.sidebar__rail-footer {
+  padding-top: 6px;
+}
+
+.sidebar__content-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sidebar__content-panel--floating {
+  position: absolute;
+  left: calc(100% + var(--sidebar-floating-offset));
+  width: min(var(--sidebar-expanded-width), calc(100vw - var(--sidebar-rail-width) - 44px));
+  max-height: calc(100% - 24px);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(229, 231, 235, 0.92);
+  border-radius: 24px;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px) scale(0.98);
+  transform-origin: left center;
+  height: fit-content;
+}
+
+.sidebar__content-panel--floating.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0) scale(1);
+}
+
+.sidebar__mobile-header {
+  display: none;
 }
 
 .sidebar__desktop-tools {
-  min-height: 54px;
-  padding: 9px 14px;
+  min-height: 72px;
+  padding: 16px 18px 14px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex: 0 0 auto;
   border-bottom: 1px solid #edf0f4;
+}
+
+.sidebar__desktop-heading {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__desktop-heading strong {
+  color: #122033;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .sidebar__section-title {
@@ -749,12 +1044,12 @@ export default {
   transition: opacity 160ms ease 60ms, transform 160ms ease 60ms;
 }
 
-.sidebar--expanded .sidebar__section-title {
+.sidebar__content-panel--floating.is-visible .sidebar__section-title,
+.sidebar__content-panel:not(.sidebar__content-panel--floating) .sidebar__section-title {
   opacity: 1;
   transform: translateX(0);
 }
 
-.sidebar__pin-button,
 .sidebar__close-button,
 .sidebar__mobile-collapse {
   padding: 0;
@@ -762,41 +1057,9 @@ export default {
   cursor: pointer;
 }
 
-.sidebar__pin-button {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  color: #7b8797;
-  background: #f6f8fb;
-  border: 1px solid #e7ebf0;
-  border-radius: 11px;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
-}
-
-.sidebar:not(.sidebar--expanded) .sidebar__pin-button {
-  margin: 0 auto;
-}
-
-.sidebar__pin-button:hover,
-.sidebar__pin-button.is-active {
-  color: var(--sidebar-primary);
-  background: #eef6ff;
-  border-color: rgba(0, 123, 255, 0.24);
-}
-
-.sidebar__pin-button:active {
-  transform: scale(0.95);
-}
-
 .sidebar__navigation {
   min-height: 0;
-  padding: 10px;
+  padding: 14px;
   flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
@@ -816,15 +1079,9 @@ export default {
   border-radius: 999px;
 }
 
-.sidebar__list,
-.sidebar-submenu {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.sidebar__item {
-  margin-bottom: 5px;
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar__separator {
@@ -862,6 +1119,14 @@ export default {
     box-shadow 170ms ease;
 }
 
+.sidebar-link--rail {
+  width: 100%;
+  min-height: 58px;
+  padding: 8px;
+  justify-content: center;
+  border-radius: 18px;
+}
+
 .sidebar-link:hover {
   color: var(--sidebar-primary-dark);
   background: #f3f8ff;
@@ -877,7 +1142,6 @@ export default {
 
 .sidebar-link:focus-visible,
 .sidebar-submenu__link:focus-visible,
-.sidebar__pin-button:focus-visible,
 .sidebar__close-button:focus-visible,
 .sidebar__mobile-collapse:focus-visible {
   outline: none;
@@ -933,7 +1197,8 @@ export default {
     transform 180ms ease;
 }
 
-.sidebar--expanded .sidebar-link__label {
+.sidebar__content-panel--floating.is-visible .sidebar-link__label,
+.sidebar__content-panel:not(.sidebar__content-panel--floating) .sidebar-link__label {
   opacity: 1;
   transform: translateX(0);
   transition-delay: 55ms;
@@ -950,7 +1215,8 @@ export default {
     transform 180ms ease;
 }
 
-.sidebar--expanded .sidebar-link__chevron {
+.sidebar__content-panel--floating.is-visible .sidebar-link__chevron,
+.sidebar__content-panel:not(.sidebar__content-panel--floating) .sidebar-link__chevron {
   opacity: 1;
   transform: translateX(0) rotate(0deg);
   transition-delay: 55ms;
@@ -971,7 +1237,8 @@ export default {
   transform: translateY(-50%);
 }
 
-.sidebar--expanded .sidebar-link__active-dot {
+.sidebar__content-panel--floating.is-visible .sidebar-link__active-dot,
+.sidebar__content-panel:not(.sidebar__content-panel--floating) .sidebar-link__active-dot {
   right: 1px;
 }
 
@@ -979,6 +1246,12 @@ export default {
   margin: 5px 4px 8px 20px;
   padding: 6px 7px 6px 22px;
   border-left: 1px solid #dce5ef;
+}
+
+.sidebar-submenu--panel {
+  margin: 0;
+  padding: 4px 0 0;
+  border-left: 0;
 }
 
 .sidebar-submenu__item + .sidebar-submenu__item {
@@ -1078,7 +1351,7 @@ export default {
 }
 
 .sidebar__footer {
-  padding: 10px;
+  padding: 12px 14px 14px;
   flex: 0 0 auto;
   background: rgba(248, 250, 252, 0.92);
   border-top: 1px solid #e9edf2;
@@ -1151,6 +1424,19 @@ export default {
   transform: translateY(-6px);
 }
 
+.sidebar-floating-panel-enter-active,
+.sidebar-floating-panel-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sidebar-floating-panel-enter-from,
+.sidebar-floating-panel-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
 .sidebar-overlay-enter-active,
 .sidebar-overlay-leave-active {
   transition: opacity 220ms ease;
@@ -1177,8 +1463,21 @@ export default {
   border-color: #2b3542;
 }
 
-:global(body.dark) .sidebar-link__icon,
-:global(body.dark) .sidebar__pin-button {
+:global(body.dark) .sidebar__content-panel--floating {
+  background: rgba(21, 29, 39, 0.98);
+  border-color: rgba(43, 53, 66, 0.95);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
+}
+
+:global(body.dark) .sidebar__desktop-heading strong {
+  color: #eef3f8;
+}
+
+:global(body.dark) .sidebar__rail-caption {
+  color: #738397;
+}
+
+:global(body.dark) .sidebar-link__icon {
   color: #b7c1ce;
   background: #202a36;
   border-color: #303c4b;
@@ -1215,15 +1514,28 @@ export default {
     border-right: 0;
     border-radius: 0 18px 18px 0;
     box-shadow: 18px 0 50px rgba(15, 23, 42, 0.22);
+    overflow: hidden;
     transform: translateX(-105%);
-  }
-
-  .sidebar.sidebar--expanded {
-    width: min(88vw, 326px);
   }
 
   .sidebar.sidebar--open {
     transform: translateX(0);
+  }
+
+  .sidebar__content-panel,
+  .sidebar__content-panel--floating {
+    position: static;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
   }
 
   .sidebar__mobile-header {
