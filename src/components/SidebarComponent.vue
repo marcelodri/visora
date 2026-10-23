@@ -26,7 +26,7 @@
       @wheel="handleSidebarWheel"
       @keydown.esc="handleEscape"
     >
-      <div v-if="!isMobile" class="sidebar__desktop-rail d-none d-md-flex">
+      <div v-if="!isMobile" class="sidebar__desktop-rail">
         <!-- <div class="sidebar__rail-top">
           <span class="sidebar__rail-caption">Menu</span>
         </div> -->
@@ -99,7 +99,7 @@
           @mouseenter="handlePanelEnter"
           @mouseleave="handlePanelLeave"
         >
-          <div class="sidebar__mobile-header d-md-none">
+          <div class="sidebar__mobile-header">
             <div>
               <span class="sidebar__mobile-eyebrow">Navegación</span>
               <strong>Menú principal</strong>
@@ -114,7 +114,7 @@
             </button>
           </div>
 
-          <div class="sidebar__desktop-tools d-none d-md-flex">
+          <div class="sidebar__desktop-tools">
             <div class="sidebar__desktop-heading">
               <span class="sidebar__section-title">Navegación</span>
               <strong>{{ desktopPanelHeading }}</strong>
@@ -267,7 +267,7 @@
 
               <button
                 type="button"
-                class="sidebar__mobile-collapse d-md-none"
+                class="sidebar__mobile-collapse"
                 @click="$emit('closeSidebar')"
               >
                 <i class="bi bi-arrow-left"></i>
@@ -458,7 +458,7 @@ export default {
   methods: {
     setupResponsiveState() {
       this.mediaQuery = window.matchMedia(MOBILE_BREAKPOINT);
-      this.isMobile = this.mediaQuery.matches;
+      this.syncResponsiveFlags();
 
       if (this.mediaQuery.addEventListener) {
         this.mediaQuery.addEventListener('change', this.handleBreakpointChange);
@@ -475,8 +475,11 @@ export default {
         this.mediaQuery.removeListener(this.handleBreakpointChange);
       }
     },
-    handleBreakpointChange(event) {
-      this.isMobile = event.matches;
+    syncResponsiveFlags() {
+      this.isMobile = Boolean(this.mediaQuery?.matches);
+    },
+    handleBreakpointChange() {
+      this.syncResponsiveFlags();
       this.clearClosePanelTimer();
       this.isHovering = false;
       this.hasKeyboardFocus = false;
@@ -996,7 +999,7 @@ export default {
   pointer-events: none;
   transform: translateX(-10px) scale(0.98);
   transform-origin: left center;
-  height: fit-content;
+  height: auto;
 }
 
 .sidebar__content-panel--floating.is-visible {
@@ -1012,6 +1015,7 @@ export default {
 .sidebar__desktop-tools {
   min-height: 72px;
   padding: 16px 18px 14px;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
   flex: 0 0 auto;
@@ -1077,6 +1081,11 @@ export default {
 .sidebar__navigation::-webkit-scrollbar-thumb {
   background: #d4dae2;
   border-radius: 999px;
+}
+
+.sidebar__content-panel--floating .sidebar__navigation {
+  flex: 0 1 auto;
+  max-height: min(70vh, calc(100dvh - var(--sidebar-header-height) - 64px));
 }
 
 .sidebar-panel {
@@ -1520,6 +1529,11 @@ export default {
 
   .sidebar.sidebar--open {
     transform: translateX(0);
+  }
+
+  .sidebar__desktop-rail,
+  .sidebar__desktop-tools {
+    display: none;
   }
 
   .sidebar__content-panel,
