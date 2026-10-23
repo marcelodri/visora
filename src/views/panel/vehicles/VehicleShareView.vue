@@ -763,6 +763,7 @@ async function loadPdfConfig() {
 
 
 async function shareVehicle(vehicle) {
+
   if (!vehicle || getDesktopImages(vehicle).length === 0) {
     showToastMsg('Error', 'El vehículo no tiene imágenes', false)
     return
@@ -948,6 +949,12 @@ async function shareVehicle(vehicle) {
       ['Marca', vehicle.brand],
       ['Modelo', vehicle.model],
       ['Año', vehicle.year || 'N/D'],
+      [
+        'Kilómetros',
+        vehicle.odometer != null && vehicle.odometer !== ''
+          ? `${Number(vehicle.odometer).toLocaleString('es-AR')} km`
+          : 'N/D'
+      ],
       ['Color', vehicle.color || 'N/D'],
       [
         'Combustible',
